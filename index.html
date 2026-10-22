@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#26734d">
+<title>GroKlassen – Små handlinger, stor forskel</title>
+<style>
+  :root {
+    color-scheme: light;
+    --bg:#f4f8f2; --panel:#ffffff; --text:#183326; --muted:#607568;
+    --primary:#26734d; --primary-hover:#1d5c3d; --soft:#e4f2e7;
+    --border:#d7e4d8; --danger:#a33b35; --warning:#8b5b13; --shadow:0 8px 24px #173a2510;
+  }
+  [data-theme="dark"] {
+    color-scheme:dark; --bg:#101b16; --panel:#192820; --text:#e8f4eb; --muted:#a7bbae;
+    --primary:#7dd69d; --primary-hover:#a2e8b8; --soft:#223e2d; --border:#344c3d;
+    --danger:#ff938b; --warning:#f1c778; --shadow:0 8px 24px #00000025;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font:16px/1.5 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+  button,input,select{font:inherit}
+  button{cursor:pointer}
+  button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #76b8ed;outline-offset:2px}
+  .wrap{max-width:1120px;margin:auto;padding:20px}
+  header{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:22px}
+  .brand{display:flex;align-items:center;gap:12px}
+  .logo{width:48px;height:48px;border-radius:15px;background:var(--soft);display:grid;place-items:center;font-size:27px}
+  h1,h2,h3,p{margin-top:0}
+  h1{font-size:clamp(1.55rem,4vw,2.2rem);margin-bottom:2px;letter-spacing:-.03em}
+  h2{font-size:1.25rem;margin-bottom:12px}
+  h3{font-size:1rem;margin-bottom:5px}
+  .subtitle,.muted{color:var(--muted)}
+  .header-actions{display:flex;gap:8px;flex-wrap:wrap}
+  .btn{border:1px solid var(--border);background:var(--panel);color:var(--text);border-radius:11px;padding:9px 13px;font-weight:650}
+  .btn.primary{background:var(--primary);color:#fff;border-color:var(--primary)}
+  [data-theme="dark"] .btn.primary{color:#102017}
+  .btn:hover{filter:brightness(.97)}
+  .btn:disabled{cursor:not-allowed;opacity:.58;filter:none}
+  .hero{background:linear-gradient(120deg,var(--soft),var(--panel));border:1px solid var(--border);border-radius:22px;padding:22px;margin-bottom:18px;display:grid;grid-template-columns:1.2fr .8fr;gap:18px;align-items:center}
+  .hero p{margin-bottom:0;color:var(--muted);max-width:600px}
+  .hero-art{display:flex;justify-content:center;align-items:center;min-height:170px}
+  .hero-art svg{width:min(100%,230px);height:auto}
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
+  .stat,.panel{background:var(--panel);border:1px solid var(--border);border-radius:17px;padding:16px;box-shadow:var(--shadow)}
+  .stat .number{font-size:1.65rem;font-weight:800;letter-spacing:-.04em}
+  .stat .label{font-size:.88rem;color:var(--muted)}
+  .layout{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(270px,.8fr);gap:18px;align-items:start}
+  .panel{margin-bottom:18px}
+  .section-head{display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .class-select{max-width:180px;width:100%;border:1px solid var(--border);border-radius:10px;padding:8px;background:var(--panel);color:var(--text)}
+  .challenge-list{display:grid;gap:10px}
+  .challenge{border:1px solid var(--border);border-radius:13px;padding:13px;display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center}
+  .challenge p{font-size:.9rem;color:var(--muted);margin:3px 0 7px}
+  .tags{display:flex;gap:6px;flex-wrap:wrap}
+  .tag{display:inline-block;border-radius:999px;background:var(--soft);padding:3px 8px;font-size:.78rem;color:var(--text)}
+  .challenge-action{display:flex;align-items:flex-end;flex-direction:column;gap:6px;min-width:130px}
+  .status{font-size:.76rem;color:var(--muted);text-align:right;max-width:160px}
+  .notice{border-radius:11px;padding:11px 13px;background:var(--soft);color:var(--text);font-size:.9rem;margin-bottom:12px}
+  .notice.error{background:#fbe9e7;color:#842e29}
+  [data-theme="dark"] .notice.error{background:#482725;color:#ffd4d0}
+  .plant-wrap{text-align:center}
+  .plant-wrap svg{width:min(100%,240px);height:auto;display:block;margin:0 auto}
+  .plant-stage{font-weight:750;margin:0 0 3px}
+  .progress-track{height:10px;border-radius:999px;background:var(--soft);overflow:hidden;margin:12px 0 6px}
+  .progress-fill{height:100%;background:var(--primary);width:0%;transition:width .3s}
+  .league{display:grid;gap:9px}
+  .league-row{display:grid;grid-template-columns:34px 1fr auto;gap:9px;align-items:center;padding:10px;border:1px solid var(--border);border-radius:12px}
+  .league-row.current{border-color:var(--primary);background:var(--soft)}
+  .rank{font-weight:800;color:var(--muted);text-align:center}
+  .points{font-weight:800;white-space:nowrap}
+  .pending-item{border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:9px}
+  .pending-item p{margin:4px 0;color:var(--muted);font-size:.9rem}
+  .pending-actions{display:flex;gap:8px;margin-top:9px;flex-wrap:wrap}
+  .small{font-size:.82rem;color:var(--muted)}
+  .empty{color:var(--muted);font-size:.92rem;padding:8px 0}
+  .modal-backdrop{position:fixed;inset:0;background:#07140dcc;display:none;place-items:center;padding:18px;z-index:5}
+  .modal-backdrop.open{display:grid}
+  .modal{width:min(100%,440px);background:var(--panel);color:var(--text);border:1px solid var(--border);border-radius:18px;padding:22px;box-shadow:0 20px 80px #0005}
+  .modal label{display:block;font-weight:650;margin:12px 0 5px}
+  .modal input{width:100%;border:1px solid var(--border);border-radius:10px;padding:10px;background:var(--bg);color:var(--text)}
+  .modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:18px}
+  footer{text-align:center;color:var(--muted);font-size:.82rem;padding:12px 0 28px}
+  @media(max-width:780px){.hero{grid-template-columns:1fr}.hero-art{min-height:120px}.hero-art svg{width:150px}.layout{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:470px){.wrap{padding:13px}.header-actions{width:100%}header{align-items:flex-start;flex-direction:column}.challenge{grid-template-columns:1fr}.challenge-action{align-items:flex-start;min-width:0}.status{text-align:left;max-width:none}.section-head{align-items:flex-start;flex-direction:column}.class-select{max-width:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <div class="logo" aria-hidden="true">🌱</div>
+      <div><h1>GroKlassen</h1><div class="subtitle">Små handlinger. Stor forskel.</div></div>
+    </div>
+    <div class="header-actions">
+      <button class="btn" id="themeBtn" type="button" aria-label="Skift farvetema">Mørk tilstand</button>
+      <button class="btn" id="teacherBtn" type="button">Lærerområde</button>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div>
+      <span class="tag">KLASSENS GRØNNE MISSION</span>
+      <h2 style="font-size:clamp(1.5rem,3.5vw,2rem);margin-top:12px">Lad gode vaner vokse.</h2>
+      <p>Registrér grønne handlinger, saml point sammen, og se klassens fælles plante vokse. Hver lille indsats tæller.</p>
+    </div>
+    <div class="hero-art" id="heroPlant" aria-label="Illustration af klassens plante"></div>
+  </section>
+
+  <section class="stats" aria-label="Klassens resultater">
+    <div class="stat"><div class="number" id="totalPoints">0</div><div class="label">Godkendte point</div></div>
+    <div class="stat"><div class="number" id="co2Total">0 kg</div><div class="label">Anslået CO₂ sparet</div></div>
+    <div class="stat"><div class="number" id="waterTotal">0 L</div><div class="label">Anslået vand sparet</div></div>
+    <div class="stat"><div class="number" id="pendingTotal">0</div><div class="label">Afventer lærer</div></div>
+  </section>
+
+  <div class="layout">
+    <main>
+      <section class="panel">
+        <div class="section-head">
+          <div><h2>Grønne udfordringer</h2><div class="small">Vælg en handling, og send den til godkendelse.</div></div>
+          <select id="classSelect" class="class-select" aria-label="Vælg klasse">
+            <option value="7.A">7.A</option><option value="7.B">7.B</option><option value="8.A">8.A</option>
+          </select>
+        </div>
+        <div id="dailyNotice" class="notice" style="margin-top:14px"></div>
+        <div id="challengeList" class="challenge-list"></div>
+      </section>
+      <section class="panel">
+        <h2>Sådan tæller det</h2>
+        <p class="muted">Pointene er en fælles klassescore. CO₂- og vandtal er vejledende eksempler, ikke præcise målinger. Læreren godkender hver indsendelse, før den tæller med.</p>
+        <div class="tags"><span class="tag">Samarbejde</span><span class="tag">Bæredygtige vaner</span><span class="tag">Fælles mål</span></div>
+      </section>
+    </main>
+    <aside>
+      <section class="panel plant-wrap">
+        <h2>Klassens plante</h2>
+        <div id="plantGraphic"></div>
+        <p class="plant-stage" id="plantStage">Frø</p>
+        <div class="small" id="plantDescription">Alt begynder med et lille frø.</div>
+        <div class="progress-track" aria-label="Fremskridt til næste plantestadie"><div class="progress-fill" id="progressFill"></div></div>
+        <div class="small" id="progressText">0 af 20 point til næste stadie</div>
+      </section>
+      <section class="panel">
+        <h2>Klasseliga</h2>
+        <div class="small" style="margin-bottom:10px">Demo-tal for at vise, hvordan ligaen kan se ud.</div>
+        <div class="league" id="leagueList"></div>
+      </section>
+      <section class="panel">
+        <div class="section-head"><h2>Afventer godkendelse</h2><span class="tag" id="pendingBadge">0</span></div>
+        <div id="pendingList"></div>
+      </section>
+    </aside>
+  </div>
+  <footer>GroKlassen · Prototype til læring om bæredygtighed · Data gemmes kun i denne browser</footer>
+</div>
+
+<div class="modal-backdrop" id="teacherModal" role="dialog" aria-modal="true" aria-labelledby="teacherTitle">
+  <div class="modal">
+    <h2 id="teacherTitle">Lærerområde</h2>
+    <p class="muted">Indtast lærerens PIN-kode for at godkende eller afvise forespørgsler.</p>
+    <label for="pinInput">PIN-kode</label>
+    <input id="pinInput" type="password" inputmode="numeric" autocomplete="current-password" placeholder="Standard: 1234">
+    <div id="pinError" class="small" style="color:var(--danger);margin-top:7px" aria-live="polite"></div>
+    <div class="modal-actions"><button class="btn" id="cancelTeacher" type="button">Annuller</button><button class="btn primary" id="unlockTeacher" type="button">Åbn lærerområde</button></div>
+    <p class="small" style="margin-top:14px">Bemærk: PIN-koden er kun en simpel demo-lås og kan ses i kildekoden. Den beskytter ikke data mod manipulation.</p>
+  </div>
+</div>
+
+<script>
+/* =========================================================
+   GroKlassen – begyndervenlig prototype
+   Du kan ændre lærerens PIN-kode i indstillingerne nedenfor.
+   Bemærk: localStorage og en PIN i browserkode er ikke sikker
+   adgangskontrol. Brug en server/backend til en rigtig løsning.
+   ========================================================= */
+const CONFIG = {
+  teacherPin: "1234",        // Skift denne PIN-kode, hvis du vil
+  dailyPointCap: 15,         // Maks. godkendte point pr. klasse pr. dag
+  cooldownSeconds: 10,       // Pause mellem indsendelser pr. klasse
+  storageKey: "groklassen-v1"
+};
+
+const CHALLENGES = [
+  {id:"cycle", title:"Cykel eller gå i skole", description:"Vælg aktiv transport frem for en biltur.", points:3, co2:1.2, water:0, icon:"🚲"},
+  {id:"sort", title:"Sortér affald korrekt", description:"Sortér papir, plast, metal eller madaffald.", points:2, co2:0.2, water:0, icon:"♻️"},
+  {id:"shower", title:"Tag et kort bad", description:"Spar på vandet ved at gøre badet kortere.", points:3, co2:0.1, water:20, icon:"🚿"},
+  {id:"lunch", title:"Madpakke uden engangsemballage", description:"Brug madkasse og genanvendelig drikkedunk.", points:3, co2:0.3, water:1, icon:"🍎"},
+  {id:"lights", title:"Sluk lyset", description:"Sluk lys og udstyr i et tomt lokale.", points:2, co2:0.4, water:0, icon:"💡"},
+  {id:"repair", title:"Reparér frem for at smide ud", description:"Giv en ting længere levetid med en lille reparation.", points:4, co2:1.0, water:5, icon:"🧵"}
+];
+const PLANT_STAGES = [
+  {name:"Frø", threshold:0, description:"Alt begynder med et lille frø."},
+  {name:"Spire", threshold:20, description:"De første grønne vaner spirer frem."},
+  {name:"Lille plante", threshold:50, description:"Jeres fælles indsats bliver synlig."},
+  {name:"Ungt træ", threshold:100, description:"Klassen er ved at skabe stærke vaner."},
+  {name:"Stort træ", threshold:180, description:"Jeres grønne fællesskab står stærkt."}
+];
+
+let state = loadState();
+let activeClass = "7.A";
+let cooldownTimer = null;
+
+function defaultState() {
+  return {
+    theme: "light",
+    classes: {
+      "7.A": {approved:[], pending:[], lastSubmission:0},
+      "7.B": {approved:[], pending:[], lastSubmission:0},
+      "8.A": {approved:[], pending:[], lastSubmission:0}
+    }
+  };
+}
+function loadState() {
+  try {
+    const raw = localStorage.getItem(CONFIG.storageKey);
+    if (!raw) return defaultState();
+    const parsed = JSON.parse(raw);
+    const fresh = defaultState();
+    if (parsed && parsed.classes) {
+      for (const name of Object.keys(fresh.classes)) {
+        if (parsed.classes[name]) {
+          fresh.classes[name] = {
+            approved: Array.isArray(parsed.classes[name].approved) ? parsed.classes[name].approved : [],
+            pending: Array.isArray(parsed.classes[name].pending) ? parsed.classes[name].pending : [],
+            lastSubmission: Number(parsed.classes[name].lastSubmission) || 0
+          };
+        }
+      }
+    }
+    fresh.theme = parsed.theme === "dark" ? "dark" : "light";
+    return fresh;
+  } catch (error) {
+    console.warn("Kunne ikke indlæse gemte data:", error);
+    return defaultState();
+  }
+}
+function saveState() {
+  try {
+    localStorage.setItem(CONFIG.storageKey, JSON.stringify(state));
+  } catch (error) {
+    console.warn("Kunne ikke gemme data i browseren:", error);
+    showNotice("Browseren kunne ikke gemme ændringer. Kontrollér browserens lagerindstillinger.", true);
+  }
+}
+function classData() { return state.classes[activeClass]; }
+function todayKey() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+}
+function approvedToday(data) {
+  return data.approved.filter(item => item.date === todayKey()).reduce((sum,item) => sum + item.points, 0);
+}
+function pendingToday(data) {
+  return data.pending.filter(item => item.date === todayKey()).reduce((sum,item) => sum + item.points, 0);
+}
+function totalApproved(data) {
+  return data.approved.reduce((sum,item) => ({
+    points:sum.points + item.points, co2:sum.co2 + item.co2, water:sum.water + item.water
+  }), {points:0,co2:0,water:0});
+}
+function safeText(value) {
+  return String(value).replace(/[&<>"']/g, char => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char]));
+}
+function showNotice(message, error=false) {
+  const el = document.getElementById("dailyNotice");
+  el.textContent = message;
+  el.classList.toggle("error", error);
+}
+function plantSvg(points) {
+  // Planten ændrer udseende alt efter klassens samlede godkendte point.
+  const stage = getStage(points);
+  const common = 'stroke="#2e6b45" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"';
+  let plant = '';
+  if (stage === 0) {
+    plant = '<ellipse cx="100" cy="143" rx="18" ry="25" fill="#9a7045" stroke="#6d4d2e" stroke-width="3" transform="rotate(-25 100 143)"/><path d="M91 137 Q101 143 108 151" fill="none" stroke="#6d4d2e" stroke-width="3"/>';
+  } else if (stage === 1) {
+    plant = `<path d="M100 155 Q99 125 106 95" fill="none" ${common}/><path d="M104 119 Q69 116 69 89 Q99 88 104 119Z" fill="#83c96b" stroke="#2e6b45" stroke-width="3"/><path d="M105 102 Q124 95 129 73 Q105 76 105 102Z" fill="#5cab57" stroke="#2e6b45" stroke-width="3"/>`;
+  } else if (stage === 2) {
+    plant = `<path d="M100 158 Q97 119 101 77" fill="none" ${common}/><path d="M100 125 Q61 125 54 95 Q88 88 100 125Z" fill="#83c96b" stroke="#2e6b45" stroke-width="3"/><path d="M100 106 Q129 104 143 75 Q112 69 100 106Z" fill="#5cab57" stroke="#2e6b45" stroke-width="3"/><path d="M100 90 Q76 80 82 55 Q107 61 100 90Z" fill="#a2d978" stroke="#2e6b45" stroke-width="3"/>`;
+  } else if (stage === 3) {
+    plant = `<path d="M100 159 L100 78" fill="none" stroke="#805a37" stroke-width="10" stroke-linecap="round"/><path d="M99 111 L69 86 M100 98 L127 72" fill="none" stroke="#805a37" stroke-width="6" stroke-linecap="round"/><circle cx="72" cy="75" r="27" fill="#83c96b" stroke="#2e6b45" stroke-width="3"/><circle cx="112" cy="61" r="31" fill="#65b85c" stroke="#2e6b45" stroke-width="3"/><circle cx="132" cy="91" r="24" fill="#9bd774" stroke="#2e6b45" stroke-width="3"/>`;
+  } else {
+    plant = `<path d="M100 160 L100 77" fill="none" stroke="#805a37" stroke-width="12" stroke-linecap="round"/><path d="M99 116 L61 83 M101 103 L137 68" fill="none" stroke="#805a37" stroke-width="7" stroke-linecap="round"/><circle cx="61" cy="74" r="32" fill="#83c96b" stroke="#2e6b45" stroke-width="3"/><circle cx="100" cy="53" r="38" fill="#5cab57" stroke="#2e6b45" stroke-width="3"/><circle cx="137" cy="75" r="31" fill="#a2d978" stroke="#2e6b45" stroke-width="3"/><circle cx="94" cy="86" r="31" fill="#72c363" stroke="#2e6b45" stroke-width="3"/>`;
+  }
+  return `<svg viewBox="0 0 200 190" role="img" aria-label="Plante på stadiet ${PLANT_STAGES[stage].name}"><path d="M22 164 Q100 151 178 164" fill="none" stroke="#a3c58e" stroke-width="3" stroke-linecap="round"/><path d="M100 156 Q85 167 74 156 M100 156 Q113 168 126 156" fill="none" stroke="#a3c58e" stroke-width="3" stroke-linecap="round"/>${plant}</svg>`;
+}
+function getStage(points) {
+  let stage = 0;
+  PLANT_STAGES.forEach((item,index) => { if (points >= item.threshold) stage = index; });
+  return stage;
+}
+function renderPlant(total) {
+  const stageIndex = getStage(total);
+  const stage = PLANT_STAGES[stageIndex];
+  const next = PLANT_STAGES[stageIndex + 1];
+  document.getElementById("plantGraphic").innerHTML = plantSvg(total);
+  document.getElementById("heroPlant").innerHTML = plantSvg(total);
+  document.getElementById("plantStage").textContent = stage.name;
+  document.getElementById("plantDescription").textContent = stage.description;
+  if (!next) {
+    document.getElementById("progressFill").style.width = "100%";
+    document.getElementById("progressText").textContent = "Maksimalt plantestadie nået – flot arbejde!";
+  } else {
+    const progress = Math.max(0, Math.min(100, ((total-stage.threshold)/(next.threshold-stage.threshold))*100));
+    document.getElementById("progressFill").style.width = progress + "%";
+    document.getElementById("progressText").textContent = `${total} point i alt · ${Math.max(0,next.threshold-total)} point til ${next.name.toLowerCase()}`;
+  }
+}
+function renderChallenges() {
+  const data = classData();
+  const used = new Set(data.approved.filter(x=>x.date===todayKey()).map(x=>x.challengeId));
+  data.pending.filter(x=>x.date===todayKey()).forEach(x=>used.add(x.challengeId));
+  const approvedPoints = approvedToday(data);
+  const pendingPoints = pendingToday(data);
+  const remaining = Math.max(0, CONFIG.dailyPointCap - approvedPoints - pendingPoints);
+  const cooldownLeft = Math.max(0, CONFIG.cooldownSeconds - Math.floor((Date.now()-data.lastSubmission)/1000));
+  const container = document.getElementById("challengeList");
+  container.innerHTML = "";
+  CHALLENGES.forEach(challenge => {
+    const isUsed = used.has(challenge.id);
+    const overCap = remaining < challenge.points;
+    let reason = "";
+    if (isUsed) reason = "Allerede registreret i dag";
+    else if (overCap) reason = `Dagens pointloft: ${remaining} point tilbage`;
+    else if (cooldownLeft > 0) reason = `Vent ${cooldownLeft} sek. før næste registrering`;
+    const disabled = isUsed || overCap || cooldownLeft > 0;
+    const card = document.createElement("div");
+    card.className = "challenge";
+    card.innerHTML = `<div><h3>${challenge.icon} ${safeText(challenge.title)}</h3><p>${safeText(challenge.description)}</p><div class="tags"><span class="tag">${challenge.points} point</span><span class="tag">CO₂: ca. ${challenge.co2} kg</span><span class="tag">Vand: ca. ${challenge.water} L</span></div></div><div class="challenge-action"><button class="btn primary" type="button" ${disabled ? "disabled" : ""}>${isUsed ? "Registreret" : "Send forespørgsel"}</button><div class="status">${reason || "Klar til indsendelse"}</div></div>`;
+    const button = card.querySelector("button");
+    button.addEventListener("click", () => submitChallenge(challenge.id));
+    container.appendChild(card);
+  });
+  document.getElementById("dailyNotice").textContent = `Klasse ${activeClass}: ${approvedPoints} af ${CONFIG.dailyPointCap} godkendte point brugt i dag. ${pendingPoints ? pendingPoints + " point afventer godkendelse." : ""}`;
+}
+function submitChallenge(id) {
+  const data = classData();
+  const challenge = CHALLENGES.find(item=>item.id===id);
+  if (!challenge) return;
+  const today = todayKey();
+  if (data.approved.some(x=>x.date===today && x.challengeId===id) || data.pending.some(x=>x.date===today && x.challengeId===id)) {
+    showNotice("Denne udfordring er allerede registreret i dag.", true); render(); return;
+  }
+  if (approvedToday(data) + pendingToday(data) + challenge.points > CONFIG.dailyPointCap) {
+    showNotice("Denne handling vil overskride klassens daglige pointloft på 15 point.", true); render(); return;
+  }
+  const elapsed = Date.now() - data.lastSubmission;
+  if (elapsed < CONFIG.cooldownSeconds*1000) {
+    showNotice(`Vent ${Math.ceil((CONFIG.cooldownSeconds*1000-elapsed)/1000)} sekunder, før du sender igen.`, true); render(); return;
+  }
+  data.pending.push({
+    id: `${Date.now()}-${Math.random().toString(36).slice(2,8)}`,
+    challengeId:id, title:challenge.title, date:today, points:challenge.points,
+    co2:challenge.co2, water:challenge.water, submittedAt:Date.now()
+  });
+  data.lastSubmission = Date.now();
+  saveState();
+  showNotice("Forespørgslen er sendt og afventer lærerens godkendelse.");
+  render();
+  startCooldownRefresh();
+}
+function startCooldownRefresh() {
+  if (cooldownTimer) clearInterval(cooldownTimer);
+  cooldownTimer = setInterval(() => {
+    renderChallenges();
+    if (Date.now()-classData().lastSubmission >= CONFIG.cooldownSeconds*1000) {
+      clearInterval(cooldownTimer); cooldownTimer = null;
+    }
+  }, 1000);
+}
+function renderPending() {
+  const data = classData();
+  document.getElementById("pendingBadge").textContent = data.pending.length;
+  const list = document.getElementById("pendingList");
+  list.innerHTML = "";
+  if (!data.pending.length) {
+    list.innerHTML = '<div class="empty">Ingen forespørgsler afventer lige nu.</div>';
+    return;
+  }
+  data.pending.slice().sort((a,b)=>a.submittedAt-b.submittedAt).forEach(item=>{
+    const el = document.createElement("div");
+    el.className = "pending-item";
+    el.innerHTML = `<strong>${safeText(item.title)}</strong><p>${item.points} point · ${safeText(item.date)}</p><span class="tag">Afventer</span>`;
+    list.appendChild(el);
+  });
+}
+function renderLeague() {
+  // De to andre klassers tal er kun demo-tal. De deles ikke mellem brugere.
+  const data = classData();
+  const currentPoints = totalApproved(data).points;
+  const entries = [
+    {name:"7.B",points:74,demo:true},
+    {name:"8.A",points:58,demo:true},
+    {name:activeClass,points:currentPoints,demo:false}
+  ].sort((a,b)=>b.points-a.points);
+  const list = document.getElementById("leagueList");
+  list.innerHTML = "";
+  entries.forEach((entry,index)=>{
+    const el = document.createElement("div");
+    el.className = "league-row" + (!entry.demo ? " current" : "");
+    el.innerHTML = `<div class="rank">${index+1}</div><div><strong>${safeText(entry.name)}</strong><div class="small">${entry.demo ? "Demo-klasse" : "Din klasse"}</div></div><div class="points">${entry.points} pt.</div>`;
+    list.appendChild(el);
+  });
+}
+function render() {
+  const data = classData();
+  const totals = totalApproved(data);
+  document.getElementById("totalPoints").textContent = totals.points;
+  document.getElementById("co2Total").textContent = `${totals.co2.toLocaleString("da-DK",{maximumFractionDigits:1})} kg`;
+  document.getElementById("waterTotal").textContent = `${totals.water.toLocaleString("da-DK",{maximumFractionDigits:0})} L`;
+  document.getElementById("pendingTotal").textContent = data.pending.length;
+  renderPlant(totals.points);
+  renderChallenges();
+  renderPending();
+  renderLeague();
+}
+function setTheme(theme) {
+  state.theme = theme;
+  document.documentElement.dataset.theme = theme;
+  document.getElementById("themeBtn").textContent = theme === "dark" ? "Lys tilstand" : "Mørk tilstand";
+  saveState();
+}
+function openTeacherModal() {
+  document.getElementById("pinInput").value = "";
+  document.getElementById("pinError").textContent = "";
+  document.getElementById("teacherModal").classList.add("open");
+  document.getElementById("pinInput").focus();
+}
+function closeTeacherModal() {
+  document.getElementById("teacherModal").classList.remove("open");
+}
+function teacherUnlock() {
+  if (document.getElementById("pinInput").value !== CONFIG.teacherPin) {
+    document.getElementById("pinError").textContent = "Forkert PIN-kode. Prøv igen.";
+    return;
+  }
+  closeTeacherModal();
+  showTeacherDashboard();
+}
+function showTeacherDashboard() {
+  const data = classData();
+  if (!data.pending.length) {
+    alert(`Lærerområde – ${activeClass}\n\nDer er ingen forespørgsler, som afventer godkendelse.`);
+    return;
+  }
+  // Brug en enkel dialog, så appen fortsat kun kræver én HTML-fil.
+  const lines = data.pending.map((item,index)=>`${index+1}. ${item.title} – ${item.points} point (${item.date})`).join("\n");
+  const answer = prompt(`Lærerområde – ${activeClass}\n\n${lines}\n\nSkriv nummeret på den forespørgsel, du vil behandle. Annullér for at lukke.`);
+  if (answer === null || answer.trim() === "") return;
+  const index = Number(answer)-1;
+  if (!Number.isInteger(index) || index < 0 || index >= data.pending.length) {
+    alert("Det nummer findes ikke. Åbn lærerområdet igen og prøv på ny.");
+    return;
+  }
+  const item = data.pending[index];
+  const action = prompt(`"${item.title}" (${item.points} point)\n\nSkriv G for at godkende eller A for at afvise.`);
+  if (!action) return;
+  if (action.trim().toUpperCase() === "G") {
+    // Ekstra kontrol: godkendelsen må ikke få dagens point over loftet.
+    if (approvedToday(data) + item.points > CONFIG.dailyPointCap) {
+      alert("Kan ikke godkende: klassens daglige pointloft vil blive overskredet.");
+      return;
+    }
+    data.pending.splice(index,1);
+    data.approved.push({...item, approvedAt:Date.now()});
+    saveState(); showNotice(`Godkendt: ${item.title} tæller nu med i klassens resultat.`); render();
+  } else if (action.trim().toUpperCase() === "A") {
+    data.pending.splice(index,1);
+    saveState(); showNotice(`Forespørgslen "${item.title}" blev afvist.`); render();
+  } else {
+    alert("Ugyldigt valg. Skriv G eller A.");
+  }
+}
+document.getElementById("classSelect").addEventListener("change", event=>{
+  activeClass = event.target.value;
+  render();
+});
+document.getElementById("themeBtn").addEventListener("click", ()=>setTheme(state.theme==="dark" ? "light" : "dark"));
+document.getElementById("teacherBtn").addEventListener("click", openTeacherModal);
+document.getElementById("cancelTeacher").addEventListener("click", closeTeacherModal);
+document.getElementById("unlockTeacher").addEventListener("click", teacherUnlock);
+document.getElementById("pinInput").addEventListener("keydown", event=>{if(event.key==="Enter") teacherUnlock();});
+document.getElementById("teacherModal").addEventListener("click", event=>{if(event.target.id==="teacherModal") closeTeacherModal();});
+
+// Start appen med det sidst valgte tema.
+setTheme(state.theme);
+render();
+// Opdatér låsebeskeder automatisk, så cooldown-knapper åbner igen.
+</script>
+</body>
+</html>
