@@ -1,15 +1,3 @@
-/* =========================================================
-   GroKlassen – automatisk test i en rigtig browser (valgfrit)
-   Appen virker uden dette. Testen er til jer, der vil tjekke,
-   at alt stadig virker, efter I har ændret i index.html.
-
-   Kræver Node.js og Playwright:
-     npm install playwright
-     npx playwright install chromium
-     node tests/e2e.cjs
-   Har I allerede Chrome installeret, kan I sætte CHROME_PATH
-   til chrome.exe, så bruges den i stedet.
-   ========================================================= */
 const path = require('path');
 const fs = require('fs');
 const os = require('os');
