@@ -5,25 +5,35 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#26734d">
 <title>GroKlassen – Små handlinger, stor forskel</title>
+<script>
+  // Sæt farvetemaet, før siden tegnes, så den ikke blinker hvid i mørk tilstand.
+  try {
+    var saved = JSON.parse(localStorage.getItem("groklassen-v2") || "{}");
+    document.documentElement.dataset.theme = saved.theme || (window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+  } catch (e) { document.documentElement.dataset.theme = "light"; }
+</script>
 <style>
   :root {
     color-scheme: light;
-    --bg:#f4f8f2; --panel:#ffffff; --text:#183326; --muted:#607568;
+    --bg:#f4f8f2; --panel:#ffffff; --text:#183326; --muted:#55695c;
     --primary:#26734d; --primary-hover:#1d5c3d; --soft:#e4f2e7;
     --border:#d7e4d8; --danger:#a33b35; --warning:#8b5b13; --shadow:0 8px 24px #173a2510;
+    --warn-bg:#fbefd5; --focus:#1a5fb4; --on-primary:#ffffff; --input-border:#7d9284;
   }
   [data-theme="dark"] {
     color-scheme:dark; --bg:#101b16; --panel:#192820; --text:#e8f4eb; --muted:#a7bbae;
     --primary:#7dd69d; --primary-hover:#a2e8b8; --soft:#223e2d; --border:#344c3d;
     --danger:#ff938b; --warning:#f1c778; --shadow:0 8px 24px #00000025;
+    --warn-bg:#3b3019; --focus:#8cc8ff; --on-primary:#102017; --input-border:#6f8a78;
   }
   *{box-sizing:border-box}
   body{margin:0;background:var(--bg);color:var(--text);font:16px/1.5 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
   button,input,select{font:inherit}
   button{cursor:pointer}
-  button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #76b8ed;outline-offset:2px}
+  a{color:var(--primary)}
+  :focus-visible{outline:3px solid var(--focus);outline-offset:2px}
   .wrap{max-width:1120px;margin:auto;padding:20px}
-  header{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:22px}
+  header{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:16px}
   .brand{display:flex;align-items:center;gap:12px}
   .logo{width:48px;height:48px;border-radius:15px;background:var(--soft);display:grid;place-items:center;font-size:27px}
   h1,h2,h3,p{margin-top:0}
@@ -33,12 +43,27 @@
   .subtitle,.muted{color:var(--muted)}
   .header-actions{display:flex;gap:8px;flex-wrap:wrap}
   .btn{border:1px solid var(--border);background:var(--panel);color:var(--text);border-radius:11px;padding:9px 13px;font-weight:650}
-  .btn.primary{background:var(--primary);color:#fff;border-color:var(--primary)}
-  [data-theme="dark"] .btn.primary{color:#102017}
+  .btn.primary{background:var(--primary);color:var(--on-primary);border-color:var(--primary)}
+  .btn.danger{color:var(--danger)}
+  .btn.small-btn{padding:6px 10px;font-size:.88rem}
   .btn:hover{filter:brightness(.97)}
-  .btn:disabled{cursor:not-allowed;opacity:.58;filter:none}
+  #themeBtn[aria-pressed="true"]{background:var(--soft)}
+  .btn:disabled,.btn[aria-disabled="true"]{cursor:not-allowed;opacity:.58;filter:none}
+  .skip-link{position:absolute;left:-9999px;top:8px;background:var(--panel);color:var(--text);padding:8px 12px;border-radius:10px;z-index:30}
+  .skip-link:focus{left:8px}
+  /* Faneblade (Klassen / Lærer) */
+  .tabs{display:flex;gap:6px;margin:0 0 18px;padding:5px;background:var(--panel);border:1px solid var(--border);border-radius:14px;width:fit-content;max-width:100%;overflow-x:auto}
+  .tabs a{padding:8px 14px;border-radius:10px;color:var(--text);text-decoration:none;font-weight:650;white-space:nowrap}
+  .tabs a:hover{background:var(--soft)}
+  .tabs a[aria-current="page"]{background:var(--primary);color:var(--on-primary)}
+  .view[hidden]{display:none}
+  main:focus{outline:none}
   .hero{background:linear-gradient(120deg,var(--soft),var(--panel));border:1px solid var(--border);border-radius:22px;padding:22px;margin-bottom:18px;display:grid;grid-template-columns:1.2fr .8fr;gap:18px;align-items:center}
   .hero p{margin-bottom:0;color:var(--muted);max-width:600px}
+  .hero-title{font-size:clamp(1.45rem,3.4vw,2rem);margin:12px 0 8px;letter-spacing:-.02em;line-height:1.2}
+  .hero .hero-lead{color:var(--text);font-size:1.05rem}
+  .hero-points{list-style:none;padding:0;margin:12px 0 0;display:grid;gap:5px;font-size:.93rem}
+  .hero-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;align-items:center}
   .hero-art{display:flex;justify-content:center;align-items:center;min-height:170px}
   .hero-art svg{width:min(100%,230px);height:auto}
   .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
@@ -47,18 +72,17 @@
   .stat .label{font-size:.88rem;color:var(--muted)}
   .layout{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(270px,.8fr);gap:18px;align-items:start}
   .panel{margin-bottom:18px}
-  .section-head{display:flex;align-items:center;justify-content:space-between;gap:12px}
-  .class-select{max-width:180px;width:100%;border:1px solid var(--border);border-radius:10px;padding:8px;background:var(--panel);color:var(--text)}
+  .section-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+  .class-select{max-width:180px;width:100%;border:1px solid var(--input-border);border-radius:10px;padding:8px;background:var(--panel);color:var(--text)}
   .challenge-list{display:grid;gap:10px}
   .challenge{border:1px solid var(--border);border-radius:13px;padding:13px;display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center}
   .challenge p{font-size:.9rem;color:var(--muted);margin:3px 0 7px}
   .tags{display:flex;gap:6px;flex-wrap:wrap}
   .tag{display:inline-block;border-radius:999px;background:var(--soft);padding:3px 8px;font-size:.78rem;color:var(--text)}
+  .tag.old{background:var(--warn-bg);color:var(--warning);font-weight:700}
   .challenge-action{display:flex;align-items:flex-end;flex-direction:column;gap:6px;min-width:130px}
   .status{font-size:.76rem;color:var(--muted);text-align:right;max-width:160px}
   .notice{border-radius:11px;padding:11px 13px;background:var(--soft);color:var(--text);font-size:.9rem;margin-bottom:12px}
-  .notice.error{background:#fbe9e7;color:#842e29}
-  [data-theme="dark"] .notice.error{background:#482725;color:#ffd4d0}
   .plant-wrap{text-align:center}
   .plant-wrap svg{width:min(100%,240px);height:auto;display:block;margin:0 auto}
   .plant-stage{font-weight:750;margin:0 0 3px}
@@ -71,21 +95,226 @@
   .points{font-weight:800;white-space:nowrap}
   .pending-item{border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:9px}
   .pending-item p{margin:4px 0;color:var(--muted);font-size:.9rem}
-  .pending-actions{display:flex;gap:8px;margin-top:9px;flex-wrap:wrap}
   .small{font-size:.82rem;color:var(--muted)}
   .empty{color:var(--muted);font-size:.92rem;padding:8px 0}
-  .modal-backdrop{position:fixed;inset:0;background:#07140dcc;display:none;place-items:center;padding:18px;z-index:5}
-  .modal-backdrop.open{display:grid}
-  .modal{width:min(100%,440px);background:var(--panel);color:var(--text);border:1px solid var(--border);border-radius:18px;padding:22px;box-shadow:0 20px 80px #0005}
-  .modal label{display:block;font-weight:650;margin:12px 0 5px}
-  .modal input{width:100%;border:1px solid var(--border);border-radius:10px;padding:10px;background:var(--bg);color:var(--text)}
-  .modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:18px}
+  /* Lærerområde */
+  .lock-panel{max-width:520px;margin:0 auto 18px}
+  .lock-panel label{display:block;font-weight:650;margin:12px 0 5px}
+  .input{width:100%;border:1px solid var(--input-border);border-radius:10px;padding:10px;background:var(--bg);color:var(--text)}
+  .form-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px}
+  .form-row .input{flex:1 1 160px;width:auto}
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px}
+  .kpi{background:var(--soft);border-radius:13px;padding:11px}
+  .kpi .number{font-size:1.35rem;font-weight:800}
+  .kpi .label{font-size:.82rem;color:var(--muted)}
+  .pending-row{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:10px;align-items:center;border:1px solid var(--border);border-radius:12px;padding:11px;margin-bottom:8px}
+  .row-actions{display:flex;gap:6px;flex-wrap:wrap}
+  .bulk-actions{display:flex;gap:8px;flex-wrap:wrap}
+  .subhead{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin:16px 0 8px}
+  .subhead h3{margin:0}
+  /* Skjult for øjet, men læses af skærmlæsere */
+  .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+  /* Demo-banner – vises øverst, når demo-data er aktive */
+  .demo-banner{background:var(--warn-bg);color:var(--text);border-bottom:2px solid var(--warning);padding:9px 16px;display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap;font-size:.92rem;position:relative;z-index:15}
+  /* På store skærme bliver demo-banneret hængende øverst. Afsnit, man hopper til, lander under det. */
+  @media(min-width:781px){.demo-banner{position:sticky;top:0}}
+  section[id],.method{scroll-margin-top:76px}
+  .demo-banner[hidden]{display:none}
+  .demo-chip{background:var(--warning);color:var(--panel);border-radius:6px;padding:2px 8px;font-weight:800;letter-spacing:.06em;font-size:.8rem}
+  /* Klassens ugemål */
+  .goal-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+  .goal-number{font-size:1.5rem;font-weight:800}
+  .goal-form{display:flex;gap:8px;align-items:end;flex-wrap:wrap;margin-top:12px}
+  .goal-form label{font-size:.85rem;font-weight:650;display:block;margin-bottom:4px}
+  .goal-form .input{width:110px}
+  .goal-done{color:var(--primary);font-weight:750}
+  /* Tabeller (bruges til grafernes tabelvisning, rapport og sammenligning) */
+  .data-table{width:100%;border-collapse:collapse;font-size:.88rem;margin-top:8px}
+  .data-table th,.data-table td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--border);vertical-align:top}
+  .data-table td.num,.data-table th.num{text-align:right;font-variant-numeric:tabular-nums}
+  .table-scroll{overflow-x:auto}
+  details summary{cursor:pointer;font-weight:650}
+  /* Grafer (inline SVG). Farverne følger temaet via CSS-variabler. */
+  :root{--viz-grid:#e1e0d9;--viz-axis:#c3c2b7;--series-a:#2a78d6;--series-b:#eb6834}
+  [data-theme="dark"]{--viz-grid:#2c3a31;--viz-axis:#46594c;--series-a:#3987e5;--series-b:#d95926}
+  .viz{position:relative;--viz-ink:var(--muted)}
+  .viz svg{width:100%;height:auto;display:block;overflow:visible}
+  .viz text{fill:var(--viz-ink);font-size:11px;font-variant-numeric:tabular-nums}
+  .viz .label-strong{fill:var(--text);font-weight:700}
+  .viz .bar{fill:var(--primary)}
+  .viz .bar-hit{fill:transparent;cursor:default}
+  .viz .bar-hit:focus{outline:none}
+  .viz .bar-hit:focus + .bar,.viz .bar-hit:hover + .bar{fill:var(--primary-hover)}
+  .viz-tip{position:absolute;pointer-events:none;background:var(--panel);color:var(--text);border:1px solid var(--border);border-radius:9px;padding:6px 9px;font-size:.82rem;box-shadow:var(--shadow);white-space:nowrap;transform:translate(-50%,-110%)}
+  .viz-tip strong{display:block;font-size:.95rem}
+  .viz-tip[hidden]{display:none}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:.84rem;color:var(--muted);margin-top:6px}
+  .legend i{display:inline-block;width:16px;height:2px;vertical-align:middle;margin-right:6px;border-radius:2px}
+  .tool-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+  .tool{border:1px solid var(--border);border-radius:13px;padding:13px}
+  .tool p{font-size:.88rem;color:var(--muted);margin:4px 0 10px}
+  /* Ugerapport (kan udskrives eller gemmes som PDF) */
+  #reportDialog{width:min(96vw,760px)}
+  .report h2{margin-bottom:4px}
+  .report .kpis{margin:12px 0}
+  .report-note{font-size:.82rem;color:var(--muted);border-top:1px solid var(--border);padding-top:10px;margin-top:14px}
+  @media print{
+    body.printing-report > *:not(#reportDialog){display:none !important}
+    body.printing-report{background:#fff;color:#000}
+    #reportDialog{position:static;border:0;box-shadow:none;width:auto;max-width:none;padding:0;color:#000;background:#fff}
+    #reportDialog::backdrop{display:none}
+    .no-print{display:none !important}
+  }
+  /* ---------- Præsentationstilstand (pitch) ---------- */
+  #pitch{width:100vw;height:100dvh;max-width:none;max-height:none;margin:0;border:0;border-radius:0;padding:0;display:none;flex-direction:column;background:var(--bg)}
+  #pitch[open]{display:flex}
+  #pitch::backdrop{background:var(--bg)}
+  .pitch-top,.pitch-bottom{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px clamp(14px,3vw,32px);flex-wrap:wrap}
+  .pitch-top .logo{width:38px;height:38px;font-size:21px;border-radius:12px}
+  .pitch-tools{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .pitch-count{font-weight:800;color:var(--muted);font-variant-numeric:tabular-nums}
+  .pitch-stage{flex:1;overflow:auto;display:flex;align-items:center;justify-content:center;padding:clamp(8px,2vw,24px) clamp(16px,5vw,64px);touch-action:pan-y}
+  .pitch-slide{width:min(100%,1100px);animation:slideIn .35s ease-out}
+  @keyframes slideIn{from{opacity:0;transform:translateX(18px)}to{opacity:1;transform:none}}
+  .pitch-kicker{font-size:clamp(.85rem,1.6vw,1.05rem);font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);display:flex;gap:8px;align-items:center}
+  .pitch-kicker i{width:14px;height:14px;border-radius:4px;background:var(--p, var(--primary));display:inline-block}
+  .pitch-slide h2{font-size:clamp(1.8rem,5vw,3.6rem);line-height:1.1;letter-spacing:-.03em;margin:10px 0 18px}
+  .pitch-slide h2:focus{outline:none}
+  .pitch-points{list-style:none;padding:0;margin:0;display:grid;gap:clamp(8px,1.5vw,16px)}
+  .pitch-points li{font-size:clamp(1.15rem,2.6vw,1.9rem);line-height:1.3;padding-left:1.3em;position:relative}
+  .pitch-points li::before{content:"";position:absolute;left:0;top:.45em;width:.55em;height:.55em;border-radius:50%;background:var(--p, var(--primary))}
+  .pitch-cols{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(10px,2vw,20px)}
+  .pitch-col{background:var(--panel);border:1px solid var(--border);border-top:6px solid var(--p, var(--primary));border-radius:16px;padding:clamp(12px,2vw,20px)}
+  .pitch-col .big{font-size:clamp(1.3rem,3vw,2.1rem);font-weight:800;line-height:1.15}
+  .pitch-col p{font-size:clamp(1rem,1.8vw,1.3rem);margin:6px 0 0;color:var(--muted)}
+  .pitch-flow{display:flex;align-items:center;gap:clamp(6px,1.5vw,16px);flex-wrap:wrap;font-size:clamp(1.15rem,2.8vw,2rem);font-weight:800;margin-bottom:16px}
+  .pitch-flow .step{white-space:nowrap}
+  .pitch-flow .arrow{color:var(--muted);margin:0 2px}
+  .pitch-split .pitch-flow{font-size:clamp(1rem,2vw,1.45rem)}
+  .pitch-split{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,.8fr);gap:clamp(12px,3vw,36px);align-items:center}
+  .pitch-plant svg{width:min(100%,320px);height:auto;display:block;margin:auto}
+  .pitch-note{font-size:clamp(.9rem,1.5vw,1.1rem);color:var(--muted);margin-top:16px}
+  .pitch-dots{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
+  .pitch-dots button{width:34px;height:34px;border-radius:50%;border:1px solid var(--input-border);background:var(--panel);color:var(--text);font-weight:800;padding:0}
+  .pitch-dots button[aria-current="step"]{background:var(--primary);color:var(--on-primary);border-color:var(--primary)}
+  @media(max-width:700px){.pitch-cols,.pitch-split{grid-template-columns:1fr}.pitch-plant svg{width:130px}.pitch-plant .pitch-note{display:none}.pitch-flow .step{white-space:normal}}
+  @media(max-width:480px){.pitch-dots{display:none}.pitch-top strong{display:none}.pitch-top,.pitch-bottom{flex-wrap:nowrap}.pitch-slide h2{margin-bottom:12px}}
+  @media (prefers-reduced-motion: reduce){.pitch-slide{animation:none}}
+  /* "Sådan har vi regnet" */
+  .est{display:inline-block;font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;border:1px solid var(--input-border);border-radius:5px;padding:0 4px;margin-left:2px;vertical-align:1px}
+  details > summary{list-style-position:outside}
+  .inline-h2{display:inline;margin:0}
+  .method{border-top:1px solid var(--border);padding:12px 0}
+  .method:focus{outline:3px solid var(--focus);outline-offset:4px;border-radius:6px}
+  .method h3{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+  .method p{font-size:.9rem;margin:5px 0}
+  .method .check{color:var(--text)}
+  .conf{font-size:.74rem;border-radius:999px;padding:2px 8px;border:1px solid var(--input-border);font-weight:650}
+  .linklike{background:none;border:0;padding:0;color:var(--primary);text-decoration:underline;font-size:.8rem;font-weight:650}
+  .mini-card h4{margin:0 0 4px;font-size:.98rem}
+  .sustain p{font-size:.9rem;margin:0}
+  .privacy{border-color:var(--primary)}
+  /* ---------- For skoler ----------
+     De fire BMP-perspektiver har hver sin farve (tjekket for farveblindhed) OG en tekstetiket,
+     så farven aldrig er det eneste tegn. */
+  :root{--p-vp:#2a78d6;--p-cs:#eb6834;--p-ka:#1baf7a;--p-ec:#4a3aa7}
+  [data-theme="dark"]{--p-vp:#3987e5;--p-cs:#d95926;--p-ka:#199e70;--p-ec:#a24fb3}
+  .persp-vp{--p:var(--p-vp)} .persp-cs{--p:var(--p-cs)} .persp-ka{--p:var(--p-ka)} .persp-ec{--p:var(--p-ec)}
+  .panel[class*="persp-"]{border-left:6px solid var(--p)}
+  .persp-label{font-size:.74rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:7px;margin-bottom:6px}
+  .persp-label i{width:12px;height:12px;border-radius:3px;background:var(--p);display:inline-block}
+  .persp-legend{margin:0 0 12px}
+  .persp-key i{width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+  .persp-key.vp i{background:var(--p-vp)} .persp-key.cs i{background:var(--p-cs)} .persp-key.ka i{background:var(--p-ka)} .persp-key.ec i{background:var(--p-ec)}
+  .jump{display:flex;flex-wrap:wrap;gap:6px;align-content:center}
+  .jump a{background:var(--panel);border:1px solid var(--border);border-radius:999px;padding:6px 11px;font-size:.86rem;font-weight:650;text-decoration:none;color:var(--text)}
+  .jump a:hover{background:var(--soft)}
+  .hyp{display:inline-block;background:var(--warn-bg);color:var(--warning);border:1px solid var(--warning);border-radius:6px;padding:0 6px;font-size:.72rem;font-weight:800;letter-spacing:.05em;vertical-align:2px}
+  /* Pladsholdere, som holdet selv skal udfylde (gule) */
+  .ph{background:var(--warn-bg);color:var(--warning);border:1px dashed var(--warning);border-radius:6px;padding:0 5px;font-weight:700}
+  .card-grid{display:grid;gap:12px}
+  .card-grid.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .card-grid.two{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .mini-card,.tier{border:1px solid var(--border);border-radius:14px;padding:14px;background:var(--panel)}
+  .mini-card p,.mini-card li,.tier li{font-size:.92rem}
+  .mini-card ul,.tier ul,.bmc-cell ul{padding-left:18px;margin:6px 0 0}
+  .role{font-size:.78rem;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px}
+  .tier.featured{border:2px solid var(--primary)}
+  .tier-name{font-weight:800}
+  .tier-price{font-size:1.6rem;font-weight:800;letter-spacing:-.02em;margin-top:4px}
+  .plain-list{padding-left:18px}
+  .plain-list li{margin-bottom:6px;font-size:.93rem}
+  .steps li{margin-bottom:8px}
+  /* Økonomiberegner */
+  .calc{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:start}
+  .calc-inputs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .calc-inputs label{font-size:.85rem;font-weight:650;display:grid;gap:4px}
+  .calc-inputs .small{font-weight:400}
+  .calc-kpis{grid-template-columns:repeat(2,1fr);margin-top:0}
+  .kpi .number.negative{color:var(--danger)}
+  /* Business Model Canvas: klassisk opstilling på store skærme */
+  .bmc{display:grid;gap:10px;grid-template-columns:repeat(5,minmax(0,1fr));grid-template-areas:"kp ka vp cr cs" "kp kr vp ch cs" "co co co rs rs"}
+  .bmc-cell{border:1px solid var(--border);border-top:6px solid var(--p);border-radius:12px;padding:12px;background:var(--panel)}
+  .bmc-cell h3{font-size:.98rem}
+  .bmc-cell li{font-size:.86rem;margin-bottom:3px}
+  .compare th[scope="row"]{font-weight:700;min-width:160px}
+  @media(max-width:980px){
+    .bmc{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-areas:"vp vp" "cs cr" "ch ka" "kr kp" "rs co"}
+    .calc{grid-template-columns:1fr}
+  }
+  @media(max-width:780px){.card-grid.three,.card-grid.two{grid-template-columns:1fr}}
+  @media(max-width:560px){
+    .bmc{grid-template-columns:1fr;grid-template-areas:"vp" "cs" "cr" "ch" "ka" "kr" "kp" "rs" "co"}
+    .calc-inputs{grid-template-columns:1fr}
+  }
+  /* Dialog (bruges i stedet for confirm()/alert()) */
+  dialog{border:1px solid var(--border);border-radius:18px;padding:22px;background:var(--panel);color:var(--text);width:min(92vw,440px);max-height:calc(100dvh - 24px);overflow:auto;box-shadow:0 20px 80px #0005}
+  dialog::backdrop{background:#07140dcc}
+  .dialog-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:18px;flex-wrap:wrap}
+  /* Introduktion i 3 trin (vises første gang) */
+  #onboarding{width:min(94vw,520px)}
+  .ob-dots{display:flex;gap:6px;justify-content:center;margin-bottom:14px}
+  .ob-dots span{width:9px;height:9px;border-radius:50%;background:var(--border)}
+  .ob-dots span.on{background:var(--primary)}
+  .ob-icon{font-size:2.6rem;text-align:center;margin-bottom:4px}
+  .ob-step h2{text-align:center}
+  .ob-step h2:focus{outline:none}
+  .ob-classes{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:12px}
+  .ob-classes .btn[aria-pressed="true"]{background:var(--primary);color:var(--on-primary);border-color:var(--primary)}
+  .ob-stages{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;margin:6px 0 10px;text-align:center;font-size:.72rem;color:var(--muted)}
+  .ob-stages svg{width:100%;height:auto}
+  .dialog-actions .spacer{flex:1}
+  /* Fejring, når planten når et nyt stadie */
+  #celebration{text-align:center;width:min(92vw,400px);overflow:visible}
+  #celebration .celebrate-plant svg{width:190px;height:auto;margin:0 auto;display:block}
+  .grow svg{transform-origin:50% 88%;animation:grow 1.1s cubic-bezier(.2,.9,.3,1.25)}
+  @keyframes grow{from{transform:scale(.55);opacity:.3}to{transform:scale(1);opacity:1}}
+  .leaves{position:fixed;inset:0;pointer-events:none;overflow:hidden}
+  .leaves span{position:absolute;top:-40px;font-size:24px;animation:fall 2.8s linear forwards}
+  @keyframes fall{to{transform:translateY(110vh) rotate(540deg);opacity:.2}}
+  @media (prefers-reduced-motion: reduce){.grow svg{animation:none}.leaves{display:none}}
   footer{text-align:center;color:var(--muted);font-size:.82rem;padding:12px 0 28px}
-  @media(max-width:780px){.hero{grid-template-columns:1fr}.hero-art{min-height:120px}.hero-art svg{width:150px}.layout{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,1fr)}}
-  @media(max-width:470px){.wrap{padding:13px}.header-actions{width:100%}header{align-items:flex-start;flex-direction:column}.challenge{grid-template-columns:1fr}.challenge-action{align-items:flex-start;min-width:0}.status{text-align:left;max-width:none}.section-head{align-items:flex-start;flex-direction:column}.class-select{max-width:none}}
+  /* Toast = korte feedbackbeskeder, der vises nederst og forsvinder igen af sig selv */
+  .toast-region{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);display:grid;gap:8px;width:min(92vw,460px);z-index:40;pointer-events:none}
+  .toast{pointer-events:auto;display:flex;gap:10px;align-items:flex-start;justify-content:space-between;background:var(--text);color:var(--bg);border-radius:12px;padding:11px 13px;box-shadow:0 10px 30px #0004;font-size:.92rem;animation:toastIn .2s ease-out}
+  .toast.error{background:var(--danger);color:#fff}
+  [data-theme="dark"] .toast.error{color:#2a0d0b}
+  .toast button{background:none;border:0;color:inherit;font-weight:800;padding:0 4px;line-height:1.2}
+  @keyframes toastIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  @media (prefers-reduced-motion: reduce){.toast{animation:none}.progress-fill{transition:none}}
+  @media(max-width:780px){.hero{grid-template-columns:1fr}.hero-art{min-height:120px}.hero-art svg{width:150px}.layout{grid-template-columns:1fr}.stats,.kpis{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:470px){.wrap{padding:13px}.header-actions{width:100%}header{align-items:flex-start;flex-direction:column}.challenge{grid-template-columns:1fr}.challenge-action{align-items:flex-start;min-width:0}.status{text-align:left;max-width:none}.section-head{align-items:flex-start;flex-direction:column}.class-select{max-width:none}.pending-row{grid-template-columns:1fr}.tabs{width:100%}.tabs a{flex:1;text-align:center}}
 </style>
 </head>
 <body>
+<a class="skip-link" href="#main">Spring til indhold</a>
+<!-- Vises kun i demo-tilstand, så ingen kan forveksle eksempeldata med rigtige resultater -->
+<div class="demo-banner" id="demoBanner" role="region" aria-label="Demo-tilstand" hidden>
+  <span class="demo-chip">DEMO</span>
+  <span>Opdigtede eksempeldata til at vise appen – ikke rigtige resultater. Klassens egne data er gemt og urørt.</span>
+  <button class="btn small-btn" type="button" id="demoResetBtn">Nulstil demo</button>
+  <button class="btn small-btn" type="button" id="demoExitBtn">Afslut demo</button>
+</div>
 <div class="wrap">
   <header>
     <div class="brand">
@@ -93,79 +322,494 @@
       <div><h1>GroKlassen</h1><div class="subtitle">Små handlinger. Stor forskel.</div></div>
     </div>
     <div class="header-actions">
-      <button class="btn" id="themeBtn" type="button" aria-label="Skift farvetema">Mørk tilstand</button>
-      <button class="btn" id="teacherBtn" type="button">Lærerområde</button>
+      <button class="btn" id="helpBtn" type="button">Sådan virker det</button>
+      <button class="btn" id="pitchBtn" type="button"><span aria-hidden="true">▶</span> Pitch</button>
+      <button class="btn" id="themeBtn" type="button" aria-pressed="false">Mørk tilstand</button>
     </div>
   </header>
 
-  <section class="hero">
-    <div>
-      <span class="tag">KLASSENS GRØNNE MISSION</span>
-      <h2 style="font-size:clamp(1.5rem,3.5vw,2rem);margin-top:12px">Lad gode vaner vokse.</h2>
-      <p>Registrér grønne handlinger, saml point sammen, og se klassens fælles plante vokse. Hver lille indsats tæller.</p>
-    </div>
-    <div class="hero-art" id="heroPlant" aria-label="Illustration af klassens plante"></div>
-  </section>
+  <nav class="tabs" aria-label="Hovedmenu">
+    <a href="#klassen" data-view="klassen"><span aria-hidden="true">🌱</span> Klassen</a>
+    <a href="#skoler" data-view="skoler"><span aria-hidden="true">🏫</span> For skoler</a>
+    <a href="#laerer" data-view="laerer"><span aria-hidden="true">🔒</span> Lærer</a>
+  </nav>
 
-  <section class="stats" aria-label="Klassens resultater">
-    <div class="stat"><div class="number" id="totalPoints">0</div><div class="label">Godkendte point</div></div>
-    <div class="stat"><div class="number" id="co2Total">0 kg</div><div class="label">Anslået CO₂ sparet</div></div>
-    <div class="stat"><div class="number" id="waterTotal">0 L</div><div class="label">Anslået vand sparet</div></div>
-    <div class="stat"><div class="number" id="pendingTotal">0</div><div class="label">Afventer lærer</div></div>
-  </section>
-
-  <div class="layout">
-    <main>
-      <section class="panel">
-        <div class="section-head">
-          <div><h2>Grønne udfordringer</h2><div class="small">Vælg en handling, og send den til godkendelse.</div></div>
-          <select id="classSelect" class="class-select" aria-label="Vælg klasse">
-            <option value="7.A">7.A</option><option value="7.B">7.B</option><option value="8.A">8.A</option>
-          </select>
+  <main id="main" tabindex="-1">
+    <!-- ============ VISNING: KLASSEN (elevernes side) ============ -->
+    <div class="view" id="view-klassen">
+      <!-- Hero: problem, løsning og målgruppe – skal kunne forstås på 10 sekunder -->
+      <section class="hero" aria-labelledby="heroTitle">
+        <div>
+          <span class="tag">KLASSENS GRØNNE MISSION</span>
+          <h2 id="heroTitle" class="hero-title">Bæredygtige vaner forsvinder, når ingen kan se dem.</h2>
+          <p class="hero-lead"><strong>GroKlassen gør dem synlige:</strong> Eleverne registrerer små grønne handlinger, læreren godkender, og klassens fælles plante vokser.</p>
+          <ul class="hero-points">
+            <li><span aria-hidden="true">🎒</span> <strong>Elever:</strong> et fælles mål for hele klassen – ingen individuelle ranglister</li>
+            <li><span aria-hidden="true">📋</span> <strong>Lærere:</strong> godkendelse, overblik og ugerapport</li>
+            <li><span aria-hidden="true">🏫</span> <strong>Skoler:</strong> et let værktøj helt uden persondata</li>
+          </ul>
+          <div class="hero-actions">
+            <button class="btn primary" id="heroHowBtn" type="button">Sådan virker det</button>
+            <button class="btn" id="heroDemoBtn" type="button">Prøv med demo-data</button>
+          </div>
         </div>
-        <div id="dailyNotice" class="notice" style="margin-top:14px"></div>
-        <div id="challengeList" class="challenge-list"></div>
+        <div class="hero-art" id="heroPlant" aria-hidden="true"></div>
       </section>
-      <section class="panel">
-        <h2>Sådan tæller det</h2>
-        <p class="muted">Pointene er en fælles klassescore. CO₂- og vandtal er vejledende eksempler, ikke præcise målinger. Læreren godkender hver indsendelse, før den tæller med.</p>
-        <div class="tags"><span class="tag">Samarbejde</span><span class="tag">Bæredygtige vaner</span><span class="tag">Fælles mål</span></div>
+
+      <section class="stats" aria-label="Klassens resultater">
+        <div class="stat"><div class="number" id="totalPoints">0</div><div class="label">Godkendte point</div></div>
+        <div class="stat"><div class="number" id="co2Total">0 kg</div><div class="label">Anslået CO₂ sparet <span class="est">vejledende</span></div></div>
+        <div class="stat"><div class="number" id="waterTotal">0 L</div><div class="label">Anslået vand sparet <span class="est">vejledende</span></div></div>
+        <div class="stat"><div class="number" id="pendingTotal">0</div><div class="label">Afventer lærer</div></div>
       </section>
-    </main>
-    <aside>
-      <section class="panel plant-wrap">
-        <h2>Klassens plante</h2>
-        <div id="plantGraphic"></div>
-        <p class="plant-stage" id="plantStage">Frø</p>
-        <div class="small" id="plantDescription">Alt begynder med et lille frø.</div>
-        <div class="progress-track" aria-label="Fremskridt til næste plantestadie"><div class="progress-fill" id="progressFill"></div></div>
-        <div class="small" id="progressText">0 af 20 point til næste stadie</div>
+
+      <div class="layout">
+        <div>
+          <section class="panel" aria-labelledby="challengesTitle">
+            <div class="section-head">
+              <div><h2 id="challengesTitle">Grønne udfordringer</h2><div class="small">Vælg en handling, og send den til godkendelse.</div></div>
+              <select id="classSelect" class="class-select" aria-label="Vælg klasse" autocomplete="off"></select>
+            </div>
+            <!-- Statuslinje: viser altid dagens pointforbrug. Feedback vises i stedet som toast-beskeder. -->
+            <div id="dailyStatus" class="notice" style="margin-top:14px"></div>
+            <div id="challengeList" class="challenge-list"></div>
+          </section>
+          <section class="panel" aria-labelledby="methodTitle">
+            <details id="methodDetails">
+              <summary><h2 id="methodTitle" class="inline-h2">Sådan har vi regnet</h2> <span class="small">– antagelser, udregning og kilder for hver udfordring</span></summary>
+              <p class="muted" style="margin-top:12px">Alle CO₂- og vandtal er <strong>vejledende skøn</strong> for én handling – ikke målinger. Vi har valgt forsigtige tal, og hver antagelse står herunder, så alle kan regne efter. Har eleven alligevel cyklet, eller slukker lyset automatisk, er besparelsen 0.</p>
+              <p class="muted">Dansk strøm og fjernvarme er efterhånden så grønne, at lys, skærme og bad kun sparer få gram CO₂. De største gevinster kommer fra transport, mad og forbrug. Kun vand fra vandhanen tælles med – ikke "skjult vand" i fx bomuld og kød.</p>
+              <div id="methodList"></div>
+            </details>
+          </section>
+          <section class="panel" aria-labelledby="countTitle">
+            <h2 id="countTitle">Sådan tæller det</h2>
+            <p class="muted">Pointene er en fælles klassescore. De belønner indsats og gode vaner – ikke kun CO₂ – derfor giver fx "Sluk lyset" point, selvom CO₂-effekten er lille. Læreren godkender hver indsendelse, før den tæller med.</p>
+            <h3 style="margin-top:14px">Bæredygtighed på tre niveauer</h3>
+            <div class="card-grid three sustain">
+              <div class="mini-card"><h4>🌍 Miljø</h4><p>Små grønne vaner i hverdagen – transport, mad, affald, forbrug og energi – med ærlige, vejledende tal.</p></div>
+              <div class="mini-card"><h4>🤝 Socialt</h4><p>Klassen arbejder sammen mod ét mål. Ingen elev bliver målt, rangeret eller udstillet.</p></div>
+              <div class="mini-card"><h4>💰 Økonomi</h4><p>En lille, let app, der er billig at drive. En skolelicens skal betale for drift og udvikling.</p></div>
+            </div>
+            <p class="small" style="margin-top:10px"><strong>Alle kan være med:</strong> der er mange slags udfordringer, så elever, der fx ikke kan cykle i skole, kan bidrage på andre måder. Point gives til klassen samlet. <a href="#skoler-baeredygtighed">Læs mere om bæredygtighed og tilgængelighed</a></p>
+          </section>
+        </div>
+        <aside>
+          <section class="panel plant-wrap" aria-labelledby="plantTitle">
+            <h2 id="plantTitle">Klassens plante</h2>
+            <div id="plantGraphic"></div>
+            <p class="plant-stage" id="plantStage">Frø</p>
+            <div class="small" id="plantDescription">Alt begynder med et lille frø.</div>
+            <div class="progress-track" role="progressbar" aria-label="Fremskridt til næste plantestadie" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="progressTrack"><div class="progress-fill" id="progressFill"></div></div>
+            <div class="small" id="progressText">0 af 20 point til næste stadie</div>
+          </section>
+          <section class="panel" aria-labelledby="goalTitle">
+            <div class="goal-head"><h2 id="goalTitle">Klassens ugemål</h2><span class="small" id="goalWeek">Uge</span></div>
+            <div><span class="goal-number" id="goalNumbers">0 / 30</span> <span class="small">godkendte point denne uge</span></div>
+            <div class="progress-track" role="progressbar" aria-label="Fremskridt mod ugemålet" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="goalTrack"><div class="progress-fill" id="goalFill"></div></div>
+            <div class="small" id="goalText"></div>
+            <form class="goal-form" id="goalForm">
+              <div><label for="goalInput">Nyt ugemål (point)</label><input class="input" id="goalInput" type="number" min="5" max="75" step="5" inputmode="numeric"></div>
+              <button class="btn" type="submit">Gem mål</button>
+            </form>
+            <p class="small" style="margin:10px 0 0">Beslut målet sammen i klassen. Det er et fælles mål – ingen enkeltpersoner bliver målt.</p>
+          </section>
+          <section class="panel" aria-labelledby="leagueTitle">
+            <h2 id="leagueTitle">Klasseliga – denne uge</h2>
+            <div class="small" style="margin-bottom:10px" id="leagueNote">Klasser dyster mod klasser – aldrig elev mod elev. Ligaen starter forfra hver mandag, så alle klasser kan vinde.</div>
+            <div class="league" id="leagueList"></div>
+          </section>
+          <section class="panel" aria-labelledby="pendingTitle">
+            <div class="section-head"><h2 id="pendingTitle">Afventer godkendelse</h2><span class="tag" id="pendingBadge">0</span></div>
+            <div id="pendingList"></div>
+          </section>
+        </aside>
+      </div>
+    </div>
+
+    <!-- ============ VISNING: FOR SKOLER (mini-salgsside og pitch-støtte) ============ -->
+    <div class="view" id="view-skoler" hidden>
+      <section class="hero schools-hero" aria-labelledby="schoolsTitle">
+        <div>
+          <span class="tag">FOR SKOLER OG KOMMUNER</span>
+          <h2 id="schoolsTitle" class="hero-title">Grønne vaner, der kan ses – for hele klassen.</h2>
+          <p class="hero-lead">GroKlassen er et let værktøj, hvor klassen samler grønne handlinger, læreren godkender, og en fælles plante viser fremskridtet. Uden elevnavne og uden persondata.</p>
+          <p class="small" style="margin-top:10px"><span class="hyp">PROTOTYPE</span> Priser, tal og partnere på denne side er hypoteser fra et gymnasiehold. De skal testes i pilotforsøg, før de er rigtige.</p>
+        </div>
+        <nav class="jump" aria-label="Indhold på siden">
+          <a href="#skoler-vaerdi">Værdi</a><a href="#skoler-roller">Kunder</a><a href="#skoler-priser">Priser</a><a href="#skoler-oekonomi">Økonomi</a><a href="#skoler-canvas">Forretningsmodel</a><a href="#skoler-partnere">Partnere</a><a href="#skoler-alternativer">Alternativer</a><a href="#skoler-baeredygtighed">Bæredygtighed</a><a href="#skoler-naeste">Næste skridt</a>
+        </nav>
       </section>
-      <section class="panel">
-        <h2>Klasseliga</h2>
-        <div class="small" style="margin-bottom:10px">Demo-tal for at vise, hvordan ligaen kan se ud.</div>
-        <div class="league" id="leagueList"></div>
+
+      <!-- Værditilbud -->
+      <section class="panel persp-vp" id="skoler-vaerdi" tabindex="-1" aria-labelledby="valueTitle">
+        <div class="persp-label"><i aria-hidden="true"></i>Værditilbud</div>
+        <h2 id="valueTitle">Problemet og løsningen</h2>
+        <div class="card-grid three">
+          <div class="mini-card"><h3>😕 Problemet</h3><p>Bæredygtige vaner forsvinder, når ingen kan se dem. Plakater og temauger er gode til at starte – men hvem holder fast, når ugen er slut?</p><p class="small">Vores hypotese. Hvad lærerne selv siger: <span data-team="interviewFinding"></span></p></div>
+          <div class="mini-card"><h3>🌱 Løsningen</h3><p>Klassen registrerer små grønne handlinger. Læreren godkender. En fælles plante vokser – og et ugemål giver klassen noget at samles om hver uge.</p></div>
+          <div class="mini-card"><h3>✨ Det nye</h3><p>Fællesskab i stedet for individuelle ranglister. Lærergodkendelse i stedet for blind tillid. Åbne, ærlige beregninger. Og ingen persondata om eleverne – det gør det lettere for skolen at sige ja.</p></div>
+        </div>
+        <p class="small" style="margin-top:12px">Sådan fik vi idéen: <span data-team="ideaOrigin"></span></p>
       </section>
-      <section class="panel">
-        <div class="section-head"><h2>Afventer godkendelse</h2><span class="tag" id="pendingBadge">0</span></div>
-        <div id="pendingList"></div>
+
+      <!-- Kundeperspektiv: tre roller -->
+      <section class="panel persp-cs" id="skoler-roller" tabindex="-1" aria-labelledby="rolesTitle">
+        <div class="persp-label"><i aria-hidden="true"></i>Kundeperspektiv</div>
+        <h2 id="rolesTitle">Tre roller – tre slags værdi</h2>
+        <div class="card-grid three">
+          <div class="mini-card"><h3>🎒 Elever</h3><div class="role">Brugere</div><ul><li>Ser at deres handlinger tæller – planten vokser</li><li>Et fælles mål for klassen, ingen udstilling af enkeltpersoner</li><li>Ingen login, intet navn – bare klassen</li></ul></div>
+          <div class="mini-card"><h3>📋 Lærere</h3><div class="role">Daglige administratorer</div><ul><li>Godkend indsendelser enkeltvis eller samlet</li><li>Graf over klassens udvikling og print-venlig ugerapport</li><li>Spørgsmål til en kort klassesamtale hver uge</li></ul></div>
+          <div class="mini-card"><h3>🏫 Skoler og kommuner</h3><div class="role">Betalende kunder</div><ul><li>Et konkret værktøj til grøn dannelse i hverdagen</li><li>Rapporter og CSV på klasseniveau – ingen persondata</li><li>Kan understøtte skolens grønne handleplan eller kommunens klimaplan</li></ul></div>
+        </div>
+        <p class="small" style="margin-top:12px">Målgruppe: <span data-team="targetGrades"></span> · Interviews indtil nu: <span data-team="interviewsTeachers"></span></p>
       </section>
-    </aside>
-  </div>
-  <footer>GroKlassen · Prototype til læring om bæredygtighed · Data gemmes kun i denne browser</footer>
+
+      <!-- Økonomi: prisskitse -->
+      <section class="panel persp-ec" id="skoler-priser" tabindex="-1" aria-labelledby="pricesTitle">
+        <div class="persp-label"><i aria-hidden="true"></i>Økonomi · indtægter</div>
+        <h2 id="pricesTitle">Prisskitse <span class="hyp">HYPOTESE</span></h2>
+        <p class="muted">Priserne er hypoteser og skal valideres gennem interviews og pilotforsøg. Alle priser er ekskl. moms.</p>
+        <div class="card-grid three">
+          <div class="tier"><div class="tier-name">🌱 Prøve</div><div class="tier-price">0 kr.</div><div class="small">1 klasse i 3 måneder</div><ul><li>Alle udfordringer og klassens plante</li><li>Lærergodkendelse og ugemål</li><li>Formål: at indsamle feedback fra pilotklasser</li></ul></div>
+          <div class="tier featured"><div class="tier-name">🌳 Skolelicens</div><div class="tier-price">ca. 1.500 kr.</div><div class="small">pr. skole pr. år</div><ul><li>Alle skolens klasser og en klasseliga</li><li>Lærerdashboard, ugerapporter og CSV</li><li>Support på mail</li></ul></div>
+          <div class="tier"><div class="tier-name">🏙️ Kommuneaftale</div><div class="tier-price">fra ca. 12.000 kr.</div><div class="small">pr. år for op til 10 skoler</div><ul><li>Alle deltagende skoler i kommunen</li><li>Samlet rapport til kommunens klimaenhed (kun klasseniveau)</li><li>Hjælp til opstart</li></ul></div>
+        </div>
+        <details style="margin-top:12px">
+          <summary>Hvorfor netop disse priser? (referencer)</summary>
+          <p class="small">Vi har lagt prisen lavt, fordi GroKlassen er et nyt og ubevist værktøj. Til sammenligning (priser set på udbydernes egne hjemmesider 25.10.2026 – <strong>faktatjek før pitchen</strong>):</p>
+          <ul class="small">
+            <li>Grøn Skole/Grønt Flag (Friluftsrådet): 3.600 kr. pr. skoleår for en grundskole – et helt program med netværk og certificering.</li>
+            <li>Klimakampen: 500 kr. pr. klasse for en kampagne på 4 uger.</li>
+            <li>Gyldendals digitale fagportaler: ca. 1.300 kr. pr. klasse pr. år.</li>
+            <li>Matematik-Tjek: 645–2.045 kr. pr. skole pr. år afhængigt af antal klasser.</li>
+          </ul>
+          <p class="small">Betalingsvilje ifølge vores egne samtaler: <span data-team="willingnessToPay"></span></p>
+        </details>
+      </section>
+
+      <!-- Økonomi: beregner -->
+      <section class="panel persp-ec" id="skoler-oekonomi" tabindex="-1" aria-labelledby="calcTitle">
+        <div class="persp-label"><i aria-hidden="true"></i>Økonomi · omkostninger og break-even</div>
+        <h2 id="calcTitle">Økonomiberegner</h2>
+        <p class="muted">Skift tallene og se, hvor mange skoler der skal til, før GroKlassen kan betale for sig selv. Alle standardværdier er <span class="hyp">ANTAGELSER</span>.</p>
+        <form class="calc" id="calcForm" autocomplete="off">
+          <div class="calc-inputs">
+            <label>Antal skoler<input class="input" type="number" id="calcSchools" min="0" max="500" step="1" inputmode="numeric"><span class="small">Eksempel</span></label>
+            <label>Pris pr. skolelicens pr. år (kr.)<input class="input" type="number" id="calcPrice" min="0" max="100000" step="100" inputmode="numeric"><span class="small">Hypotese</span></label>
+            <label>Variable omkostninger pr. skole pr. år (kr.)<input class="input" type="number" id="calcVariable" min="0" max="100000" step="50" inputmode="numeric"><span class="small">Onboarding, fakturering, support</span></label>
+            <label>Hosting og database pr. år (kr.)<input class="input" type="number" id="calcHosting" min="0" max="1000000" step="500" inputmode="numeric"><span class="small">Fx database i EU + webhosting + domæne</span></label>
+            <label>Support pr. år (kr.)<input class="input" type="number" id="calcSupport" min="0" max="1000000" step="500" inputmode="numeric"><span class="small">Lærersupport og fejlrettelser</span></label>
+            <label>Udvikling pr. år (kr.)<input class="input" type="number" id="calcDev" min="0" max="1000000" step="1000" inputmode="numeric"><span class="small">Fx sikkerhed, GDPR-rådgivning, nye funktioner</span></label>
+          </div>
+          <div class="calc-results" aria-live="polite">
+            <div class="kpis calc-kpis">
+              <div class="kpi"><div class="number" id="calcRevenue">0</div><div class="label">Indtægt pr. år</div></div>
+              <div class="kpi"><div class="number" id="calcCosts">0</div><div class="label">Omkostninger pr. år</div></div>
+              <div class="kpi"><div class="number" id="calcResult">0</div><div class="label">Resultat pr. år</div></div>
+              <div class="kpi"><div class="number" id="calcBreakEven">0</div><div class="label">Break-even (antal skoler)</div></div>
+            </div>
+            <p class="small" id="calcExplain"></p>
+          </div>
+        </form>
+        <div class="viz" id="breakEvenChart"></div>
+        <div class="legend" aria-hidden="true"><span><i style="background:var(--series-a)"></i>Indtægt</span><span><i style="background:var(--series-b)"></i>Omkostninger</span></div>
+        <details style="margin-top:8px"><summary>Vis som tabel</summary><div class="table-scroll" id="breakEvenTable"></div></details>
+        <div class="form-row"><button class="btn small-btn" type="button" id="calcReset">Gendan antagelser</button></div>
+      </section>
+
+      <!-- Business Model Canvas -->
+      <section class="panel" id="skoler-canvas" tabindex="-1" aria-labelledby="bmcTitle">
+        <h2 id="bmcTitle">Business Model Canvas</h2>
+        <p class="muted">De 9 felter er farvekodet efter de fire perspektiver, som Business Mind Programme bedømmer. Gule felter skal holdet selv udfylde med rigtige data.</p>
+        <div class="legend persp-legend">
+          <span class="persp-key vp"><i></i>Værditilbud</span>
+          <span class="persp-key cs"><i></i>Kundeperspektiv</span>
+          <span class="persp-key ka"><i></i>Aktivitetsperspektiv</span>
+          <span class="persp-key ec"><i></i>Økonomi</span>
+        </div>
+        <div class="bmc">
+          <article class="bmc-cell persp-ka" style="grid-area:kp"><div class="persp-label"><i aria-hidden="true"></i>Aktivitet</div><h3>Nøglepartnere</h3><ul><li>Pilotskoler og -lærere</li><li>Kommunernes klimaenheder</li><li>Organisationer med grønne skoleprogrammer</li><li>Fagpersoner, der faktatjekker CO₂-tal</li><li>Hosting i EU</li></ul><p class="small">Alle er <strong>mulige</strong> partnere – ingen aftaler endnu.</p></article>
+          <article class="bmc-cell persp-ka" style="grid-area:ka"><div class="persp-label"><i aria-hidden="true"></i>Aktivitet</div><h3>Nøgleaktiviteter</h3><ul><li>Udvikle og drive appen</li><li>Udvikle udfordringer og faktatjekke beregninger</li><li>Pilotforsøg og lærersupport</li><li>Salg til skoler og kommuner</li></ul></article>
+          <article class="bmc-cell persp-ka" style="grid-area:kr"><div class="persp-label"><i aria-hidden="true"></i>Aktivitet</div><h3>Nøgleressourcer</h3><ul><li>Appen (én let webapp)</li><li>Beregningsmetoder og kilder</li><li>Holdets tid og kompetencer</li><li>Feedback fra pilotklasser</li></ul></article>
+          <article class="bmc-cell persp-vp" style="grid-area:vp"><div class="persp-label"><i aria-hidden="true"></i>Værditilbud</div><h3>Værditilbud</h3><ul><li>Gør klassens grønne vaner synlige med en fælles plante</li><li>Fællesskab – kun klasser sammenlignes, aldrig elever</li><li>Lærergodkendelse, ugemål og ugerapport</li><li>Ingen persondata om elever</li><li>Ærlige, åbne CO₂-beregninger</li></ul></article>
+          <article class="bmc-cell persp-cs" style="grid-area:cr"><div class="persp-label"><i aria-hidden="true"></i>Kunde</div><h3>Kunderelationer</h3><ul><li>Gratis prøve → selvbetjening</li><li>Ugerapport og ugemål holder klassen i gang</li><li>Personlig hjælp i pilotperioden</li></ul></article>
+          <article class="bmc-cell persp-cs" style="grid-area:ch"><div class="persp-label"><i aria-hidden="true"></i>Kunde</div><h3>Kanaler</h3><ul><li>Direkte kontakt via pilotlærere</li><li>Lærernetværk og faglige foreninger</li><li>Kommunernes klimaenheder</li><li>Fagmesser for lærere</li><li>Webapp – ingen installation</li></ul></article>
+          <article class="bmc-cell persp-cs" style="grid-area:cs"><div class="persp-label"><i aria-hidden="true"></i>Kunde</div><h3>Kundesegmenter</h3><ul><li><strong>Brugere:</strong> elever i skoleklasser</li><li><strong>Administratorer:</strong> lærere</li><li><strong>Betalende:</strong> skoleledelser og kommuner</li></ul><p class="small">Klassetrin: <span data-team="targetGrades"></span></p></article>
+          <article class="bmc-cell persp-ec" style="grid-area:co"><div class="persp-label"><i aria-hidden="true"></i>Økonomi</div><h3>Omkostningsstruktur</h3><ul><li>Udvikling og vedligehold</li><li>Hosting og database (ca. 4.000 kr./år – antagelse)</li><li>Support og onboarding</li><li>GDPR-rådgivning og databehandleraftale, når lærere får login</li><li>Markedsføring, fx messer</li></ul></article>
+          <article class="bmc-cell persp-ec" style="grid-area:rs"><div class="persp-label"><i aria-hidden="true"></i>Økonomi</div><h3>Indtægtsstrømme</h3><ul><li>Årlig skolelicens (hypotese: ca. 1.500 kr.)</li><li>Kommuneaftaler for flere skoler (hypotese)</li><li>Gratis prøve som indgang (freemium)</li></ul><p class="small">Betalingsvilje: <span data-team="willingnessToPay"></span></p></article>
+        </div>
+      </section>
+
+      <!-- Aktivitetsperspektiv: partnere og kanaler -->
+      <section class="panel persp-ka" id="skoler-partnere" tabindex="-1" aria-labelledby="partnersTitle">
+        <div class="persp-label"><i aria-hidden="true"></i>Aktivitetsperspektiv og kanaler</div>
+        <h2 id="partnersTitle">Mulige partnere og kanaler</h2>
+        <p class="muted">Ingen af dem er kontaktet eller har sagt ja. Det er mulige samarbejder, som vi vil undersøge.</p>
+        <div class="card-grid two">
+          <div>
+            <h3>Mulige nøglepartnere</h3>
+            <ul class="plain-list">
+              <li><strong>Kommunernes klimaenheder</strong> – alle kommuner har klimaplaner (DK2020), og nogle betaler allerede for skolernes grønne programmer.</li>
+              <li><strong>Grøn Skole/Grønt Flag (Friluftsrådet)</strong> – GroKlassen kunne være et dagligt værktøj til skolernes miljøhandleplaner.</li>
+              <li><strong>CONCITO</strong> – grøn tænketank med skoleprojekter om klimahandling.</li>
+              <li><strong>Faglige foreninger</strong> – fx Danmarks Naturfagslærerforening – til feedback på udfordringerne.</li>
+              <li><strong>Astra</strong> (nationalt naturfagscenter) – vej til kommunale naturfagskonsulenter.</li>
+              <li><strong>Kampagner som Alle Børn Cykler</strong> – GroKlassen kunne holde vanen i gang efter kampagneugerne.</li>
+            </ul>
+          </div>
+          <div>
+            <h3>Kanaler – sådan når vi skolerne</h3>
+            <ul class="plain-list">
+              <li><strong>Pilotlærere</strong> – de første klasser og mund-til-mund på lærerværelset.</li>
+              <li><strong>Lærernetværk og fagblade</strong> – fx naturfagslærernes blade og kurser.</li>
+              <li><strong>Kommunerne</strong> – én aftale kan nå mange skoler på én gang.</li>
+              <li><strong>Grønne netværk for skoler</strong> – skoler, der allerede arbejder med bæredygtighed.</li>
+              <li><strong>Fagmesser</strong> – fx Lærfest for grundskolen (dato faktatjekkes).</li>
+              <li><strong>Selve appen</strong> – virker i browseren uden installation, så det er let at prøve.</li>
+            </ul>
+          </div>
+        </div>
+        <p class="small">Hvem har vi talt med, og hvad ændrede vi bagefter? <span data-team="feedbackUsed"></span></p>
+      </section>
+
+      <!-- Alternativer -->
+      <section class="panel persp-vp" id="skoler-alternativer" tabindex="-1" aria-labelledby="altTitle">
+        <div class="persp-label"><i aria-hidden="true"></i>Værditilbud · konkurrenter</div>
+        <h2 id="altTitle">Alternativer – en ærlig sammenligning</h2>
+        <div class="table-scroll">
+          <table class="data-table compare">
+            <caption class="sr-only">Sammenligning af GroKlassen med alternativer</caption>
+            <thead><tr><th scope="col">Alternativ</th><th scope="col">Styrker</th><th scope="col">Hvad GroKlassen gør anderledes</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">Plakater og opslag i klassen</th><td>Gratis, altid synlige, ingen skærm og ingen data.</td><td>Historik, ugemål, lærergodkendelse og rapport. Men kræver en skærm.</td></tr>
+              <tr><th scope="row">Kampagner og temauger (fx Alle Børn Cykler, Affaldsindsamlingen)</th><td>Gratis, stor rækkevidde og stærke afsendere.</td><td>Kører hele året og dækker mange slags handlinger. Om det fastholder vaner bedre, skal testes.</td></tr>
+              <tr><th scope="row">Klimakonkurrence-apps (fx Klimakampen)</th><td>Findes allerede, har point og hold og en lav pris pr. klasse.</td><td>Et løbende værktøj hele skoleåret med lærergodkendelse, fælles plante og kun data på klasseniveau.</td></tr>
+              <tr><th scope="row">Generelle vane-apps (fx Habitica, JouleBug)</th><td>Moden gamification og mange funktioner.</td><td>Bygget til danske skoleklasser – ingen individuelle profiler, ingen elevlogin.</td></tr>
+              <tr><th scope="row">Grønne skoleprogrammer (fx Grønt Flag – Grøn Skole)</th><td>Etablerede, med netværk og certificering.</td><td>Et dagligt værktøj på klasseniveau – kan supplere et program, ikke erstatte det.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="card-grid two" style="margin-top:14px">
+          <div class="mini-card"><h3>Vores svagheder – ærligt</h3><ul><li>Ingen rigtige brugere endnu – kun en prototype</li><li>Data ligger kun i én browser (ingen login eller fælles database endnu)</li><li>CO₂-tallene er skøn, ikke målinger</li><li>Der findes allerede konkurrenter med færdige apps</li></ul></div>
+          <div class="mini-card"><h3>Kan idéen beskyttes?</h3><p>En idé kan ikke beskyttes i sig selv. Vores forspring skal komme fra pilotskoler, et stærkt navn og åbne beregninger, der skaber tillid. Navnet kan måske registreres som varemærke: <span data-team="nameCheck"></span></p></div>
+        </div>
+        <p class="small" style="margin-top:10px">Oplysninger om andre løsninger er fra deres egne hjemmesider (set 25.10.2026) og skal faktatjekkes. Vi påstår intet om deres svagheder.</p>
+      </section>
+
+      <!-- Bæredygtighed på tre niveauer -->
+      <section class="panel" id="skoler-baeredygtighed" tabindex="-1" aria-labelledby="sustainTitle">
+        <h2 id="sustainTitle">Bæredygtighed på tre niveauer</h2>
+        <div class="card-grid three">
+          <div class="mini-card"><h3>🌍 Miljømæssig</h3><ul><li>Gør grønne vaner synlige: transport, mad, affald, forbrug og energi</li><li>Ærlige, forsigtige CO₂-tal med åben beregning – se "Sådan har vi regnet" på klassens side</li><li>Den største effekt kommer fra transport, mad og forbrug. Lys og skærme sparer få gram, fordi dansk strøm er grøn – det siger vi højt</li></ul></div>
+          <div class="mini-card"><h3>🤝 Social</h3><ul><li>Klassen er holdet: ét fælles mål, én fælles plante</li><li>Ingen individuelle ranglister – ingen elev bliver udstillet</li><li>Ugerapporten giver spørgsmål til en klassesamtale om vaner</li><li>Ligaen starter forfra hver mandag, så alle klasser kan vinde</li></ul></div>
+          <div class="mini-card"><h3>💰 Økonomisk</h3><ul><li>En skolelicens skal finansiere drift og udvikling, så værktøjet kan leve videre</li><li>Lav pris, fordi appen er lille og billig at drive</li><li>Om skolerne får økonomisk værdi, skal pilotforsøg vise – det påstår vi ikke endnu</li></ul></div>
+        </div>
+        <div class="card-grid three" style="margin-top:12px">
+          <div class="mini-card"><h3>🌐 Verdensmål</h3><p><strong>4.7</strong> Uddannelse for bæredygtig udvikling · <strong>12</strong> Ansvarligt forbrug og produktion · <strong>13</strong> Klimaindsats.</p><p class="small">Forklar selv med jeres egne ord, hvordan GroKlassen bidrager – og hvor lidt eller meget.</p></div>
+          <div class="mini-card"><h3>🪶 Appen selv er let</h3><ul><li>Én fil på ca. <strong id="appSize">–</strong> – ingen billeder eller biblioteker at hente</li><li>Ingen tracking, ingen cookies, ingen reklamer</li><li>Ingen server i prototypen – virker offline</li><li>Mørk tilstand og reduceret animation</li></ul></div>
+          <div class="mini-card"><h3>♿ Tilgængelighed og inklusion</h3><ul><li>Alle elever kan bidrage – mange slags udfordringer, og ingen kræver at man køber noget</li><li>Bygget til tastatur og skærmlæser: labels, synligt fokus og beskeder, der læses op</li><li>Virker på mobil, tablet og computer</li><li>Ingen individuelle point eller ranglister</li></ul></div>
+        </div>
+        <div class="mini-card privacy" style="margin-top:12px">
+          <h3>🔒 Ingen persondata – også et salgsargument</h3>
+          <p>Prototypen indsamler ingen elevnavne, e-mails eller andet, der kan identificere en person. Alt er på klasseniveau, og data ligger kun i browseren på den enhed, der bruges. Det gør det lettere for skolen at sige ja (GDPR). En senere version med lærerlogin vil behandle lærernes e-mail – det kræver en databehandleraftale og en GDPR-vurdering, før den bruges i skoler.</p>
+        </div>
+      </section>
+
+      <!-- Næste skridt -->
+      <section class="panel" id="skoler-naeste" tabindex="-1" aria-labelledby="nextTitle">
+        <h2 id="nextTitle">Næste skridt: fra hypotese til viden</h2>
+        <ol class="steps">
+          <li><strong>Interviews:</strong> tal med <span data-team="interviewsTeachers"></span> lærere og skoleledere om behov og pris.</li>
+          <li><strong>Pilotforsøg:</strong> <span data-team="pilotClasses"></span> klasser bruger GroKlassen i 4 uger. Vi måler, om klasserne bliver ved, og hvad lærerne siger. Resultat: <span data-team="pilotResult"></span></li>
+          <li><strong>Faktatjek:</strong> CO₂-tallene tjekkes af <span data-team="factChecker"></span>.</li>
+          <li><strong>Version 2:</strong> login for lærere, fælles database i EU, servervalidering af fusk-reglerne, GDPR-vurdering og databehandleraftale.</li>
+          <li><strong>Test af pris:</strong> spørg skoleledelser, om de vil betale fx 1.000, 1.500 eller 3.000 kr. om året.</li>
+        </ol>
+      </section>
+    </div>
+
+    <!-- ============ VISNING: LÆRER (bag demo-PIN) ============ -->
+    <div class="view" id="view-laerer" hidden>
+      <section class="panel lock-panel" id="teacherLock" aria-labelledby="lockTitle">
+        <h2 id="lockTitle">Lærerområde</h2>
+        <p class="muted">Indtast lærerens PIN-kode for at godkende eller afvise klassens indsendelser.</p>
+        <form id="pinForm" autocomplete="off">
+          <label for="pinInput">PIN-kode</label>
+          <div class="form-row" style="margin-top:0">
+            <input id="pinInput" class="input" type="password" inputmode="numeric" autocomplete="off" aria-describedby="pinError pinNote">
+            <button class="btn primary" type="submit">Åbn lærerområde</button>
+          </div>
+          <div id="pinError" class="small" style="color:var(--danger);margin-top:7px" aria-live="polite"></div>
+        </form>
+        <p class="small" id="pinNote" style="margin-top:14px">Bemærk: PIN-koden er kun en simpel demo-lås og kan ses i kildekoden. Den beskytter ikke data mod manipulation.</p>
+      </section>
+
+      <div id="teacherDashboard" hidden>
+        <section class="panel" aria-labelledby="dashTitle">
+          <div class="section-head">
+            <div>
+              <h2 id="dashTitle">Lærerdashboard</h2>
+              <div class="small">Overblik over klassens indsendelser. Ingen elevnavne – kun klassens fælles handlinger.</div>
+            </div>
+            <div class="form-row" style="margin-top:0">
+              <label for="teacherClassSelect" class="small">Klasse</label>
+              <select id="teacherClassSelect" class="class-select" autocomplete="off"></select>
+              <button class="btn" id="lockBtn" type="button">Lås lærerområdet</button>
+            </div>
+          </div>
+          <div class="kpis">
+            <div class="kpi"><div class="number" id="kpiPending">0</div><div class="label">Afventer godkendelse</div></div>
+            <div class="kpi"><div class="number" id="kpiOld">0</div><div class="label">Ældre end i dag</div></div>
+            <div class="kpi"><div class="number" id="kpiToday">0</div><div class="label">Godkendte point i dag</div></div>
+            <div class="kpi"><div class="number" id="kpiTotal">0</div><div class="label">Godkendte point i alt</div></div>
+          </div>
+        </section>
+
+        <section class="panel" aria-labelledby="queueTitle">
+          <h2 id="queueTitle" tabindex="-1">Ventende indsendelser</h2>
+          <div class="subhead">
+            <h3>Fra i dag</h3>
+            <button class="btn primary small-btn" id="approveTodayBtn" type="button">Godkend alle fra i dag</button>
+          </div>
+          <div id="pendingTodayList"></div>
+          <div id="olderBlock" hidden>
+            <div class="subhead">
+              <h3>Fra tidligere dage</h3>
+              <div class="bulk-actions">
+                <button class="btn small-btn" id="approveOlderBtn" type="button">Godkend alle ældre</button>
+                <button class="btn danger small-btn" id="rejectOlderBtn" type="button">Afvis alle ældre</button>
+              </div>
+            </div>
+            <p class="small">Disse indsendelser er blevet liggende. Pointloftet tjekkes mod den dag, de blev indsendt – ikke mod i dag.</p>
+            <div id="pendingOlderList"></div>
+          </div>
+        </section>
+
+        <section class="panel" aria-labelledby="chartTitle">
+          <h2 id="chartTitle">Klassens udvikling</h2>
+          <div class="small">Godkendte point pr. uge de seneste 8 uger. Den vandrette linje er klassens nuværende ugemål.</div>
+          <div class="viz" id="weekChart"></div>
+          <details style="margin-top:8px">
+            <summary>Vis som tabel</summary>
+            <div class="table-scroll" id="weekTable"></div>
+          </details>
+        </section>
+
+        <section class="panel" aria-labelledby="toolsTitle">
+          <h2 id="toolsTitle">Rapport, eksport og data</h2>
+          <div class="tool-grid">
+            <div class="tool">
+              <h3>📄 Ugerapport</h3>
+              <p>En print-venlig rapport til undervisningen eller til ledelsen – med spørgsmål til en klassesamtale.</p>
+              <button class="btn primary small-btn" type="button" id="reportBtn">Vis ugerapport</button>
+            </div>
+            <div class="tool">
+              <h3>⬇️ Eksportér CSV</h3>
+              <p>Alle klassens indsendelser som regneark (åbner i Excel/Numbers). Kun klassedata – ingen persondata.</p>
+              <button class="btn small-btn" type="button" id="csvBtn">Download CSV</button>
+            </div>
+            <div class="tool">
+              <h3>🧪 Demo-data</h3>
+              <p id="demoToolText">Indlæs eksempeldata for flere uger, så graf og plante ser levende ud. Klassens egne data bliver ikke rørt.</p>
+              <div class="bulk-actions">
+                <button class="btn small-btn" type="button" id="demoLoadBtn">Indlæs demo-data</button>
+                <button class="btn small-btn" type="button" id="demoResetBtn2" hidden>Nulstil demo</button>
+                <button class="btn small-btn" type="button" id="demoExitBtn2" hidden>Afslut demo</button>
+              </div>
+            </div>
+            <div class="tool">
+              <h3>🗑️ Nulstil klassen</h3>
+              <p>Sletter de valgte klasses indsendelser i denne browser. Kan ikke fortrydes.</p>
+              <button class="btn danger small-btn" type="button" id="resetClassBtn">Nulstil klassens data</button>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+  <footer>GroKlassen · Prototype til læring om bæredygtighed · <strong>Ingen persondata</strong> · Ingen tracking · Data gemmes kun i denne browser</footer>
 </div>
 
-<div class="modal-backdrop" id="teacherModal" role="dialog" aria-modal="true" aria-labelledby="teacherTitle">
-  <div class="modal">
-    <h2 id="teacherTitle">Lærerområde</h2>
-    <p class="muted">Indtast lærerens PIN-kode for at godkende eller afvise forespørgsler.</p>
-    <label for="pinInput">PIN-kode</label>
-    <input id="pinInput" type="password" inputmode="numeric" autocomplete="current-password" placeholder="Standard: 1234">
-    <div id="pinError" class="small" style="color:var(--danger);margin-top:7px" aria-live="polite"></div>
-    <div class="modal-actions"><button class="btn" id="cancelTeacher" type="button">Annuller</button><button class="btn primary" id="unlockTeacher" type="button">Åbn lærerområde</button></div>
-    <p class="small" style="margin-top:14px">Bemærk: PIN-koden er kun en simpel demo-lås og kan ses i kildekoden. Den beskytter ikke data mod manipulation.</p>
+<!-- Her vises feedbackbeskeder. aria-live="polite" betyder, at skærmlæsere læser dem højt. -->
+<div id="toastRegion" class="toast-region" aria-live="polite" aria-atomic="false"></div>
+
+<!-- Bekræftelsesdialog – bruges i stedet for browserens confirm(), der ikke kan styles og virker dårligt på mobil -->
+<dialog id="confirmDialog" aria-labelledby="confirmTitle" aria-describedby="confirmText">
+  <h2 id="confirmTitle">Er du sikker?</h2>
+  <p id="confirmText" class="muted"></p>
+  <div class="dialog-actions">
+    <button class="btn" type="button" id="confirmCancel">Annullér</button>
+    <button class="btn primary" type="button" id="confirmOk">OK</button>
   </div>
-</div>
+</dialog>
+
+<!-- Introduktion i 3 trin. Vises første gang og kan åbnes igen via "Sådan virker det". -->
+<dialog id="onboarding" aria-labelledby="obTitle0">
+  <div class="ob-dots" aria-hidden="true"><span class="on"></span><span></span><span></span></div>
+  <div class="ob-step" data-step="0">
+    <div class="ob-icon" aria-hidden="true">🏫</div>
+    <h2 id="obTitle0" tabindex="-1">1. Vælg klasse</h2>
+    <p class="muted">Hele klassen samler point sammen. Der er ingen login og ingen navne – kun klassen.</p>
+    <div class="ob-classes" id="obClasses" role="group" aria-label="Vælg klasse"></div>
+  </div>
+  <div class="ob-step" data-step="1" hidden>
+    <div class="ob-icon" aria-hidden="true">🚲 ♻️ 💡</div>
+    <h2 id="obTitle1" tabindex="-1">2. Lav grønne handlinger</h2>
+    <p class="muted">Vælg en udfordring, fx at cykle i skole eller sortere affald, og send den. Læreren godkender, før den tæller med.</p>
+    <p class="small">Fair play: én gang pr. udfordring pr. dag, højst 15 point om dagen og 10 sekunders pause mellem indsendelser.</p>
+  </div>
+  <div class="ob-step" data-step="2" hidden>
+    <div class="ob-stages" id="obStages" aria-hidden="true"></div>
+    <h2 id="obTitle2" tabindex="-1">3. Se planten vokse</h2>
+    <p class="muted">Godkendte point får klassens plante til at vokse fra frø til stort træ. Sæt et ugemål sammen, og følg med hver uge.</p>
+  </div>
+  <div class="dialog-actions">
+    <button class="btn" type="button" id="obSkip">Spring over</button>
+    <span class="spacer"></span>
+    <button class="btn" type="button" id="obBack">Tilbage</button>
+    <button class="btn primary" type="button" id="obNext">Næste</button>
+  </div>
+  <p class="small" style="text-align:center;margin:10px 0 0" id="obCount">Trin 1 af 3</p>
+</dialog>
+
+<!-- Ugerapport. Knappen "Udskriv" udskriver kun rapporten (se @media print i CSS). -->
+<dialog id="reportDialog" aria-labelledby="reportTitle">
+  <div class="report" id="reportContent"></div>
+  <div class="dialog-actions no-print">
+    <button class="btn" type="button" id="reportClose">Luk</button>
+    <button class="btn primary" type="button" id="reportPrint">Udskriv / gem som PDF</button>
+  </div>
+</dialog>
+
+<!-- Præsentationstilstand: 6 trin til en pitch på 4 minutter. Styres med piletaster, swipe eller knapperne. -->
+<dialog id="pitch" aria-roledescription="præsentation" aria-labelledby="pitchSlideTitle">
+  <div class="pitch-top">
+    <div class="brand"><div class="logo" aria-hidden="true">🌱</div><strong>GroKlassen</strong></div>
+    <div class="pitch-tools">
+      <span class="pitch-count" id="pitchCount">1 / 6</span>
+      <button class="btn small-btn" type="button" id="pitchFullscreen">Fuld skærm</button>
+      <button class="btn small-btn" type="button" id="pitchClose">Luk (Esc)</button>
+    </div>
+  </div>
+  <div class="pitch-stage" id="pitchStage">
+    <div class="pitch-slide" id="pitchSlide"></div>
+  </div>
+  <div class="pitch-bottom">
+    <button class="btn" type="button" id="pitchPrev"><span aria-hidden="true">←</span> Forrige</button>
+    <div class="pitch-dots" id="pitchDots" role="group" aria-label="Vælg trin"></div>
+    <button class="btn primary" type="button" id="pitchNext">Næste <span aria-hidden="true">→</span></button>
+  </div>
+</dialog>
+
+<!-- Fejring, når planten når et nyt stadie -->
+<dialog id="celebration" aria-labelledby="celebrateTitle" aria-describedby="celebrateText">
+  <div class="leaves" id="leaves" aria-hidden="true"></div>
+  <div class="celebrate-plant grow" id="celebratePlant"></div>
+  <h2 id="celebrateTitle">Planten er vokset! 🎉</h2>
+  <p id="celebrateText" class="muted"></p>
+  <div class="dialog-actions" style="justify-content:center"><button class="btn primary" type="button" id="celebrateClose">Fedt!</button></div>
+</dialog>
 
 <script>
 /* =========================================================
@@ -174,20 +818,107 @@
    Bemærk: localStorage og en PIN i browserkode er ikke sikker
    adgangskontrol. Brug en server/backend til en rigtig løsning.
    ========================================================= */
+// Filens størrelse måles allerede her, før appen tegner noget – så tallet svarer til selve filen.
+const APP_SIZE_BYTES = new Blob([document.documentElement.outerHTML]).size;
 const CONFIG = {
   teacherPin: "1234",        // Skift denne PIN-kode, hvis du vil
-  dailyPointCap: 15,         // Maks. godkendte point pr. klasse pr. dag
+  dailyPointCap: 15,         // Maks. point pr. klasse pr. dag (godkendte + ventende)
   cooldownSeconds: 10,       // Pause mellem indsendelser pr. klasse
-  storageKey: "groklassen-v1"
+  defaultWeeklyGoal: 30,     // Startværdi for klassens ugemål (point)
+  storageKey: "groklassen-v2",       // Nuværende datastruktur
+  legacyStorageKey: "groklassen-v1", // Gammel datastruktur – flyttes automatisk over
+  demoStorageKey: "groklassen-demo"  // Demo-data gemmes for sig, så de aldrig blandes med rigtige data
+};
+const CLASS_NAMES = ["7.A", "7.B", "8.A"];
+
+/* ---------- HOLDETS EGNE DATA – udfyld før pitchen ----------
+   Alt i [INDSÆT: ...], [VALIDÉR: ...] og [FAKTATJEK: ...] er pladsholdere og vises med gult i appen.
+   Ret teksten her ét sted, så opdateres både "For skoler"-siden og pitch-tilstanden.
+   Skriv KUN det, I faktisk har undersøgt – opfind aldrig tal, citater eller skolenavne. */
+const TEAM_DATA = {
+  ideaOrigin:        "[INDSÆT: hvordan I fik idéen – 1 sætning]",
+  interviewsTeachers:"[INDSÆT: antal interviewede lærere]",
+  interviewFinding:  "[INDSÆT: vigtigste fund fra jeres interviews med lærere]",
+  targetGrades:      "[VALIDÉR: klassetrin, fx 4.–9. klasse]",
+  willingnessToPay:  "[INDSÆT: hvad skoleledere/lærere sagde om pris og betalingsvilje]",
+  feedbackUsed:      "[INDSÆT: hvem I har talt med, og hvad I ændrede bagefter]",
+  pilotClasses:      "[INDSÆT: antal pilotklasser]",
+  pilotResult:       "[INDSÆT: hvad pilotforsøget viste]",
+  factChecker:       "[INDSÆT: hvem der faktatjekker CO₂-tallene, fx en biologilærer]",
+  nameCheck:         "[FAKTATJEK: er navnet GroKlassen og et domæne ledigt?]"
 };
 
+/* ---------- Økonomiberegnerens antagelser (kr. pr. år, ekskl. moms) ----------
+   Alle tal er HYPOTESER til pitchen – se README for begrundelser og kilder. */
+const CALC_DEFAULTS = {
+  schools: 25,      // Eksempel på antal betalende skoler
+  price: 1500,      // Skolelicens pr. år (hypotese)
+  variable: 150,    // Pr. skole: onboarding, fakturering, support
+  hosting: 4000,    // Database i EU + webhosting + domæne
+  support: 6000,    // Lærersupport og fejlrettelser
+  dev: 20000        // Udvikling, sikkerhed, GDPR-rådgivning
+};
+
+/* ---------- Udfordringer ----------
+   co2 (kg) og water (liter) er VEJLEDENDE skøn for én handling – ikke målinger.
+   method = antagelse og udregning, check = hvad holdet skal faktatjekke, sources = kilder (set 25.10.2026).
+   Vi har valgt forsigtige (lave) tal for at undgå greenwashing. Point belønner indsats og vaner – ikke kun CO₂. */
 const CHALLENGES = [
-  {id:"cycle", title:"Cykel eller gå i skole", description:"Vælg aktiv transport frem for en biltur.", points:3, co2:1.2, water:0, icon:"🚲"},
-  {id:"sort", title:"Sortér affald korrekt", description:"Sortér papir, plast, metal eller madaffald.", points:2, co2:0.2, water:0, icon:"♻️"},
-  {id:"shower", title:"Tag et kort bad", description:"Spar på vandet ved at gøre badet kortere.", points:3, co2:0.1, water:20, icon:"🚿"},
-  {id:"lunch", title:"Madpakke uden engangsemballage", description:"Brug madkasse og genanvendelig drikkedunk.", points:3, co2:0.3, water:1, icon:"🍎"},
-  {id:"lights", title:"Sluk lyset", description:"Sluk lys og udstyr i et tomt lokale.", points:2, co2:0.4, water:0, icon:"💡"},
-  {id:"repair", title:"Reparér frem for at smide ud", description:"Giv en ting længere levetid med en lille reparation.", points:4, co2:1.0, water:5, icon:"🧵"}
+  {id:"cycle", title:"Cykel eller gå i skole", description:"Cykl eller gå i stedet for at blive kørt i bil.", points:3, co2:0.4, water:0, icon:"🚲", confidence:"middel",
+   method:"Antagelse: én elev cykler eller går i stedet for at blive kørt 2 km hver vej (4 km). En gennemsnitlig dansk bil (hvor ca. hver femte er en elbil) sættes forsigtigt til ca. 0,10 kg CO₂ pr. km: 4 km × 0,10 kg = ca. 0,4 kg.",
+   waterMethod:"0 L – ingen direkte vandbesparelse.",
+   check:"Er 0,10 kg CO₂ pr. km rimeligt for den danske bilpark? Er 2 km hver vej realistisk for jeres skole? Handlingen tæller kun, hvis turen ellers var sket i bil.",
+   sources:[{label:"Danmarks Statistik: elbilers andel af personbilerne", url:"https://www.dst.dk/da/Statistik/udgivelser/NytHtml?cid=51885"},
+            {label:"EEA: CO₂ fra nye personbiler i EU", url:"https://www.eea.europa.eu/en/analysis/indicators/co2-performance-of-new-passenger"},
+            {label:"Energistyrelsen: standardfaktorer for brændsler", url:"https://ens.dk/media/1031/download"}]},
+  {id:"sort", title:"Sortér affald korrekt", description:"Sortér papir, plast, metal eller madaffald i klassen.", points:2, co2:0.05, water:0, icon:"♻️", confidence:"lav",
+   method:"Antagelse: klassen sorterer ca. 50 g plast fra restaffaldet. Genanvendelse sparer ca. 1,8 kg CO₂ pr. kg plast, men ca. 30 % af den sorterede plast bliver alligevel brændt: 0,05 kg × 1,8 × 0,7 ≈ 0,06 – rundet ned til ca. 0,05 kg.",
+   waterMethod:"0 L – eventuel vandbesparelse i industrien er ikke dokumenteret.",
+   check:"Vej den plast, klassen sorterer på en dag. Find en kilde med metode for de 1,8 kg pr. kg (AffaldPlus oplyser ikke metoden). Papir, pap og madaffald er ikke regnet med.",
+   sources:[{label:"AffaldPlus: CO₂-reduktion ved genanvendelse", url:"https://affaldplus.dk/co2-reduktion"},
+            {label:"Samvirke: andel af sorteret plast, der ikke genanvendes (rundspørge)", url:"https://samvirke.dk/artikler/mere-end-30-procent-af-den-sorterede-plastik-bliver-ikke-genanvendt"}]},
+  {id:"shower", title:"Tag et kort bad", description:"Gør badet 2 minutter kortere derhjemme.", points:3, co2:0.02, water:15, icon:"🚿", confidence:"middel",
+   method:"Antagelse: badet er 2 minutter kortere med en sparebruser på ca. 7,5 L/min = 15 L mindre vand. At varme 15 L fra ca. 10 til 38 °C kræver ca. 0,5 kWh fjernvarme × ca. 0,04 kg CO₂/kWh ≈ 0,02 kg.",
+   waterMethod:"15 L: 2 min × ca. 7,5 L/min (sparebrusere bruger 6–10 L/min).",
+   check:"Faktoren 0,04 kg/kWh gælder fjernvarme i hovedstadsområdet – jeres egen varmeforsyning kan ligge højere (fx gasfyr). Badet tages hjemme og kan ikke kontrolleres.",
+   sources:[{label:"Energistyrelsen: kortere bad og sparebrusere", url:"https://ens.dk/presse/hver-uge-bruger-vi-34-minutter-under-bruseren-spar-penge-ved-forkorte-badet"},
+            {label:"VEKS: miljødeklaration for fjernvarme 2024", url:"https://www.veks.dk/-/media/veks/files/publications/miljoedeklaration.pdf"},
+            {label:"Energistyrelsen: nøgletal om energiforsyning", url:"https://ens.dk/analyser-og-statistik/noegletal-om-energiforbrug-og-forsyning"}]},
+  {id:"lunch", title:"Madpakke uden engangsplast", description:"Brug madkasse og genanvendelig drikkedunk i stedet for poser og film.", points:3, co2:0.02, water:0, icon:"🍎", confidence:"lav",
+   method:"Antagelse: madkasse og drikkedunk erstatter ca. 10 g engangsplast (fx en frysepose og lidt film). Det koster ca. 1,9 kg CO₂ at lave 1 kg af den slags plast: 0,01 kg × 1,9 ≈ 0,02 kg.",
+   waterMethod:"0 L – madkasse og dunk skal vaskes op, så der spares ikke vand.",
+   check:"Tallet 1,9 kg CO₂ pr. kg plast (LDPE) er kun set i søgeresultater – bekræft det. Vej en typisk frysepose. Madkassen giver kun en gevinst, hvis den bruges mange gange.",
+   sources:[{label:"PlasticsEurope: miljøprofil for polyethylen (ikke åbnet – faktatjek)", url:"https://www.pedagogie.ac-aix-marseille.fr/upload/docs/application/pdf/2015-11/4-_eco-profile_pe_2014-04.pdf"}]},
+  {id:"lights", title:"Sluk lyset", description:"Sluk lyset, når klasselokalet står tomt.", points:2, co2:0.01, water:0, icon:"💡", confidence:"middel",
+   method:"Antagelse: lyset slukkes i 30 minutter i et tomt klasselokale på 60 m² med LED-lys (ca. 7 W/m² = 0,42 kW). Det sparer ca. 0,21 kWh × 0,06 kg CO₂/kWh (dansk strøm 2025) ≈ 0,01 kg.",
+   waterMethod:"0 L – ingen direkte vandbesparelse.",
+   check:"Mål jeres eget lokale og tæl lampernes watt. Har lokalet bevægelsessensor, er besparelsen næsten 0. Dansk strøm er så grøn, at lys sparer få gram – det er en ærlig pointe.",
+   sources:[{label:"Dansk Center for Lys: Lys og energi", url:"https://centerforlys.dk/wp-content/uploads/2022/12/5_Lys_og_energi.pdf"},
+            {label:"Green Power Denmark: strømmens CO₂-udledning 2025", url:"https://greenpowerdenmark.dk/nyheder/vores-stroem-er-groennere-nogensinde"}]},
+  {id:"repair", title:"Reparér frem for at smide ud", description:"Giv en ting længere levetid med en lille reparation, fx sy et hul.", points:4, co2:0.5, water:0, icon:"🧵", confidence:"lav",
+   method:"Antagelse: en lille reparation (fx et hul i en t-shirt) gør, at en del af et nyt køb undgås. En ny bomulds-t-shirt koster ca. 5,2 kg CO₂ at fremstille, og vi regner forsigtigt med 10 % af det: ca. 0,5 kg.",
+   waterMethod:"0 L – det skjulte vand i bomuld bruges mest i udlandet og lægges ikke sammen med vand fra hanen.",
+   check:"De 10 % er vores egen forsigtige antagelse. Besparelsen afhænger helt af, om tingen ellers var blevet erstattet – en sok giver mindre, en jakke meget mere.",
+   sources:[{label:"Impact CO2 (ADEME): bomulds-t-shirt", url:"https://impactco2.fr/outils/habillement/tshirtencoton"},
+            {label:"WRAP: reparation og brugtkøb erstatter nye køb", url:"https://www.wrap.ngo/media-centre/press-releases/fast-fashion-could-be-left-peg-preloved-and-repair-displace-new-sales"}]},
+  {id:"plantlunch", title:"Plantebaseret frokost", description:"Spis en frokost uden kød og ost, fx med bønnepostej, linser eller grøntsager.", points:3, co2:0.1, water:0, icon:"🥗", confidence:"middel",
+   method:"Antagelse: 50 g kødpålæg (skinke, ca. 4,3 kg CO₂/kg) i madpakken erstattes af 50 g bønnepostej (ca. 2,1 kg CO₂/kg): 0,05 kg × (4,3 − 2,1) ≈ 0,1 kg.",
+   waterMethod:"0 L – kød har et stort skjult vandaftryk, men vi har ikke et verificeret tal pr. måltid.",
+   check:"De 50 g er en antagelse. Erstattes en varm ret med oksekød, er besparelsen meget større – overvej to niveauer. Ost som erstatning sparer næsten intet.",
+   sources:[{label:"Den Store Klimadatabase: skinke i skiver", url:"https://thebigclimatedatabase.com/activity/Ra00046-DK/"},
+            {label:"Den Store Klimadatabase: vegansk bønnepostej", url:"https://thebigclimatedatabase.com/activity/Ra00450-DK/"}]},
+  {id:"swap", title:"Byt eller køb brugt", description:"Byt, lån eller køb brugt i stedet for at købe noget nyt.", points:4, co2:0.5, water:0, icon:"🔄", confidence:"lav",
+   method:"Antagelse: en brugt eller byttet ting erstatter en del af et nyt køb. En ny bomulds-t-shirt koster ca. 5,2 kg CO₂, men ikke alle brugtkøb erstatter et nyt køb, og mange ting er mindre. Vi regner forsigtigt med 10 %: ca. 0,5 kg.",
+   waterMethod:"0 L – skjult vand i ny bomuld lægges ikke sammen med vand fra hanen.",
+   check:"Andelen på 10 % er en forsigtig antagelse. Find kildebelagte tal for de ting, I oftest bytter (tøj, bøger, elektronik). Merforbrug kan gøre besparelsen 0.",
+   sources:[{label:"Impact CO2 (ADEME): bomulds-t-shirt", url:"https://impactco2.fr/outils/habillement/tshirtencoton"},
+            {label:"WRAP: 3 ud af 5 brugtkøb erstatter et nyt køb", url:"https://www.wrap.ngo/media-centre/press-releases/fast-fashion-could-be-left-peg-preloved-and-repair-displace-new-sales"}]},
+  {id:"screens", title:"Sluk skærme og opladere", description:"Sluk projektor, skærme og opladere, når timen er slut.", points:1, co2:0.007, water:0, icon:"🔌", confidence:"lav",
+   method:"Antagelse: en projektor eller interaktiv skærm (ca. 150 W) slukkes 30 minutter tidligere (0,075 kWh), og 5 pc'er eller opladere tages ud af standby natten over (ca. 0,04 kWh). I alt ca. 0,12 kWh × 0,06 kg CO₂/kWh ≈ 0,007 kg (ca. 7 g).",
+   waterMethod:"0 L – ingen direkte vandbesparelse.",
+   check:"Find watt-tallet på jeres egen skærm (mærkepladen eller manualen). Moderne opladere bruger næsten intet uden belastning. Pointet er vanen – ikke CO₂-tallet.",
+   sources:[{label:"Europa-Kommissionen: EU-krav til standby", url:"https://energy-efficient-products.ec.europa.eu/product-list/standby-networked-standby-and-mode_en"},
+            {label:"Green Power Denmark: strømmens CO₂-udledning 2025", url:"https://greenpowerdenmark.dk/nyheder/vores-stroem-er-groennere-nogensinde"}]}
 ];
 const PLANT_STAGES = [
   {name:"Frø", threshold:0, description:"Alt begynder med et lille frø."},
@@ -198,75 +929,225 @@ const PLANT_STAGES = [
 ];
 
 let state = loadState();
-let activeClass = "7.A";
+let activeClass = state.activeClass;
 let cooldownTimer = null;
+let teacherUnlocked = readTeacherSession();
+// Demo-data ligger i deres egen "kasse". Er demo aktiv, arbejder appen i den i stedet for i de rigtige data.
+let demoState = loadDemoState();
 
+/* ---------- Data og lagring ----------
+   Datastruktur version 2 (gemmes under "groklassen-v2"):
+   {
+     version: 2,
+     theme: "light" | "dark" | null      (null = følg enhedens indstilling)
+     onboardingDone: true/false,
+     activeClass: "7.A",
+     classes: {
+       "7.A": { approved:[...], pending:[...], rejected:[...], lastSubmission:0, weeklyGoal:30 }
+     }
+   }
+   Der gemmes ALDRIG navne eller andre persondata – kun klassens fælles handlinger. */
+function emptyClass() {
+  return {approved:[], pending:[], rejected:[], lastSubmission:0, weeklyGoal:CONFIG.defaultWeeklyGoal};
+}
 function defaultState() {
+  const classes = {};
+  CLASS_NAMES.forEach(name => { classes[name] = emptyClass(); });
+  return {version:2, theme:null, onboardingDone:false, activeClass:CLASS_NAMES[0], classes};
+}
+// Tjekker at en gemt indsendelse ser fornuftig ud. Ødelagte rækker springes over i stedet for at crashe appen.
+function cleanItem(item) {
+  if (!item || typeof item !== "object") return null;
+  if (typeof item.date !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(item.date)) return null;
+  const points = Number(item.points);
+  if (!Number.isFinite(points) || points <= 0 || points > CONFIG.dailyPointCap) return null;
+  // Kendte udfordringer får titel og point fra listen i koden – så gemte data ikke kan snyde med dem.
+  const known = CHALLENGES.find(c => c.id === item.challengeId);
   return {
-    theme: "light",
-    classes: {
-      "7.A": {approved:[], pending:[], lastSubmission:0},
-      "7.B": {approved:[], pending:[], lastSubmission:0},
-      "8.A": {approved:[], pending:[], lastSubmission:0}
-    }
+    id: String(item.id || `${item.date}-${item.challengeId}-${Math.random().toString(36).slice(2,8)}`),
+    challengeId: String(item.challengeId || ""),
+    title: known ? known.title : String(item.title || "Ukendt udfordring"),
+    date: item.date,
+    points: known ? known.points : points,
+    co2: Number(item.co2) || 0,
+    water: Number(item.water) || 0,
+    submittedAt: Number(item.submittedAt) || 0,
+    approvedAt: item.approvedAt ? Number(item.approvedAt) : undefined,
+    rejectedAt: item.rejectedAt ? Number(item.rejectedAt) : undefined
   };
+}
+function cleanList(list) { return Array.isArray(list) ? list.map(cleanItem).filter(Boolean) : []; }
+// Laver gemte data (v1 eller v2) om til en gyldig v2-struktur.
+function normalizeState(parsed) {
+  const fresh = defaultState();
+  if (!parsed || typeof parsed !== "object") return fresh;
+  if (parsed.classes && typeof parsed.classes === "object") {
+    for (const name of CLASS_NAMES) {
+      const saved = parsed.classes[name];
+      if (!saved) continue;
+      fresh.classes[name] = {
+        approved: cleanList(saved.approved),
+        pending: cleanList(saved.pending),
+        rejected: cleanList(saved.rejected),
+        // Et tidspunkt i fremtiden (fx efter urjustering) ignoreres.
+        lastSubmission: Number(saved.lastSubmission) > Date.now() + 60000 ? 0 : (Number(saved.lastSubmission) || 0),
+        weeklyGoal: Math.min(75, Math.max(5, Number(saved.weeklyGoal) || CONFIG.defaultWeeklyGoal))
+      };
+    }
+  }
+  fresh.theme = parsed.theme === "dark" || parsed.theme === "light" ? parsed.theme : null;
+  fresh.onboardingDone = parsed.onboardingDone === true;
+  fresh.activeClass = CLASS_NAMES.includes(parsed.activeClass) ? parsed.activeClass : CLASS_NAMES[0];
+  return fresh;
 }
 function loadState() {
   try {
     const raw = localStorage.getItem(CONFIG.storageKey);
-    if (!raw) return defaultState();
-    const parsed = JSON.parse(raw);
-    const fresh = defaultState();
-    if (parsed && parsed.classes) {
-      for (const name of Object.keys(fresh.classes)) {
-        if (parsed.classes[name]) {
-          fresh.classes[name] = {
-            approved: Array.isArray(parsed.classes[name].approved) ? parsed.classes[name].approved : [],
-            pending: Array.isArray(parsed.classes[name].pending) ? parsed.classes[name].pending : [],
-            lastSubmission: Number(parsed.classes[name].lastSubmission) || 0
-          };
-        }
-      }
+    if (raw) return normalizeState(JSON.parse(raw));
+    // Migrering: findes der data fra den gamle version (groklassen-v1), flyttes de over,
+    // så klassens point ikke går tabt. Den gamle nøgle bliver liggende som backup.
+    const legacy = localStorage.getItem(CONFIG.legacyStorageKey);
+    if (legacy) {
+      const migrated = normalizeState(JSON.parse(legacy));
+      localStorage.setItem(CONFIG.storageKey, JSON.stringify(migrated));
+      console.info("GroKlassen: data flyttet fra groklassen-v1 til groklassen-v2.");
+      return migrated;
     }
-    fresh.theme = parsed.theme === "dark" ? "dark" : "light";
-    return fresh;
   } catch (error) {
     console.warn("Kunne ikke indlæse gemte data:", error);
-    return defaultState();
   }
+  return defaultState();
 }
 function saveState() {
   try {
     localStorage.setItem(CONFIG.storageKey, JSON.stringify(state));
+    if (demoState) localStorage.setItem(CONFIG.demoStorageKey, JSON.stringify(demoState));
   } catch (error) {
     console.warn("Kunne ikke gemme data i browseren:", error);
-    showNotice("Browseren kunne ikke gemme ændringer. Kontrollér browserens lagerindstillinger.", true);
+    showToast("Browseren kunne ikke gemme ændringer. Kontrollér browserens lagerindstillinger.", true);
   }
 }
-function classData() { return state.classes[activeClass]; }
-function todayKey() {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+function loadDemoState() {
+  try {
+    const raw = localStorage.getItem(CONFIG.demoStorageKey);
+    if (raw) return normalizeState(JSON.parse(raw));
+  } catch (error) {
+    console.warn("Kunne ikke indlæse demo-data:", error);
+  }
+  return null;
 }
-function approvedToday(data) {
-  return data.approved.filter(item => item.date === todayKey()).reduce((sum,item) => sum + item.points, 0);
+// Henter data for en klasse – fra demo-kassen, hvis demo er aktiv, ellers fra de rigtige data.
+function classData(name = activeClass) { return (demoState || state).classes[name]; }
+
+/* ---------- Datoer ----------
+   Datoer gemmes som tekst "ÅÅÅÅ-MM-DD" i lokal tid, så "i dag" følger skolens ur. */
+function pad(n) { return String(n).padStart(2, "0"); }
+function dateKey(d) { return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; }
+function todayKey() { return dateKey(new Date()); }
+function parseDateKey(key) { const [y,m,d] = key.split("-").map(Number); return new Date(y, m-1, d); }
+// Antal hele dage mellem en dato og i dag (Math.round tager højde for sommertid).
+function daysAgo(key) { return Math.round((parseDateKey(todayKey()) - parseDateKey(key)) / 86400000); }
+function ageLabel(key) {
+  const n = daysAgo(key);
+  if (n <= 0) return "I dag";
+  if (n === 1) return "I går";
+  return `${n} dage siden`;
 }
-function pendingToday(data) {
-  return data.pending.filter(item => item.date === todayKey()).reduce((sum,item) => sum + item.points, 0);
+function formatDate(key) { return parseDateKey(key).toLocaleDateString("da-DK", {weekday:"short", day:"numeric", month:"short"}); }
+function formatTime(ms) { return ms ? new Date(ms).toLocaleTimeString("da-DK", {hour:"2-digit", minute:"2-digit"}) : ""; }
+function addDays(key, days) { const d = parseDateKey(key); d.setDate(d.getDate() + days); return dateKey(d); }
+// Mandagen i den uge, datoen ligger i (danske uger starter mandag).
+function mondayOf(key) { const d = parseDateKey(key); return addDays(key, -((d.getDay() + 6) % 7)); }
+// Ugenummer som i den danske kalender (ISO 8601).
+function weekNumber(key) {
+  const d = parseDateKey(key);
+  // Find torsdagen i samme uge – den afgør, hvilket år ugen hører til. Uge 1 er ugen med 4. januar.
+  const thursday = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 3 - ((d.getDay() + 6) % 7));
+  const jan4 = new Date(thursday.getFullYear(), 0, 4);
+  return 1 + Math.round(((thursday - jan4) / 86400000 - 3 + ((jan4.getDay() + 6) % 7)) / 7);
+}
+// Godkendte point i den uge, der starter med mandagen "monday".
+// Datoer som "2026-10-19" kan sammenlignes som tekst, fordi de står i rækkefølgen år-måned-dag.
+function weekPoints(data, monday) {
+  const nextMonday = addDays(monday, 7);
+  return data.approved.filter(item => item.date >= monday && item.date < nextMonday).reduce((sum,item) => sum + item.points, 0);
+}
+function formatNumber(value, decimals = 0) { return Number(value).toLocaleString("da-DK", {maximumFractionDigits:decimals}); }
+// Små CO₂-mængder vises i gram (fx "ca. 400 g"), større i kg med én decimal.
+function formatCo2(kg) { return kg < 1 ? `${formatNumber(Math.round(kg * 1000))} g` : `${formatNumber(kg, 1)} kg`; }
+
+/* ---------- Beregninger ---------- */
+// Summen af godkendte point på en bestemt dato (fx "2026-10-24").
+// Bruges både for i dag og for ældre indsendelser, så loftet altid tjekkes mod den rigtige dag.
+function approvedOnDate(data, date) {
+  return data.approved.filter(item => item.date === date).reduce((sum,item) => sum + item.points, 0);
+}
+function pendingOnDate(data, date) {
+  return data.pending.filter(item => item.date === date).reduce((sum,item) => sum + item.points, 0);
+}
+function approvedToday(data) { return approvedOnDate(data, todayKey()); }
+function pendingToday(data) { return pendingOnDate(data, todayKey()); }
+// Hvor mange sekunder af cooldown der er tilbage for en klasse (0 = klar).
+function cooldownLeft(data) {
+  const left = Math.ceil((CONFIG.cooldownSeconds*1000 - (Date.now() - data.lastSubmission)) / 1000);
+  // Begræns til højst cooldown-tiden – så et ur, der er stillet tilbage, ikke kan låse klassen i timevis.
+  return Math.max(0, Math.min(CONFIG.cooldownSeconds, left));
 }
 function totalApproved(data) {
   return data.approved.reduce((sum,item) => ({
-    points:sum.points + item.points, co2:sum.co2 + item.co2, water:sum.water + item.water
+    points:sum.points + item.points, co2:sum.co2 + estimateFor(item).co2, water:sum.water + estimateFor(item).water
   }), {points:0,co2:0,water:0});
 }
+function getStage(points) {
+  let stage = 0;
+  PLANT_STAGES.forEach((item,index) => { if (points >= item.threshold) stage = index; });
+  return stage;
+}
+function challengeById(id) { return CHALLENGES.find(item => item.id === id); }
+
+/* ---------- Små hjælpefunktioner til brugerfladen ---------- */
+// Gør tekst sikker at sætte ind i HTML (forhindrer at tekst bliver tolket som kode).
 function safeText(value) {
   return String(value).replace(/[&<>"']/g, char => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char]));
 }
-function showNotice(message, error=false) {
-  const el = document.getElementById("dailyNotice");
-  el.textContent = message;
-  el.classList.toggle("error", error);
+// Viser en kort besked (toast) nederst på skærmen. Den forsvinder selv efter nogle sekunder.
+// Beskeden ligger i sit eget område, så statuslinjen ikke kan overskrive den.
+function showToast(message, error=false) {
+  const region = document.getElementById("toastRegion");
+  const toast = document.createElement("div");
+  toast.className = "toast" + (error ? " error" : "");
+  toast.innerHTML = `<span>${safeText(message)}</span><button type="button" aria-label="Luk besked">×</button>`;
+  toast.querySelector("button").addEventListener("click", () => toast.remove());
+  region.appendChild(toast);
+  // Vis højst tre beskeder ad gangen.
+  while (region.children.length > 3) region.firstElementChild.remove();
+  setTimeout(() => toast.remove(), error ? 7000 : 4500);
 }
+// Viser en bekræftelsesdialog og svarer med true (OK) eller false (Annullér).
+function confirmDialog(title, text, okText = "OK") {
+  const dialog = document.getElementById("confirmDialog");
+  document.getElementById("confirmTitle").textContent = title;
+  document.getElementById("confirmText").textContent = text;
+  document.getElementById("confirmOk").textContent = okText;
+  return new Promise(resolve => {
+    const finish = answer => { dialog.close(); cleanup(); resolve(answer); };
+    const ok = () => finish(true);
+    const cancel = () => finish(false);
+    const onClose = () => { cleanup(); resolve(false); };
+    function cleanup() {
+      document.getElementById("confirmOk").removeEventListener("click", ok);
+      document.getElementById("confirmCancel").removeEventListener("click", cancel);
+      dialog.removeEventListener("close", onClose);
+    }
+    document.getElementById("confirmOk").addEventListener("click", ok);
+    document.getElementById("confirmCancel").addEventListener("click", cancel);
+    dialog.addEventListener("close", onClose); // Escape-tasten lukker også dialogen
+    dialog.showModal();
+    document.getElementById("confirmCancel").focus();
+  });
+}
+
+/* ---------- Planten ---------- */
 function plantSvg(points) {
   // Planten ændrer udseende alt efter klassens samlede godkendte point.
   const stage = getStage(points);
@@ -285,11 +1166,6 @@ function plantSvg(points) {
   }
   return `<svg viewBox="0 0 200 190" role="img" aria-label="Plante på stadiet ${PLANT_STAGES[stage].name}"><path d="M22 164 Q100 151 178 164" fill="none" stroke="#a3c58e" stroke-width="3" stroke-linecap="round"/><path d="M100 156 Q85 167 74 156 M100 156 Q113 168 126 156" fill="none" stroke="#a3c58e" stroke-width="3" stroke-linecap="round"/>${plant}</svg>`;
 }
-function getStage(points) {
-  let stage = 0;
-  PLANT_STAGES.forEach((item,index) => { if (points >= item.threshold) stage = index; });
-  return stage;
-}
 function renderPlant(total) {
   const stageIndex = getStage(total);
   const stage = PLANT_STAGES[stageIndex];
@@ -298,57 +1174,90 @@ function renderPlant(total) {
   document.getElementById("heroPlant").innerHTML = plantSvg(total);
   document.getElementById("plantStage").textContent = stage.name;
   document.getElementById("plantDescription").textContent = stage.description;
+  let progress = 100;
   if (!next) {
-    document.getElementById("progressFill").style.width = "100%";
     document.getElementById("progressText").textContent = "Maksimalt plantestadie nået – flot arbejde!";
   } else {
-    const progress = Math.max(0, Math.min(100, ((total-stage.threshold)/(next.threshold-stage.threshold))*100));
-    document.getElementById("progressFill").style.width = progress + "%";
+    progress = Math.max(0, Math.min(100, ((total-stage.threshold)/(next.threshold-stage.threshold))*100));
     document.getElementById("progressText").textContent = `${total} point i alt · ${Math.max(0,next.threshold-total)} point til ${next.name.toLowerCase()}`;
   }
+  document.getElementById("progressFill").style.width = progress + "%";
+  document.getElementById("progressTrack").setAttribute("aria-valuenow", String(Math.round(progress)));
 }
+
+/* ---------- Udfordringer ---------- */
+// Bygger udfordringskortene én gang. Knapperne opdateres derefter "på stedet" af
+// updateChallengeStates(), så tastaturfokus ikke forsvinder hvert sekund under cooldown.
 function renderChallenges() {
+  const container = document.getElementById("challengeList");
+  if (!container.children.length) {
+    CHALLENGES.forEach(challenge => {
+      const card = document.createElement("div");
+      card.className = "challenge";
+      card.innerHTML = `<div><h3><span aria-hidden="true">${challenge.icon}</span> ${safeText(challenge.title)}</h3><p>${safeText(challenge.description)}</p><div class="tags"><span class="tag">${challenge.points} point</span><span class="tag">CO₂: ca. ${formatCo2(challenge.co2)}*</span><span class="tag">Vand: ${challenge.water ? "ca. " + challenge.water + " L" : "0 L"}*</span><button class="linklike" type="button" data-method="${challenge.id}" aria-label="Se beregning for ${safeText(challenge.title)}">*Se beregning</button></div></div><div class="challenge-action"><button class="btn primary" type="button" data-challenge="${challenge.id}" aria-describedby="status-${challenge.id}">Send forespørgsel</button><div class="status" id="status-${challenge.id}"></div></div>`;
+      card.querySelector("[data-challenge]").addEventListener("click", () => submitChallenge(challenge.id));
+      card.querySelector("[data-method]").addEventListener("click", () => openMethod(challenge.id));
+      container.appendChild(card);
+    });
+  }
+  updateChallengeStates();
+}
+// Opdaterer knappernes tekst og status (brugt i dag, pointloft, cooldown) uden at bygge kortene om.
+// Status for en udfordring i dag: "approved", "pending", "rejected" eller "" (ikke brugt).
+function todayStatus(data, challengeId, today) {
+  if (data.approved.some(x => x.date === today && x.challengeId === challengeId)) return "approved";
+  if (data.pending.some(x => x.date === today && x.challengeId === challengeId)) return "pending";
+  if (data.rejected.some(x => x.date === today && x.challengeId === challengeId)) return "rejected";
+  return "";
+}
+function updateChallengeStates() {
   const data = classData();
-  const used = new Set(data.approved.filter(x=>x.date===todayKey()).map(x=>x.challengeId));
-  data.pending.filter(x=>x.date===todayKey()).forEach(x=>used.add(x.challengeId));
+  const today = todayKey();
   const approvedPoints = approvedToday(data);
   const pendingPoints = pendingToday(data);
   const remaining = Math.max(0, CONFIG.dailyPointCap - approvedPoints - pendingPoints);
-  const cooldownLeft = Math.max(0, CONFIG.cooldownSeconds - Math.floor((Date.now()-data.lastSubmission)/1000));
-  const container = document.getElementById("challengeList");
-  container.innerHTML = "";
+  const waitSeconds = cooldownLeft(data);
+  const labels = {approved:"Godkendt i dag", pending:"Afventer lærer", rejected:"Afvist i dag"};
   CHALLENGES.forEach(challenge => {
-    const isUsed = used.has(challenge.id);
+    const button = document.querySelector(`[data-challenge="${challenge.id}"]`);
+    const status = document.getElementById(`status-${challenge.id}`);
+    const used = todayStatus(data, challenge.id, today);
     const overCap = remaining < challenge.points;
-    let reason = "";
-    if (isUsed) reason = "Allerede registreret i dag";
+    let reason = "Klar til indsendelse";
+    if (used === "approved") reason = "Godkendt og talt med i dag";
+    else if (used === "pending") reason = "Sendt i dag – venter på læreren";
+    else if (used === "rejected") reason = "Afvist af læreren i dag – prøv igen i morgen";
     else if (overCap) reason = `Dagens pointloft: ${remaining} point tilbage`;
-    else if (cooldownLeft > 0) reason = `Vent ${cooldownLeft} sek. før næste registrering`;
-    const disabled = isUsed || overCap || cooldownLeft > 0;
-    const card = document.createElement("div");
-    card.className = "challenge";
-    card.innerHTML = `<div><h3>${challenge.icon} ${safeText(challenge.title)}</h3><p>${safeText(challenge.description)}</p><div class="tags"><span class="tag">${challenge.points} point</span><span class="tag">CO₂: ca. ${challenge.co2} kg</span><span class="tag">Vand: ca. ${challenge.water} L</span></div></div><div class="challenge-action"><button class="btn primary" type="button" ${disabled ? "disabled" : ""}>${isUsed ? "Registreret" : "Send forespørgsel"}</button><div class="status">${reason || "Klar til indsendelse"}</div></div>`;
-    const button = card.querySelector("button");
-    button.addEventListener("click", () => submitChallenge(challenge.id));
-    container.appendChild(card);
+    else if (waitSeconds > 0) reason = `Vent ${waitSeconds} sek. før næste registrering`;
+    // aria-disabled i stedet for disabled: knappen beholder fokus, og skærmlæsere kan læse årsagen.
+    button.setAttribute("aria-disabled", String(!!used || overCap || waitSeconds > 0));
+    const text = used ? labels[used] : "Send forespørgsel";
+    if (button.textContent !== text) button.textContent = text;
+    // Knappens navn for skærmlæsere indeholder også udfordringens titel, så de 9 knapper kan skelnes.
+    button.setAttribute("aria-label", `${text}: ${challenge.title}`);
+    if (status.textContent !== reason) status.textContent = reason;
   });
-  document.getElementById("dailyNotice").textContent = `Klasse ${activeClass}: ${approvedPoints} af ${CONFIG.dailyPointCap} godkendte point brugt i dag. ${pendingPoints ? pendingPoints + " point afventer godkendelse." : ""}`;
+  // Statuslinjen har sit eget element og overskriver derfor ikke feedbackbeskeder.
+  document.getElementById("dailyStatus").textContent = `Klasse ${activeClass}: ${approvedPoints + pendingPoints} af ${CONFIG.dailyPointCap} point brugt i dag (${approvedPoints} godkendt, ${pendingPoints} afventer).`;
 }
 function submitChallenge(id) {
   const data = classData();
-  const challenge = CHALLENGES.find(item=>item.id===id);
+  const challenge = challengeById(id);
   if (!challenge) return;
   const today = todayKey();
-  if (data.approved.some(x=>x.date===today && x.challengeId===id) || data.pending.some(x=>x.date===today && x.challengeId===id)) {
-    showNotice("Denne udfordring er allerede registreret i dag.", true); render(); return;
+  // Fusk-regel 1: én registrering pr. udfordring pr. dag pr. klasse (også hvis den blev afvist).
+  if (todayStatus(data, id, today)) {
+    showToast("Denne udfordring er allerede registreret i dag.", true); render(); return;
   }
+  // Fusk-regel 2: dagligt pointloft (godkendte + ventende point tæller med).
   if (approvedToday(data) + pendingToday(data) + challenge.points > CONFIG.dailyPointCap) {
-    showNotice("Denne handling vil overskride klassens daglige pointloft på 15 point.", true); render(); return;
+    showToast(`Denne handling vil overskride klassens daglige pointloft på ${CONFIG.dailyPointCap} point.`, true); render(); return;
   }
-  const elapsed = Date.now() - data.lastSubmission;
-  if (elapsed < CONFIG.cooldownSeconds*1000) {
-    showNotice(`Vent ${Math.ceil((CONFIG.cooldownSeconds*1000-elapsed)/1000)} sekunder, før du sender igen.`, true); render(); return;
+  // Fusk-regel 4: cooldown mellem indsendelser.
+  if (cooldownLeft(data) > 0) {
+    showToast(`Vent ${cooldownLeft(data)} sekunder, før I sender igen.`, true); render(); return;
   }
+  // Fusk-regel 3: indsendelsen lægges i kø og tæller først, når læreren godkender.
   data.pending.push({
     id: `${Date.now()}-${Math.random().toString(36).slice(2,8)}`,
     challengeId:id, title:challenge.title, date:today, points:challenge.points,
@@ -356,19 +1265,47 @@ function submitChallenge(id) {
   });
   data.lastSubmission = Date.now();
   saveState();
-  showNotice("Forespørgslen er sendt og afventer lærerens godkendelse.");
+  showToast("Forespørgslen er sendt og afventer lærerens godkendelse.");
   render();
   startCooldownRefresh();
 }
+// Opdaterer nedtællingen hvert sekund, så længe den valgte klasse har cooldown.
+// Kaldes efter indsendelse, ved klasseskift OG når siden indlæses (fx efter genindlæsning).
 function startCooldownRefresh() {
   if (cooldownTimer) clearInterval(cooldownTimer);
+  cooldownTimer = null;
+  if (cooldownLeft(classData()) <= 0) return;
   cooldownTimer = setInterval(() => {
-    renderChallenges();
-    if (Date.now()-classData().lastSubmission >= CONFIG.cooldownSeconds*1000) {
+    updateChallengeStates();
+    if (cooldownLeft(classData()) <= 0) {
       clearInterval(cooldownTimer); cooldownTimer = null;
     }
   }, 1000);
 }
+
+/* ---------- "Sådan har vi regnet" ---------- */
+function renderMethods() {
+  const levels = {høj:"Pålidelighed: høj", middel:"Pålidelighed: middel", lav:"Pålidelighed: lav"};
+  document.getElementById("methodList").innerHTML = CHALLENGES.map(c => `
+    <article class="method" id="method-${c.id}" tabindex="-1" aria-labelledby="method-title-${c.id}">
+      <h3 id="method-title-${c.id}"><span aria-hidden="true">${c.icon}</span> ${safeText(c.title)} <span class="tag">ca. ${formatCo2(c.co2)} CO₂</span><span class="tag">${c.water} L vand</span><span class="conf">${levels[c.confidence] || ""}</span></h3>
+      <p><strong>Antagelse og udregning:</strong> ${safeText(c.method)}</p>
+      <p><strong>Vand:</strong> ${safeText(c.waterMethod)}</p>
+      <p class="check"><span class="ph">Til faktatjek</span> ${safeText(c.check)}</p>
+      <p class="small">Kilder (set 25.10.2026): ${c.sources.map(s => `<a href="${safeText(s.url)}" target="_blank" rel="noopener">${safeText(s.label)}</a>`).join(" · ")}</p>
+    </article>`).join("");
+}
+// Åbner "Sådan har vi regnet" og hopper til den valgte udfordring.
+function openMethod(id) {
+  if (location.hash && location.hash !== "#klassen") location.hash = "klassen";
+  const details = document.getElementById("methodDetails");
+  details.open = true;
+  const target = document.getElementById(`method-${id}`);
+  target.scrollIntoView({behavior: prefersReducedMotion() ? "auto" : "smooth", block: "start"});
+  target.focus({preventScroll:true});
+}
+
+/* ---------- Elevernes oversigt over ventende ---------- */
 function renderPending() {
   const data = classData();
   document.getElementById("pendingBadge").textContent = data.pending.length;
@@ -381,112 +1318,995 @@ function renderPending() {
   data.pending.slice().sort((a,b)=>a.submittedAt-b.submittedAt).forEach(item=>{
     const el = document.createElement("div");
     el.className = "pending-item";
-    el.innerHTML = `<strong>${safeText(item.title)}</strong><p>${item.points} point · ${safeText(item.date)}</p><span class="tag">Afventer</span>`;
+    const old = daysAgo(item.date) > 0;
+    el.innerHTML = `<strong>${safeText(item.title)}</strong><p>${item.points} point · ${safeText(formatDate(item.date))}</p><span class="tag ${old ? "old" : ""}">Afventer · ${safeText(ageLabel(item.date))}</span>`;
     list.appendChild(el);
   });
 }
+// Klasseligaen sammenligner KUN klasser – aldrig enkelte elever (social bæredygtighed).
+// Den rangerer efter denne uges point og starter forfra hver mandag, så alle klasser kan vinde.
 function renderLeague() {
-  // De to andre klassers tal er kun demo-tal. De deles ikke mellem brugere.
-  const data = classData();
-  const currentPoints = totalApproved(data).points;
-  const entries = [
-    {name:"7.B",points:74,demo:true},
-    {name:"8.A",points:58,demo:true},
-    {name:activeClass,points:currentPoints,demo:false}
-  ].sort((a,b)=>b.points-a.points);
+  const monday = mondayOf(todayKey());
+  const entries = CLASS_NAMES.map(name => ({
+    name,
+    week: weekPoints(classData(name), monday),
+    total: totalApproved(classData(name)).points
+  })).sort((a,b) => b.week - a.week || b.total - a.total);
   const list = document.getElementById("leagueList");
   list.innerHTML = "";
   entries.forEach((entry,index)=>{
     const el = document.createElement("div");
-    el.className = "league-row" + (!entry.demo ? " current" : "");
-    el.innerHTML = `<div class="rank">${index+1}</div><div><strong>${safeText(entry.name)}</strong><div class="small">${entry.demo ? "Demo-klasse" : "Din klasse"}</div></div><div class="points">${entry.points} pt.</div>`;
+    el.className = "league-row" + (entry.name === activeClass ? " current" : "");
+    el.innerHTML = `<div class="rank">${index+1}</div><div><strong>${safeText(entry.name)}</strong><div class="small">${entry.name === activeClass ? "Jeres klasse · " : ""}${entry.total} point i alt</div></div><div class="points">${entry.week} pt.</div>`;
     list.appendChild(el);
   });
+  const note = demoState ? " Tallene er demo-data." : " Kun data fra denne browser.";
+  document.getElementById("leagueNote").textContent = "Klasser dyster mod klasser – aldrig elev mod elev. Ligaen starter forfra hver mandag, så alle klasser kan vinde." + note;
 }
+
+/* ---------- Klassens ugemål ---------- */
+function renderGoal() {
+  const data = classData();
+  const today = todayKey();
+  const points = weekPoints(data, mondayOf(today));
+  const goal = data.weeklyGoal;
+  const pct = Math.min(100, Math.round(points / goal * 100));
+  document.getElementById("goalWeek").textContent = `Uge ${weekNumber(today)}`;
+  document.getElementById("goalNumbers").textContent = `${points} / ${goal}`;
+  document.getElementById("goalFill").style.width = pct + "%";
+  document.getElementById("goalTrack").setAttribute("aria-valuenow", String(pct));
+  const text = document.getElementById("goalText");
+  text.textContent = points >= goal ? "Ugemålet er nået – flot klaret! 🎉" : `${goal - points} point mangler for at nå ugemålet.`;
+  text.classList.toggle("goal-done", points >= goal);
+  const input = document.getElementById("goalInput");
+  if (document.activeElement !== input) input.value = goal;
+}
+function setWeeklyGoal(value) {
+  const goal = Math.round(Number(value) / 5) * 5;
+  if (!Number.isFinite(goal) || goal < 5 || goal > 75) {
+    showToast("Ugemålet skal være mellem 5 og 75 point (i spring af 5). Højst 15 point om dagen i 5 skoledage = 75.", true);
+    return;
+  }
+  classData().weeklyGoal = goal;
+  saveState();
+  render();
+  showToast(`Klasse ${activeClass} har nu et ugemål på ${goal} point.`);
+}
+
+/* ---------- Graf: point pr. uge (inline SVG – ingen eksterne biblioteker) ---------- */
+function weeklySeries(data, weeks = 8) {
+  const thisMonday = mondayOf(todayKey());
+  const series = [];
+  for (let i = weeks - 1; i >= 0; i--) {
+    const monday = addDays(thisMonday, -7 * i);
+    series.push({monday, week: weekNumber(monday), points: weekPoints(data, monday)});
+  }
+  return series;
+}
+function renderWeekChart() {
+  const data = classData();
+  const series = weeklySeries(data);
+  const goal = data.weeklyGoal;
+  // Mål og marginer for grafen. Bredden følger boksen, så teksten er lige stor på mobil og computer.
+  const box = document.getElementById("weekChart");
+  const W = chartWidth(box), H = 230, left = 34, right = 62, top = 16, bottom = 30;
+  const plotW = W - left - right, plotH = H - top - bottom;
+  const maxValue = Math.max(goal, ...series.map(s => s.points), 10);
+  const yMax = Math.ceil(maxValue / 10) * 10;
+  const y = v => top + plotH - (v / yMax) * plotH;
+  const slot = plotW / series.length;
+  const barW = Math.min(24, slot * 0.6);
+  let svg = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Søjlediagram over godkendte point pr. uge. ${series.map(s => `Uge ${s.week}: ${s.points} point`).join(", ")}. Ugemål: ${goal} point.">`;
+  // Vandrette hjælpelinjer (tynde og diskrete)
+  for (let v = 0; v <= yMax; v += yMax / 4) {
+    svg += `<line x1="${left}" x2="${W - right}" y1="${y(v)}" y2="${y(v)}" stroke="var(--viz-grid)" stroke-width="1"/>`;
+    svg += `<text x="${left - 6}" y="${y(v) + 4}" text-anchor="end">${v}</text>`;
+  }
+  series.forEach((s, i) => {
+    const cx = left + slot * i + slot / 2;
+    const h = Math.max(0, y(0) - y(s.points));
+    const x = cx - barW / 2;
+    const r = Math.min(4, h);
+    // Søjle med 4px runde hjørner i toppen og flad bund
+    const path = h > 0 ? `M${x},${y(0)} V${y(s.points) + r} Q${x},${y(s.points)} ${x + r},${y(s.points)} H${x + barW - r} Q${x + barW},${y(s.points)} ${x + barW},${y(s.points) + r} V${y(0)} Z` : "";
+    // Usynligt, større område gør det let at holde musen over eller tabbe til søjlen
+    svg += `<rect class="bar-hit" x="${cx - slot / 2 + 1}" y="${top}" width="${slot - 2}" height="${plotH}" tabindex="0" data-tip="Uge ${s.week}|${s.points} point" aria-label="Uge ${s.week}: ${s.points} point"/>`;
+    svg += `<path class="bar" d="${path}"/>`;
+    const isCurrent = i === series.length - 1;
+    svg += `<text x="${cx}" y="${H - 10}" text-anchor="middle" class="${isCurrent ? "label-strong" : ""}">${isCurrent ? (W < 420 ? "Nu" : "Denne uge") : (W < 420 ? "" : "u.") + s.week}</text>`;
+    if (isCurrent || s.points === Math.max(...series.map(t => t.points))) {
+      svg += `<text x="${cx}" y="${y(s.points) - 6}" text-anchor="middle" class="label-strong">${s.points}</text>`;
+    }
+  });
+  // Ugemålet som en vandret referencelinje med etiket
+  svg += `<line x1="${left}" x2="${W - right}" y1="${y(goal)}" y2="${y(goal)}" stroke="var(--text)" stroke-width="2" opacity=".55"/>`;
+  svg += `<text x="${W - right + 6}" y="${y(goal) + 4}" class="label-strong">Mål ${goal}</text>`;
+  svg += `<line x1="${left}" x2="${W - right}" y1="${y(0)}" y2="${y(0)}" stroke="var(--viz-axis)" stroke-width="1"/>`;
+  svg += `</svg><div class="viz-tip" hidden></div>`;
+  box.innerHTML = svg;
+  attachTooltips(box);
+  // Tabelvisning – samme tal uden graf (til skærmlæsere og til dem, der foretrækker tal)
+  document.getElementById("weekTable").innerHTML = `<table class="data-table"><thead><tr><th>Uge</th><th>Starter</th><th class="num">Godkendte point</th><th class="num">Ugemål nået?</th></tr></thead><tbody>${
+    series.map(s => `<tr><td>Uge ${s.week}</td><td>${safeText(formatDate(s.monday))}</td><td class="num">${s.points}</td><td class="num">${s.points >= goal ? "Ja" : "Nej"}</td></tr>`).join("")
+  }</tbody></table>`;
+}
+// Grafens bredde i pixels = boksens bredde (640 hvis boksen er skjult lige nu).
+function chartWidth(box) { return Math.max(300, Math.round(box.clientWidth || 640)); }
+// Viser en lille boks med værdien, når man holder musen over eller tabber til en søjle.
+function attachTooltips(box) {
+  const tip = box.querySelector(".viz-tip");
+  const show = target => {
+    const [title, value] = target.dataset.tip.split("|");
+    tip.innerHTML = "";
+    const strong = document.createElement("strong");
+    strong.textContent = value;
+    tip.append(strong, document.createTextNode(title));
+    const boxRect = box.getBoundingClientRect();
+    const rect = target.getBoundingClientRect();
+    tip.style.left = `${rect.left - boxRect.left + rect.width / 2}px`;
+    tip.style.top = `${Math.max(40, rect.top - boxRect.top + rect.height * 0.35)}px`;
+    tip.hidden = false;
+  };
+  box.querySelectorAll("[data-tip]").forEach(el => {
+    el.addEventListener("pointerenter", () => show(el));
+    el.addEventListener("focus", () => show(el));
+    el.addEventListener("pointerleave", () => { tip.hidden = true; });
+    el.addEventListener("blur", () => { tip.hidden = true; });
+  });
+}
+
+/* ---------- Eksport som CSV (regneark) ---------- */
+// Bruger semikolon og decimalkomma, så filen åbner pænt i dansk Excel.
+function csvCell(value) {
+  const text = String(value ?? "");
+  return /[;"\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+}
+function exportCsv() {
+  const data = classData();
+  const rows = [["Klasse","Dato","Uge","Udfordring","Point","Status","Anslået CO2 (kg)","Anslået vand (L)","Datakilde"]];
+  const add = (item, status) => {
+    const est = estimateFor(item);
+    rows.push([activeClass, item.date, weekNumber(item.date), item.title, item.points, status,
+      formatNumber(est.co2, 2), formatNumber(est.water, 0), demoState ? "Demo (opdigtet)" : "Klassens egne data"]);
+  };
+  data.approved.forEach(item => add(item, "Godkendt"));
+  data.pending.forEach(item => add(item, "Afventer"));
+  data.rejected.forEach(item => add(item, "Afvist"));
+  rows.splice(1, rows.length - 1, ...rows.slice(1).sort((a,b) => a[1] < b[1] ? -1 : a[1] > b[1] ? 1 : 0));
+  const csv = "﻿" + rows.map(row => row.map(csvCell).join(";")).join("\r\n"); // ﻿ = så Excel læser æ, ø og å rigtigt
+  const blob = new Blob([csv], {type:"text/csv;charset=utf-8"});
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = `${demoState ? "DEMO-" : ""}groklassen-${activeClass.replace(/\W/g, "")}-${todayKey()}.csv`;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(link.href), 1000);
+  showToast(`CSV med ${rows.length - 1} rækker er downloadet.`);
+}
+// CO₂ og vand beregnes ud fra udfordringens aktuelle estimat (så alle tal bruger samme metode).
+function estimateFor(item) {
+  const challenge = challengeById(item.challengeId);
+  return challenge ? {co2: challenge.co2, water: challenge.water} : {co2: item.co2 || 0, water: item.water || 0};
+}
+
+/* ---------- Holdets pladsholdere ---------- */
+// Indsætter TEAM_DATA i alle elementer med data-team="...". Pladsholdere (der starter med "[") bliver gule.
+function applyTeamData(root = document) {
+  root.querySelectorAll("[data-team]").forEach(el => {
+    const value = TEAM_DATA[el.dataset.team] || "";
+    el.textContent = value;
+    el.classList.toggle("ph", value.trim().startsWith("["));
+  });
+}
+
+/* ---------- Økonomiberegner ---------- */
+const CALC_FIELDS = {schools:"calcSchools", price:"calcPrice", variable:"calcVariable", hosting:"calcHosting", support:"calcSupport", dev:"calcDev"};
+function formatKr(value) { return `${formatNumber(Math.round(value))} kr.`; }
+function readCalc() {
+  const values = {};
+  Object.entries(CALC_FIELDS).forEach(([key, id]) => {
+    const n = Number(document.getElementById(id).value);
+    values[key] = Number.isFinite(n) && n >= 0 ? n : 0;
+  });
+  return values;
+}
+// Selve regnestykket – holdt for sig selv, så det er let at forklare:
+//   indtægt = skoler × pris
+//   omkostninger = faste omkostninger + skoler × variable omkostninger
+//   break-even = faste omkostninger ÷ (pris − variable omkostninger), rundet op
+function calcEconomy(v) {
+  const fixed = v.hosting + v.support + v.dev;
+  const margin = v.price - v.variable; // dækningsbidrag pr. skole
+  const revenue = v.schools * v.price;
+  const costs = fixed + v.schools * v.variable;
+  const breakEven = margin > 0 ? Math.ceil(fixed / margin) : null;
+  return {fixed, margin, revenue, costs, result: revenue - costs, breakEven};
+}
+function renderCalc() {
+  const v = readCalc();
+  const e = calcEconomy(v);
+  document.getElementById("calcRevenue").textContent = formatKr(e.revenue);
+  document.getElementById("calcCosts").textContent = formatKr(e.costs);
+  const result = document.getElementById("calcResult");
+  result.textContent = (e.result >= 0 ? "+" : "−") + formatKr(Math.abs(e.result));
+  result.classList.toggle("negative", e.result < 0);
+  document.getElementById("calcBreakEven").textContent = e.breakEven === null ? "–" : `${e.breakEven} skoler`;
+  document.getElementById("calcExplain").textContent = e.breakEven === null
+    ? "Prisen skal være højere end de variable omkostninger pr. skole – ellers kan GroKlassen aldrig tjene penge."
+    : `Faste omkostninger: ${formatKr(e.fixed)} om året. Hver skole bidrager med ${formatKr(e.margin)} efter variable omkostninger (dækningsbidrag), så der skal ${e.breakEven} skoler til at dække de faste omkostninger.`;
+  renderBreakEvenChart(v, e);
+  renderPitchNumbers();
+}
+function setCalcValues(values) {
+  Object.entries(CALC_FIELDS).forEach(([key, id]) => { document.getElementById(id).value = values[key]; });
+  renderCalc();
+}
+// Linjediagram: indtægt og omkostninger ved 0..N skoler. Hvor linjerne krydser, er break-even.
+function renderBreakEvenChart(v, e) {
+  const maxSchools = Math.max(10, Math.ceil(Math.max(v.schools, (e.breakEven || 0) * 1.6) / 5) * 5);
+  const points = [];
+  for (let s = 0; s <= maxSchools; s++) points.push({s, revenue: s * v.price, costs: e.fixed + s * v.variable});
+  const box = document.getElementById("breakEvenChart");
+  const W = chartWidth(box), H = 250, left = 56, right = W < 420 ? 82 : 96, top = 24, bottom = 34;
+  const plotW = W - left - right, plotH = H - top - bottom;
+  const yMaxRaw = Math.max(...points.map(p => Math.max(p.revenue, p.costs)), 1);
+  const step = Math.pow(10, Math.floor(Math.log10(yMaxRaw / 4)));
+  const nice = [1, 2, 2.5, 5, 10].map(m => m * step).find(m => yMaxRaw / m <= 4) || step * 10;
+  const yMax = Math.ceil(yMaxRaw / nice) * nice;
+  const x = s => left + (s / maxSchools) * plotW;
+  const y = val => top + plotH - (val / yMax) * plotH;
+  const line = key => points.map((p, i) => `${i ? "L" : "M"}${x(p.s).toFixed(1)},${y(p[key]).toFixed(1)}`).join(" ");
+  let svg = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Indtægt og omkostninger ved 0 til ${maxSchools} skoler. Break-even ved ${e.breakEven ?? "ingen"} skoler.">`;
+  for (let val = 0; val <= yMax + 1; val += nice) {
+    svg += `<line x1="${left}" x2="${W - right}" y1="${y(val)}" y2="${y(val)}" stroke="var(--viz-grid)" stroke-width="1"/>`;
+    svg += `<text x="${left - 6}" y="${y(val) + 4}" text-anchor="end">${formatNumber(val)}</text>`;
+  }
+  const xStep = maxSchools <= 20 ? 5 : maxSchools <= 60 ? 10 : 20;
+  for (let s = 0; s <= maxSchools; s += xStep) svg += `<text x="${x(s)}" y="${H - 14}" text-anchor="middle">${s}</text>`;
+  svg += `<text x="${left + plotW / 2}" y="${H}" text-anchor="middle">Antal skoler</text>`;
+  svg += `<line x1="${left}" x2="${W - right}" y1="${y(0)}" y2="${y(0)}" stroke="var(--viz-axis)" stroke-width="1"/>`;
+  svg += `<path d="${line("costs")}" fill="none" stroke="var(--series-b)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`;
+  svg += `<path d="${line("revenue")}" fill="none" stroke="var(--series-a)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`;
+  const last = points[points.length - 1];
+  svg += `<text x="${W - right + 8}" y="${y(last.revenue) + 4}" class="label-strong">Indtægt</text>`;
+  svg += `<text x="${W - right + 8}" y="${y(last.costs) + (Math.abs(y(last.costs) - y(last.revenue)) < 14 ? 16 : 4)}" class="label-strong">Omkostninger</text>`;
+  if (e.breakEven !== null && e.breakEven <= maxSchools) {
+    const bx = x(e.breakEven), by = y(e.breakEven * v.price);
+    svg += `<circle cx="${bx}" cy="${by}" r="5" fill="var(--text)" stroke="var(--panel)" stroke-width="2"/>`;
+    // Etiketten placeres over og til venstre for punktet, så den ikke ligger oven på linjerne.
+    const roomLeft = bx - left > 140; // Er der plads til teksten til venstre for punktet?
+    svg += `<text x="${roomLeft ? bx - 8 : bx + 8}" y="${roomLeft ? by - 12 : by + 20}" text-anchor="${roomLeft ? "end" : "start"}" class="label-strong">Break-even: ${e.breakEven} skoler</text>`;
+  }
+  // Markér det valgte antal skoler med en lodret linje
+  if (v.schools <= maxSchools) svg += `<line x1="${x(v.schools)}" x2="${x(v.schools)}" y1="${top}" y2="${y(0)}" stroke="var(--text)" stroke-width="1" opacity=".35"/>`;
+  // Usynlige områder til tooltip: ét pr. antal skoler
+  points.forEach(p => {
+    const w = plotW / maxSchools;
+    svg += `<rect class="bar-hit" x="${x(p.s) - w / 2}" y="${top}" width="${w}" height="${plotH}" data-tip="${p.s} skoler|Indtægt ${formatKr(p.revenue)} · Omkostninger ${formatKr(p.costs)}"${p.s % xStep === 0 ? ' tabindex="0"' : ""} aria-label="${p.s} skoler: indtægt ${formatKr(p.revenue)}, omkostninger ${formatKr(p.costs)}"/>`;
+  });
+  svg += `</svg><div class="viz-tip" hidden></div>`;
+  box.innerHTML = svg;
+  attachTooltips(box);
+  const rows = points.filter(p => p.s % xStep === 0 || p.s === e.breakEven || p.s === v.schools);
+  document.getElementById("breakEvenTable").innerHTML = `<table class="data-table"><thead><tr><th class="num">Skoler</th><th class="num">Indtægt</th><th class="num">Omkostninger</th><th class="num">Resultat</th></tr></thead><tbody>${
+    rows.map(p => `<tr><td class="num">${p.s}${p.s === e.breakEven ? " (break-even)" : ""}</td><td class="num">${formatKr(p.revenue)}</td><td class="num">${formatKr(p.costs)}</td><td class="num">${formatKr(p.revenue - p.costs)}</td></tr>`).join("")
+  }</tbody></table>`;
+}
+// Hvis pitch-tilstanden er åben, opdateres tallene fra beregneren med det samme.
+function renderPitchNumbers() {
+  if (document.getElementById("pitch").open) renderPitch(false);
+}
+
+/* ---------- Præsentationstilstand (pitch) ----------
+   6 trin: Problem → Løsning/demo → Kunder → Forretningsmodel → Bæredygtighed → Næste skridt.
+   Teksterne er korte stikord – selve fortællingen står i PITCH.md. */
+let pitchIndex = 0;
+// Viser en pladsholder fra TEAM_DATA (gul, hvis den ikke er udfyldt endnu).
+// Laver en kæde af trin med pile imellem. Hvert trin holdes samlet på én linje.
+function flow(items) {
+  return `<div class="pitch-flow">${items.map((text, i) => `<span class="step">${text}${i < items.length - 1 ? ' <span class="arrow" aria-hidden="true">→</span>' : ""}</span>`).join("")}</div>`;
+}
+function team(key) {
+  const value = TEAM_DATA[key] || "";
+  return value.trim().startsWith("[") ? `<span class="ph">${safeText(value)}</span>` : safeText(value);
+}
+const PITCH_SLIDES = [
+  () => `
+    <div class="pitch-kicker persp-vp"><i></i>1 · Problemet</div>
+    <h2 id="pitchSlideTitle" tabindex="-1">Bæredygtige vaner forsvinder, når ingen kan se dem.</h2>
+    <ul class="pitch-points persp-vp">
+      <li>Gode intentioner i klassen – men ingen fælles opfølgning</li>
+      <li>Plakater og temauger starter noget. Hvem holder fast bagefter?</li>
+      <li>Lærerne siger: ${team("interviewFinding")}</li>
+    </ul>`,
+  () => {
+    const total = totalApproved(classData()).points;
+    return `
+    <div class="pitch-kicker persp-vp"><i></i>2 · Løsningen</div>
+    <h2 id="pitchSlideTitle" tabindex="-1">GroKlassen gør vanerne synlige.</h2>
+    <div class="pitch-split">
+      <div>
+        ${flow(["1. Klassen registrerer", "2. Læreren godkender", "3. Planten vokser"])}
+        <ul class="pitch-points persp-vp">
+          <li>Fælles klassemål – ingen individuelle ranglister</li>
+          <li>Fair play: 1 gang pr. dag, pointloft og lærergodkendelse</li>
+          <li>Ingen persondata – kun klassen</li>
+        </ul>
+        <div class="form-row" style="margin-top:18px"><button class="btn primary" type="button" id="pitchDemoBtn">Vis live-demo</button></div>
+      </div>
+      <div class="pitch-plant">${plantSvg(total)}<p class="pitch-note" style="text-align:center">Klasse ${safeText(activeClass)}: ${total} point · ${safeText(PLANT_STAGES[getStage(total)].name)}${demoState ? " (demo-data)" : ""}</p></div>
+    </div>`;
+  },
+  () => `
+    <div class="pitch-kicker persp-cs"><i></i>3 · Kunderne</div>
+    <h2 id="pitchSlideTitle" tabindex="-1">Én bruger, én administrator, én betaler.</h2>
+    <div class="pitch-cols persp-cs">
+      <div class="pitch-col"><div class="big">🎒 Elever</div><p>Brugerne – ser at deres handlinger tæller</p></div>
+      <div class="pitch-col"><div class="big">📋 Lærere</div><p>Daglige administratorer – godkender og får ugerapport</p></div>
+      <div class="pitch-col"><div class="big">🏫 Skoler og kommuner</div><p>Betaler – en licens pr. år</p></div>
+    </div>
+    <p class="pitch-note">Vejen til kunden: pilotlærere · lærernetværk · kommunernes klimaenheder. Interviews: ${team("interviewsTeachers")}.</p>`,
+  () => {
+    const e = calcEconomy(readCalc());
+    const v = readCalc();
+    return `
+    <div class="pitch-kicker persp-ec"><i></i>4 · Forretningsmodellen</div>
+    <h2 id="pitchSlideTitle" tabindex="-1">Gratis at prøve. Skolen betaler for at fortsætte.</h2>
+    ${flow(["🌱 Prøve: 0 kr.", `🌳 Skole: ca. ${formatKr(v.price)}/år`, "🏙️ Kommuneaftale"])}
+    <div class="pitch-cols persp-ec">
+      <div class="pitch-col"><div class="big">${formatKr(e.fixed)}</div><p>Faste omkostninger pr. år: udvikling, hosting, support</p></div>
+      <div class="pitch-col"><div class="big">${e.breakEven === null ? "–" : e.breakEven + " skoler"}</div><p>Break-even med vores antagelser</p></div>
+      <div class="pitch-col persp-ka" style="--p:var(--p-ka)"><div class="big">Partnere</div><p>Mulige: kommuner, grønne skoleprogrammer, fagpersoner</p></div>
+    </div>
+    <p class="pitch-note"><span class="hyp">HYPOTESE</span> Priserne skal valideres i pilotforsøg. Betalingsvilje: ${team("willingnessToPay")}</p>`;
+  },
+  () => `
+    <div class="pitch-kicker"><i></i>5 · Bæredygtighed</div>
+    <h2 id="pitchSlideTitle" tabindex="-1">Bæredygtig på tre niveauer – og ærlig om tallene.</h2>
+    <div class="pitch-cols">
+      <div class="pitch-col"><div class="big">🌍 Miljø</div><p>Vaner inden for transport, mad, affald og forbrug</p></div>
+      <div class="pitch-col"><div class="big">🤝 Socialt</div><p>Fællesskab – ingen elev bliver udstillet</p></div>
+      <div class="pitch-col"><div class="big">💰 Økonomi</div><p>Lille, let app – licensen betaler driften</p></div>
+    </div>
+    <p class="pitch-note">Ærlige tal: at cykle i stedet for at blive kørt sparer ca. 400 g CO₂ – at slukke lyset kun ca. 10 g. Alle beregninger er åbne i appen. Verdensmål 4.7, 12 og 13.</p>`,
+  () => `
+    <div class="pitch-kicker"><i></i>6 · Næste skridt</div>
+    <h2 id="pitchSlideTitle" tabindex="-1">Fra prototype til pilot.</h2>
+    <ul class="pitch-points">
+      <li>Pilot med ${team("pilotClasses")} klasser i 4 uger</li>
+      <li>CO₂-tallene faktatjekkes af ${team("factChecker")}</li>
+      <li>Version 2: lærerlogin, database i EU og GDPR-vurdering</li>
+      <li>Test af pris med skoleledere</li>
+    </ul>
+    <p class="pitch-note" style="font-size:clamp(1.2rem,2.6vw,1.8rem);font-weight:800;color:var(--text)">GroKlassen – små handlinger, stor forskel. 🌱</p>`
+];
+function renderPitch(moveFocus) {
+  const slide = document.getElementById("pitchSlide");
+  slide.innerHTML = PITCH_SLIDES[pitchIndex]();
+  // Genstart den lille glide-animation
+  slide.style.animation = "none"; void slide.offsetWidth; slide.style.animation = "";
+  document.getElementById("pitchCount").textContent = `${pitchIndex + 1} / ${PITCH_SLIDES.length}`;
+  document.getElementById("pitchPrev").disabled = pitchIndex === 0;
+  document.getElementById("pitchNext").disabled = pitchIndex === PITCH_SLIDES.length - 1;
+  document.querySelectorAll("#pitchDots button").forEach((dot, i) => {
+    if (i === pitchIndex) dot.setAttribute("aria-current", "step"); else dot.removeAttribute("aria-current");
+  });
+  const demoBtn = document.getElementById("pitchDemoBtn");
+  if (demoBtn) demoBtn.addEventListener("click", () => {
+    closePitch();
+    if (!demoState) startDemo(false);
+    location.hash = "klassen";
+  });
+  // Flyt fokus til overskriften, så skærmlæsere læser det nye trin op
+  if (moveFocus) document.getElementById("pitchSlideTitle").focus({preventScroll:true});
+}
+function goPitch(index) {
+  pitchIndex = Math.max(0, Math.min(PITCH_SLIDES.length - 1, index));
+  renderPitch(true);
+}
+function openPitch() {
+  const dialog = document.getElementById("pitch");
+  document.getElementById("pitchDots").innerHTML = PITCH_SLIDES.map((_, i) => `<button type="button" aria-label="Trin ${i + 1}">${i + 1}</button>`).join("");
+  pitchIndex = 0;
+  if (!dialog.open) dialog.showModal();
+  renderPitch(true);
+}
+function closePitch() {
+  const dialog = document.getElementById("pitch");
+  if (document.fullscreenElement && document.exitFullscreen) document.exitFullscreen().catch(() => {});
+  if (dialog.open) dialog.close();
+}
+function toggleFullscreen() {
+  if (!document.fullscreenEnabled) return;
+  if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+  else document.documentElement.requestFullscreen().catch(() => {});
+}
+
+/* ---------- Ugerapport ---------- */
+function buildReport() {
+  const data = classData();
+  const today = todayKey();
+  const monday = mondayOf(today);
+  const sunday = addDays(monday, 6);
+  const weekItems = data.approved.filter(item => item.date >= monday && item.date <= sunday);
+  const points = weekItems.reduce((sum, item) => sum + item.points, 0);
+  const lastWeek = weekPoints(data, addDays(monday, -7));
+  const totals = totalApproved(data);
+  const byChallenge = CHALLENGES.map(c => {
+    const items = weekItems.filter(item => item.challengeId === c.id);
+    return {c, count: items.length, points: items.reduce((s, i) => s + i.points, 0)};
+  }).filter(row => row.count > 0).sort((a,b) => b.points - a.points);
+  const co2 = weekItems.reduce((s, i) => s + estimateFor(i).co2, 0);
+  const water = weekItems.reduce((s, i) => s + estimateFor(i).water, 0);
+  const stage = PLANT_STAGES[getStage(totals.points)];
+  const series = weeklySeries(data);
+  return `
+    ${demoState ? '<p><span class="demo-chip">DEMO</span> Rapporten bygger på opdigtede eksempeldata.</p>' : ""}
+    <h2 id="reportTitle">Ugerapport · Klasse ${safeText(activeClass)} · Uge ${weekNumber(today)}</h2>
+    <p class="small">${safeText(formatDate(monday))} – ${safeText(formatDate(sunday))} · Udskrevet ${safeText(formatDate(today))}</p>
+    <div class="kpis">
+      <div class="kpi"><div class="number">${points} / ${data.weeklyGoal}</div><div class="label">Point denne uge / ugemål</div></div>
+      <div class="kpi"><div class="number">${weekItems.length}</div><div class="label">Godkendte handlinger</div></div>
+      <div class="kpi"><div class="number">${points - lastWeek >= 0 ? "+" : ""}${points - lastWeek}</div><div class="label">Point i forhold til sidste uge</div></div>
+      <div class="kpi"><div class="number">${safeText(stage.name)}</div><div class="label">Plantestadie (${totals.points} point i alt)</div></div>
+    </div>
+    <h3>Ugens handlinger</h3>
+    ${byChallenge.length ? `<table class="data-table"><thead><tr><th>Udfordring</th><th class="num">Antal</th><th class="num">Point</th><th class="num">CO₂ (ca. kg)</th><th class="num">Vand (ca. L)</th></tr></thead><tbody>${
+      byChallenge.map(r => `<tr><td>${r.c.icon} ${safeText(r.c.title)}</td><td class="num">${r.count}</td><td class="num">${r.points}</td><td class="num">${formatNumber(r.count * r.c.co2, 2)}</td><td class="num">${formatNumber(r.count * r.c.water)}</td></tr>`).join("")
+    }<tr><th>I alt</th><th class="num">${weekItems.length}</th><th class="num">${points}</th><th class="num">${formatNumber(co2, 1)}</th><th class="num">${formatNumber(water)}</th></tr></tbody></table>` : '<p class="muted">Ingen godkendte handlinger endnu i denne uge.</p>'}
+    <h3 style="margin-top:14px">Udvikling de seneste 8 uger</h3>
+    <table class="data-table"><thead><tr>${series.map(s => `<th class="num">u.${s.week}</th>`).join("")}</tr></thead><tbody><tr>${series.map(s => `<td class="num">${s.points}</td>`).join("")}</tr></tbody></table>
+    <h3 style="margin-top:14px">Forslag til klassesamtale (5 min.)</h3>
+    <ol>
+      <li>Hvilken grøn handling var nemmest at gøre til en vane – og hvorfor?</li>
+      <li>Hvad kan vi gøre mere af i næste uge? Er vores ugemål realistisk?</li>
+      <li>Hvordan kan alle i klassen være med – også dem, der ikke kan cykle eller købe brugt?</li>
+    </ol>
+    <p class="report-note">CO₂- og vandtal er vejledende estimater (se "Sådan har vi regnet" i appen) – ikke målinger. Rapporten indeholder ingen persondata, kun klassens samlede handlinger. Lavet med GroKlassen (prototype).</p>`;
+}
+function openReport() {
+  document.getElementById("reportContent").innerHTML = buildReport();
+  document.getElementById("reportDialog").showModal();
+  document.getElementById("reportPrint").focus();
+}
+
+/* ---------- Demo-data ----------
+   Demo-data er opdigtede eksempler, der viser, hvordan appen ser ud efter nogle ugers brug.
+   De laves med et fast "frø", så de bliver ens hver gang – det gør det let at øve pitchen. */
+function seededRandom(seed) {
+  // Lille tilfældighedsgenerator (mulberry32): samme frø giver samme talrække.
+  return function () {
+    seed = (seed + 0x6D2B79F5) | 0;
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+const DEMO_PROFILES = {
+  // target = samlede godkendte point. 7.A står 2 point fra "Stort træ" (180), så første godkendelse i en demo får planten til at vokse.
+  // shape = hvor meget hver af de seneste 6 hele uger vægter (vanerne bliver stærkere over tid).
+  // rate = hvor hurtigt klassen samler point i den igangværende uge (i forhold til ugemålet).
+  "7.A": {seed: 11, target: 178, goal: 30, rate: 0.8, shape: [0.55, 0.75, 0.95, 1.1, 1.25, 1.4]},
+  "7.B": {seed: 22, target: 141, goal: 25, rate: 1.1, shape: [0.7, 0.8, 0.9, 1.0, 1.05, 1.1]},
+  "8.A": {seed: 33, target: 96, goal: 20, rate: 0.9, shape: [0.5, 0.7, 0.9, 1.0, 1.1, 1.2]}
+};
+function buildDemoState() {
+  const demo = defaultState();
+  const today = todayKey();
+  const thisMonday = mondayOf(today);
+  const isSchoolDay = d => { const w = parseDateKey(d).getDay(); return w >= 1 && w <= 5; };
+  const time = (date, hour, minute) => { const t = parseDateKey(date); t.setHours(hour, minute); return t.getTime(); };
+  const makeItem = (challenge, date, rand) => ({
+    id: `demo-${date}-${challenge.id}`, challengeId: challenge.id, title: challenge.title, date,
+    points: challenge.points, co2: challenge.co2, water: challenge.water,
+    submittedAt: time(date, 8 + Math.floor(rand() * 6), Math.floor(rand() * 60))
+  });
+  // Vælg tilfældige, forskellige udfordringer, der giver præcis "amount" point (eller så tæt på som muligt).
+  const pickForDay = (amount, rand) => {
+    let best = [];
+    for (let attempt = 0; attempt < 40; attempt++) {
+      const picks = [];
+      let sum = 0;
+      CHALLENGES.slice().sort(() => rand() - 0.5).forEach(c => { if (sum + c.points <= amount) { picks.push(c); sum += c.points; } });
+      if (sum === amount) return picks;
+      if (sum > best.reduce((s, c) => s + c.points, 0)) best = picks;
+    }
+    return best;
+  };
+  // Alle skoledage (man–fre) fra 6 uger tilbage til og med i går
+  const schoolDays = [];
+  for (let d = addDays(thisMonday, -42); d < today; d = addDays(d, 1)) if (isSchoolDay(d)) schoolDays.push(d);
+  CLASS_NAMES.forEach(name => {
+    const profile = DEMO_PROFILES[name];
+    const rand = seededRandom(profile.seed);
+    const data = demo.classes[name];
+    data.weeklyGoal = profile.goal;
+    // 1) Den igangværende uge: klassen er godt på vej, men har ikke nået ugemålet endnu.
+    const daysThisWeek = schoolDays.filter(d => d >= thisMonday);
+    const currentWeek = Math.min(profile.goal - 2, Math.round(daysThisWeek.length * profile.goal / 5 * profile.rate));
+    // 2) Resten af pointene fordeles på de 6 hele uger efter profilens "shape".
+    const shapeSum = profile.shape.reduce((s, v) => s + v, 0);
+    const weekTotals = profile.shape.map(v => Math.round((profile.target - currentWeek) * v / shapeSum));
+    const plan = [...weekTotals, currentWeek];
+    plan.forEach((weekTotal, w) => {
+      const monday = addDays(thisMonday, -7 * (6 - w));
+      const days = schoolDays.filter(d => d >= monday && d < addDays(monday, 7));
+      let left = weekTotal;
+      days.forEach((date, i) => {
+        const share = i === days.length - 1 ? left : Math.round(left / (days.length - i) * (0.7 + rand() * 0.6));
+        const picks = pickForDay(Math.min(CONFIG.dailyPointCap, Math.max(0, share)), rand);
+        picks.forEach(c => data.approved.push(makeItem(c, date, rand)));
+        left -= picks.reduce((s, c) => s + c.points, 0);
+      });
+    });
+    // 3) Finjustér, så klassen ender præcis på profilens antal point (ændrer kun de ældste dage).
+    data.approved.sort((a,b) => a.date < b.date ? -1 : 1);
+    while (totalApproved(data).points > profile.target) data.approved.shift();
+    for (let i = 0; i < schoolDays.length && schoolDays[i] < thisMonday && totalApproved(data).points < profile.target; i++) {
+      const date = schoolDays[i];
+      CHALLENGES.forEach(challenge => {
+        const missing = profile.target - totalApproved(data).points;
+        const used = data.approved.some(x => x.date === date && x.challengeId === challenge.id);
+        if (!used && challenge.points <= missing && approvedOnDate(data, date) + challenge.points <= CONFIG.dailyPointCap) {
+          data.approved.push(makeItem(challenge, date, rand));
+        }
+      });
+    }
+    data.approved.forEach(item => { item.approvedAt = item.submittedAt + 3600000; });
+  });
+  // 3) Et par ventende indsendelser fra tidligere dage (viser "ældre indsendelser" i lærerområdet)
+  const a = demo.classes["7.A"];
+  const lastDays = schoolDays.slice(-2);
+  // Hver af de to seneste skoledage får én ventende indsendelse (første udfordring, der overholder reglerne).
+  // Alle har mindst 2 point, så den første godkendelse altid får 7.A over 180 point (nyt plantestadie).
+  lastDays.forEach((date, i) => {
+    const challenge = ["sort", "lights", "shower", "lunch", "cycle"].map(challengeById).find(c =>
+      !a.approved.some(x => x.date === date && x.challengeId === c.id) &&
+      !a.pending.some(x => x.challengeId === c.id) &&
+      approvedOnDate(a, date) + pendingOnDate(a, date) + c.points <= CONFIG.dailyPointCap);
+    if (challenge) a.pending.push({...makeItem(challenge, date, seededRandom(5 + i)), id: `demo-pending-${i}`});
+  });
+  // 4) Én afvist indsendelse, så CSV og rapport viser alle tre statusser
+  if (lastDays[0]) a.rejected.push({...makeItem(challengeById("repair"), lastDays[0], seededRandom(7)), id: "demo-rejected", rejectedAt: Date.now()});
+  demo.activeClass = "7.A";
+  return demo;
+}
+function startDemo(quiet) {
+  demoState = buildDemoState();
+  activeClass = "7.A";
+  state.activeClass = activeClass;
+  saveState();
+  render();
+  startCooldownRefresh();
+  if (!quiet) showToast("Demo-data er indlæst. Klassens egne data er gemt og urørt.");
+}
+function exitDemo() {
+  demoState = null;
+  try { localStorage.removeItem(CONFIG.demoStorageKey); } catch (e) {}
+  // Fjern ?demo=1 fra adressen, så en genindlæsning ikke starter demoen igen.
+  try {
+    const url = new URL(location.href);
+    if (url.searchParams.has("demo")) { url.searchParams.delete("demo"); history.replaceState(null, "", url.href); }
+  } catch (e) {}
+  render();
+  startCooldownRefresh();
+  showToast("Demo er afsluttet. Nu vises klassens egne data igen.");
+}
+function renderDemoControls() {
+  const active = !!demoState;
+  document.getElementById("demoBanner").hidden = !active;
+  document.getElementById("heroDemoBtn").textContent = active ? "Nulstil demo" : "Prøv med demo-data";
+  document.getElementById("demoLoadBtn").hidden = active;
+  document.getElementById("demoResetBtn2").hidden = !active;
+  document.getElementById("demoExitBtn2").hidden = !active;
+  document.getElementById("resetClassBtn").hidden = active;
+  document.getElementById("demoToolText").textContent = active
+    ? "Demo er aktiv. 'Nulstil demo' gendanner udgangspunktet med det samme. 'Afslut demo' viser klassens egne data igen."
+    : "Indlæs eksempeldata for flere uger, så graf og plante ser levende ud. Klassens egne data bliver ikke rørt.";
+}
+
+/* ---------- Lærerområde ---------- */
+// Lærerens "lås op" huskes kun i denne fane (sessionStorage) og forsvinder, når fanen lukkes.
+function readTeacherSession() {
+  try { return sessionStorage.getItem("groklassen-laerer") === "1"; } catch (e) { return false; }
+}
+function setTeacherUnlocked(value) {
+  teacherUnlocked = value;
+  try { value ? sessionStorage.setItem("groklassen-laerer", "1") : sessionStorage.removeItem("groklassen-laerer"); } catch (e) {}
+  renderTeacher();
+}
+function pendingRowHtml(item) {
+  const challenge = challengeById(item.challengeId);
+  const icon = challenge ? challenge.icon + " " : "";
+  const old = daysAgo(item.date) > 0;
+  const when = `${formatDate(item.date)}${item.submittedAt ? " kl. " + formatTime(item.submittedAt) : ""}`;
+  return `<div class="pending-row">
+    <div><strong>${icon}${safeText(item.title)}</strong><div class="small">${item.points} point · indsendt ${safeText(when)}</div></div>
+    <span class="tag ${old ? "old" : ""}">${safeText(ageLabel(item.date))}</span>
+    <div class="row-actions">
+      <button class="btn primary small-btn" type="button" data-action="approve" data-id="${safeText(item.id)}" aria-label="Godkend ${safeText(item.title)} (${safeText(ageLabel(item.date).toLowerCase())})">Godkend</button>
+      <button class="btn small-btn" type="button" data-action="reject" data-id="${safeText(item.id)}" aria-label="Afvis ${safeText(item.title)} (${safeText(ageLabel(item.date).toLowerCase())})">Afvis</button>
+    </div>
+  </div>`;
+}
+function renderTeacher() {
+  document.getElementById("teacherLock").hidden = teacherUnlocked;
+  document.getElementById("teacherDashboard").hidden = !teacherUnlocked;
+  if (!teacherUnlocked) return;
+  const data = classData();
+  const today = todayKey();
+  const sorted = data.pending.slice().sort((a,b)=>a.submittedAt-b.submittedAt);
+  const todays = sorted.filter(item => item.date === today);
+  const older = sorted.filter(item => item.date !== today);
+  document.getElementById("kpiPending").textContent = data.pending.length;
+  document.getElementById("kpiOld").textContent = older.length;
+  document.getElementById("kpiToday").textContent = `${approvedToday(data)}/${CONFIG.dailyPointCap}`;
+  document.getElementById("kpiTotal").textContent = totalApproved(data).points;
+  document.getElementById("pendingTodayList").innerHTML = todays.length ? todays.map(pendingRowHtml).join("") : '<div class="empty">Ingen indsendelser fra i dag afventer.</div>';
+  document.getElementById("pendingOlderList").innerHTML = older.map(pendingRowHtml).join("");
+  document.getElementById("olderBlock").hidden = !older.length;
+  document.getElementById("approveTodayBtn").disabled = !todays.length;
+  renderWeekChart();
+}
+// Godkender en eller flere indsendelser. Loftet tjekkes mod hver indsendelses EGEN dato.
+function approveItems(ids) {
+  const data = classData();
+  const stageBefore = getStage(totalApproved(data).points);
+  const thisMonday = mondayOf(todayKey());
+  const goalReachedBefore = weekPoints(data, thisMonday) >= data.weeklyGoal;
+  const items = data.pending.filter(item => ids.includes(item.id)).sort((a,b)=>a.submittedAt-b.submittedAt);
+  const done = [];
+  const skipped = [];
+  items.forEach(item => {
+    const duplicate = data.approved.some(x => x.date === item.date && x.challengeId === item.challengeId);
+    const overCap = approvedOnDate(data, item.date) + item.points > CONFIG.dailyPointCap;
+    if (duplicate || overCap) { skipped.push(item); return; }
+    data.pending = data.pending.filter(x => x.id !== item.id);
+    data.approved.push({...item, approvedAt: Date.now()});
+    done.push(item);
+  });
+  saveState();
+  render();
+  if (done.length === 1) showToast(`Godkendt: ${done[0].title} tæller nu med i klassens resultat.`);
+  else if (done.length > 1) showToast(`${done.length} indsendelser er godkendt og tæller nu med.`);
+  if (skipped.length) showToast(`${skipped.length} kunne ikke godkendes, fordi pointloftet for dagen ville blive overskredet (eller udfordringen allerede er godkendt den dag). Afvis dem i stedet.`, true);
+  // Nåede planten et nyt stadie? Så fejrer vi det.
+  const stageAfter = getStage(totalApproved(data).points);
+  if (stageAfter > stageBefore) celebrate(stageAfter);
+  else if (!goalReachedBefore && weekPoints(data, thisMonday) >= data.weeklyGoal) showToast(`Klasse ${activeClass} har nået ugemålet på ${data.weeklyGoal} point! 🎉`);
+  return done.length;
+}
+function rejectItems(ids) {
+  const data = classData();
+  const items = data.pending.filter(item => ids.includes(item.id));
+  data.pending = data.pending.filter(item => !ids.includes(item.id));
+  items.forEach(item => data.rejected.push({...item, rejectedAt: Date.now()}));
+  data.rejected = data.rejected.slice(-200); // Gem kun de seneste 200 afviste
+  saveState();
+  render();
+  if (items.length === 1) showToast(`Forespørgslen "${items[0].title}" blev afvist.`);
+  else if (items.length > 1) showToast(`${items.length} indsendelser blev afvist.`);
+}
+// Efter godkend/afvis forsvinder rækken. Flyt fokus til næste knap, så tastaturbrugere ikke "falder ud".
+function refocusQueue(listId, index) {
+  const buttons = document.querySelectorAll(`#${listId} [data-action="approve"]`);
+  const target = buttons[Math.min(index, buttons.length - 1)] || document.getElementById("queueTitle");
+  target.focus();
+}
+function handleQueueClick(event) {
+  const button = event.target.closest("[data-action]");
+  if (!button) return;
+  const listId = event.currentTarget.id;
+  const index = [...event.currentTarget.querySelectorAll('[data-action="approve"]')].indexOf(button.closest(".pending-row").querySelector('[data-action="approve"]'));
+  if (button.dataset.action === "approve") approveItems([button.dataset.id]);
+  else rejectItems([button.dataset.id]);
+  refocusQueue(listId, index);
+}
+
+/* ---------- Fejring af nyt plantestadie ---------- */
+function prefersReducedMotion() {
+  return window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
+function celebrate(stageIndex) {
+  const dialog = document.getElementById("celebration");
+  const stage = PLANT_STAGES[stageIndex];
+  document.getElementById("celebratePlant").innerHTML = plantSvg(stage.threshold);
+  document.getElementById("celebrateText").textContent = `Klasse ${activeClass} har nået stadiet "${stage.name}". ${stage.description}`;
+  // Faldende blade – kun hvis brugeren ikke har slået animationer fra.
+  const leaves = document.getElementById("leaves");
+  leaves.innerHTML = "";
+  if (!prefersReducedMotion()) {
+    for (let i = 0; i < 18; i++) {
+      const leaf = document.createElement("span");
+      leaf.textContent = ["🍃", "🌿", "🍀", "🌱"][i % 4];
+      leaf.style.left = `${(i * 37) % 100}%`;
+      leaf.style.animationDelay = `${(i % 6) * 0.18}s`;
+      leaves.appendChild(leaf);
+    }
+  }
+  // Planten i siden får også en lille vækst-animation.
+  ["plantGraphic", "heroPlant"].forEach(id => {
+    const el = document.getElementById(id);
+    el.classList.remove("grow"); void el.offsetWidth; el.classList.add("grow");
+  });
+  if (!dialog.open) dialog.showModal();
+  document.getElementById("celebrateClose").focus();
+}
+
+/* ---------- Introduktion i 3 trin ---------- */
+let onboardingStep = 0;
+function renderOnboarding() {
+  document.querySelectorAll("#onboarding .ob-step").forEach(step => { step.hidden = Number(step.dataset.step) !== onboardingStep; });
+  document.querySelectorAll("#onboarding .ob-dots span").forEach((dot, i) => dot.classList.toggle("on", i === onboardingStep));
+  document.getElementById("onboarding").setAttribute("aria-labelledby", `obTitle${onboardingStep}`);
+  document.getElementById("obBack").hidden = onboardingStep === 0;
+  document.getElementById("obNext").textContent = onboardingStep === 2 ? "Kom i gang" : "Næste";
+  document.getElementById("obCount").textContent = `Trin ${onboardingStep + 1} af 3`;
+  document.querySelectorAll("#obClasses .btn").forEach(btn => btn.setAttribute("aria-pressed", String(btn.dataset.class === activeClass)));
+}
+function openOnboarding() {
+  onboardingStep = 0;
+  document.getElementById("obClasses").innerHTML = CLASS_NAMES.map(name => `<button class="btn" type="button" data-class="${name}">${name}</button>`).join("");
+  document.getElementById("obStages").innerHTML = PLANT_STAGES.map(stage => `<div>${plantSvg(stage.threshold)}${safeText(stage.name)}</div>`).join("");
+  renderOnboarding();
+  const dialog = document.getElementById("onboarding");
+  if (!dialog.open) dialog.showModal();
+  document.getElementById("obNext").focus();
+}
+function moveOnboarding(delta) {
+  onboardingStep = Math.max(0, Math.min(2, onboardingStep + delta));
+  renderOnboarding();
+  document.getElementById(`obTitle${onboardingStep}`).focus();
+}
+function finishOnboarding() {
+  state.onboardingDone = true;
+  saveState();
+  const dialog = document.getElementById("onboarding");
+  if (dialog.open) dialog.close();
+}
+
+/* ---------- Visninger (faneblade) ----------
+   Adressen efter # bestemmer, hvilken visning der vises: #klassen, #skoler eller #laerer.
+   Et afsnit på en side kan nås med fx #skoler-priser. Det virker også, når filen åbnes direkte fra computeren. */
+const VIEWS = ["klassen", "skoler", "laerer"];
+function showView(name, moveFocus) {
+  VIEWS.forEach(view => { document.getElementById(`view-${view}`).hidden = view !== name; });
+  document.querySelectorAll(".tabs a").forEach(link => {
+    if (link.dataset.view === name) link.setAttribute("aria-current", "page");
+    else link.removeAttribute("aria-current");
+  });
+  if (name === "laerer") renderTeacher();
+  if (name === "skoler") renderCalc();
+  if (moveFocus) {
+    const target = name === "laerer" && !teacherUnlocked ? document.getElementById("pinInput") : document.getElementById("main");
+    target.focus({preventScroll:true});
+    window.scrollTo(0, 0);
+  }
+}
+function routeFromHash(moveFocus) {
+  const hash = location.hash.slice(1);
+  const name = hash.split("-")[0];
+  if (VIEWS.includes(name)) {
+    showView(name, moveFocus && hash === name);
+    // Et afsnit, fx #skoler-priser: rul ned til det og flyt fokus dertil.
+    const section = hash !== name ? document.getElementById(hash) : null;
+    if (section) { section.scrollIntoView({behavior: prefersReducedMotion() ? "auto" : "smooth", block: "start"}); section.focus({preventScroll:true}); }
+  } else if (!location.hash) showView("klassen", false);
+  // Andre #-adresser (fx #main fra "Spring til indhold") ændrer ikke visningen.
+}
+
+/* ---------- Samlet opdatering af skærmen ---------- */
 function render() {
   const data = classData();
   const totals = totalApproved(data);
   document.getElementById("totalPoints").textContent = totals.points;
-  document.getElementById("co2Total").textContent = `${totals.co2.toLocaleString("da-DK",{maximumFractionDigits:1})} kg`;
+  document.getElementById("co2Total").textContent = formatCo2(totals.co2);
   document.getElementById("waterTotal").textContent = `${totals.water.toLocaleString("da-DK",{maximumFractionDigits:0})} L`;
   document.getElementById("pendingTotal").textContent = data.pending.length;
+  document.getElementById("classSelect").value = activeClass;
+  document.getElementById("teacherClassSelect").value = activeClass;
   renderPlant(totals.points);
   renderChallenges();
   renderPending();
+  renderGoal();
   renderLeague();
+  renderDemoControls();
+  renderTeacher();
 }
-function setTheme(theme) {
-  state.theme = theme;
-  document.documentElement.dataset.theme = theme;
-  document.getElementById("themeBtn").textContent = theme === "dark" ? "Lys tilstand" : "Mørk tilstand";
+function setActiveClass(name) {
+  if (!CLASS_NAMES.includes(name)) return;
+  activeClass = name;
+  state.activeClass = name;
   saveState();
-}
-function openTeacherModal() {
-  document.getElementById("pinInput").value = "";
-  document.getElementById("pinError").textContent = "";
-  document.getElementById("teacherModal").classList.add("open");
-  document.getElementById("pinInput").focus();
-}
-function closeTeacherModal() {
-  document.getElementById("teacherModal").classList.remove("open");
-}
-function teacherUnlock() {
-  if (document.getElementById("pinInput").value !== CONFIG.teacherPin) {
-    document.getElementById("pinError").textContent = "Forkert PIN-kode. Prøv igen.";
-    return;
-  }
-  closeTeacherModal();
-  showTeacherDashboard();
-}
-function showTeacherDashboard() {
-  const data = classData();
-  if (!data.pending.length) {
-    alert(`Lærerområde – ${activeClass}\n\nDer er ingen forespørgsler, som afventer godkendelse.`);
-    return;
-  }
-  // Brug en enkel dialog, så appen fortsat kun kræver én HTML-fil.
-  const lines = data.pending.map((item,index)=>`${index+1}. ${item.title} – ${item.points} point (${item.date})`).join("\n");
-  const answer = prompt(`Lærerområde – ${activeClass}\n\n${lines}\n\nSkriv nummeret på den forespørgsel, du vil behandle. Annullér for at lukke.`);
-  if (answer === null || answer.trim() === "") return;
-  const index = Number(answer)-1;
-  if (!Number.isInteger(index) || index < 0 || index >= data.pending.length) {
-    alert("Det nummer findes ikke. Åbn lærerområdet igen og prøv på ny.");
-    return;
-  }
-  const item = data.pending[index];
-  const action = prompt(`"${item.title}" (${item.points} point)\n\nSkriv G for at godkende eller A for at afvise.`);
-  if (!action) return;
-  if (action.trim().toUpperCase() === "G") {
-    // Ekstra kontrol: godkendelsen må ikke få dagens point over loftet.
-    if (approvedToday(data) + item.points > CONFIG.dailyPointCap) {
-      alert("Kan ikke godkende: klassens daglige pointloft vil blive overskredet.");
-      return;
-    }
-    data.pending.splice(index,1);
-    data.approved.push({...item, approvedAt:Date.now()});
-    saveState(); showNotice(`Godkendt: ${item.title} tæller nu med i klassens resultat.`); render();
-  } else if (action.trim().toUpperCase() === "A") {
-    data.pending.splice(index,1);
-    saveState(); showNotice(`Forespørgslen "${item.title}" blev afvist.`); render();
-  } else {
-    alert("Ugyldigt valg. Skriv G eller A.");
-  }
-}
-document.getElementById("classSelect").addEventListener("change", event=>{
-  activeClass = event.target.value;
   render();
-});
-document.getElementById("themeBtn").addEventListener("click", ()=>setTheme(state.theme==="dark" ? "light" : "dark"));
-document.getElementById("teacherBtn").addEventListener("click", openTeacherModal);
-document.getElementById("cancelTeacher").addEventListener("click", closeTeacherModal);
-document.getElementById("unlockTeacher").addEventListener("click", teacherUnlock);
-document.getElementById("pinInput").addEventListener("keydown", event=>{if(event.key==="Enter") teacherUnlock();});
-document.getElementById("teacherModal").addEventListener("click", event=>{if(event.target.id==="teacherModal") closeTeacherModal();});
+  startCooldownRefresh();
+}
+function setTheme(theme, remember) {
+  if (remember) { state.theme = theme; saveState(); }
+  document.documentElement.dataset.theme = theme;
+  // Knappen hedder altid "Mørk tilstand" og er "trykket ned", når mørk tilstand er slået til.
+  const button = document.getElementById("themeBtn");
+  button.textContent = "Mørk tilstand";
+  button.setAttribute("aria-pressed", String(theme === "dark"));
+  document.querySelector('meta[name="theme-color"]').setAttribute("content", theme === "dark" ? "#101b16" : "#26734d");
+}
 
-// Start appen med det sidst valgte tema.
-setTheme(state.theme);
+/* ---------- Knapper og hændelser ---------- */
+["classSelect", "teacherClassSelect"].forEach(id => {
+  const select = document.getElementById(id);
+  select.innerHTML = CLASS_NAMES.map(name => `<option value="${name}">${name}</option>`).join("");
+  select.addEventListener("change", event => setActiveClass(event.target.value));
+});
+document.getElementById("themeBtn").addEventListener("click", () => setTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark", true));
+document.getElementById("pinForm").addEventListener("submit", event => {
+  event.preventDefault();
+  const input = document.getElementById("pinInput");
+  const error = document.getElementById("pinError");
+  if (input.value !== CONFIG.teacherPin) {
+    input.setAttribute("aria-invalid", "true");
+    // Tøm feltet først, så skærmlæsere også læser beskeden op, hvis man taster forkert to gange.
+    error.textContent = "";
+    setTimeout(() => { error.textContent = "Forkert PIN-kode. Prøv igen."; }, 50);
+    input.select();
+    return;
+  }
+  input.value = "";
+  input.removeAttribute("aria-invalid");
+  error.textContent = "";
+  setTeacherUnlocked(true);
+  document.getElementById("dashTitle").setAttribute("tabindex", "-1");
+  document.getElementById("dashTitle").focus();
+  showToast("Lærerområdet er åbent.");
+});
+document.getElementById("lockBtn").addEventListener("click", () => {
+  setTeacherUnlocked(false);
+  document.getElementById("pinInput").focus();
+  showToast("Lærerområdet er låst.");
+});
+document.getElementById("pendingTodayList").addEventListener("click", handleQueueClick);
+document.getElementById("pendingOlderList").addEventListener("click", handleQueueClick);
+document.getElementById("approveTodayBtn").addEventListener("click", () => {
+  const ids = classData().pending.filter(item => item.date === todayKey()).map(item => item.id);
+  approveItems(ids);
+  document.getElementById("queueTitle").focus();
+});
+document.getElementById("approveOlderBtn").addEventListener("click", () => {
+  const ids = classData().pending.filter(item => item.date !== todayKey()).map(item => item.id);
+  approveItems(ids);
+  document.getElementById("queueTitle").focus();
+});
+document.getElementById("rejectOlderBtn").addEventListener("click", async () => {
+  const ids = classData().pending.filter(item => item.date !== todayKey()).map(item => item.id);
+  const ok = await confirmDialog("Afvis alle ældre?", `${ids.length} indsendelser fra tidligere dage bliver afvist og tæller ikke med.`, "Afvis alle");
+  if (ok) rejectItems(ids);
+  document.getElementById("queueTitle").focus();
+});
+window.addEventListener("hashchange", () => routeFromHash(true));
+let resizeTimer = null;
+window.addEventListener("resize", () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => { renderCalc(); if (teacherUnlocked) renderWeekChart(); }, 150);
+});
+// Hvis appen er åben i to faner (fx elev og lærer), opdateres den ene, når den anden gemmer.
+window.addEventListener("storage", event => {
+  if (event.key !== CONFIG.storageKey && event.key !== CONFIG.demoStorageKey) return;
+  state = loadState();
+  demoState = loadDemoState();
+  activeClass = state.activeClass;
+  render();
+  startCooldownRefresh();
+});
+// Står siden åben hen over midnat (fx på klassens skærm), starter en ny dag automatisk.
+let renderedDay = todayKey();
+setInterval(() => {
+  if (todayKey() !== renderedDay) { renderedDay = todayKey(); render(); }
+}, 30000);
+// Introduktion og fejring
+document.getElementById("helpBtn").addEventListener("click", openOnboarding);
+document.getElementById("heroHowBtn").addEventListener("click", openOnboarding);
+document.getElementById("obNext").addEventListener("click", () => onboardingStep === 2 ? finishOnboarding() : moveOnboarding(1));
+document.getElementById("obBack").addEventListener("click", () => moveOnboarding(-1));
+document.getElementById("obSkip").addEventListener("click", finishOnboarding);
+document.getElementById("onboarding").addEventListener("close", () => { if (!state.onboardingDone) { state.onboardingDone = true; saveState(); } });
+document.getElementById("obClasses").addEventListener("click", event => {
+  const button = event.target.closest("[data-class]");
+  if (!button) return;
+  setActiveClass(button.dataset.class);
+  renderOnboarding();
+});
+document.getElementById("celebrateClose").addEventListener("click", () => document.getElementById("celebration").close());
+// Præsentationstilstand
+document.getElementById("pitchBtn").addEventListener("click", openPitch);
+document.getElementById("pitchClose").addEventListener("click", closePitch);
+document.getElementById("pitchPrev").addEventListener("click", () => goPitch(pitchIndex - 1));
+document.getElementById("pitchNext").addEventListener("click", () => goPitch(pitchIndex + 1));
+document.getElementById("pitchDots").addEventListener("click", event => {
+  const dot = event.target.closest("button");
+  if (dot) goPitch([...dot.parentElement.children].indexOf(dot));
+});
+document.getElementById("pitchFullscreen").addEventListener("click", toggleFullscreen);
+document.getElementById("pitchFullscreen").hidden = !document.fullscreenEnabled;
+document.getElementById("pitch").addEventListener("close", () => {
+  if (document.fullscreenElement && document.exitFullscreen) document.exitFullscreen().catch(() => {});
+});
+// Piletaster: → og PageDown = næste, ← og PageUp = forrige, Home/End = første/sidste, F = fuld skærm. Esc lukker.
+document.getElementById("pitch").addEventListener("keydown", event => {
+  const onButton = event.target.closest && event.target.closest("button");
+  if (event.key === "ArrowRight" || event.key === "PageDown" || (event.key === " " && !onButton)) { event.preventDefault(); goPitch(pitchIndex + 1); }
+  else if (event.key === "ArrowLeft" || event.key === "PageUp") { event.preventDefault(); goPitch(pitchIndex - 1); }
+  else if (event.key === "Home") { event.preventDefault(); goPitch(0); }
+  else if (event.key === "End") { event.preventDefault(); goPitch(PITCH_SLIDES.length - 1); }
+  else if ((event.key === "f" || event.key === "F") && !event.ctrlKey && !event.metaKey && !event.altKey) toggleFullscreen();
+});
+// Swipe på mobil og tablet: stryg til venstre = næste, til højre = forrige.
+let swipeStart = null;
+const pitchStage = document.getElementById("pitchStage");
+pitchStage.addEventListener("pointerdown", event => { swipeStart = {x: event.clientX, y: event.clientY}; });
+pitchStage.addEventListener("pointercancel", () => { swipeStart = null; });
+pitchStage.addEventListener("pointerup", event => {
+  if (!swipeStart) return;
+  const dx = event.clientX - swipeStart.x, dy = event.clientY - swipeStart.y;
+  swipeStart = null;
+  if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) goPitch(pitchIndex + (dx < 0 ? 1 : -1));
+});
+// Økonomiberegner
+Object.values(CALC_FIELDS).forEach(id => document.getElementById(id).addEventListener("input", renderCalc));
+document.getElementById("calcForm").addEventListener("submit", event => event.preventDefault());
+document.getElementById("calcReset").addEventListener("click", () => { setCalcValues(CALC_DEFAULTS); showToast("Beregneren viser igen vores antagelser."); });
+// Ugemål
+document.getElementById("goalForm").addEventListener("submit", event => {
+  event.preventDefault();
+  setWeeklyGoal(document.getElementById("goalInput").value);
+});
+// Rapport og eksport
+document.getElementById("csvBtn").addEventListener("click", exportCsv);
+document.getElementById("reportBtn").addEventListener("click", openReport);
+document.getElementById("reportClose").addEventListener("click", () => document.getElementById("reportDialog").close());
+document.getElementById("reportPrint").addEventListener("click", () => {
+  document.body.classList.add("printing-report");
+  window.print();
+});
+window.addEventListener("afterprint", () => document.body.classList.remove("printing-report"));
+// Demo-data
+document.getElementById("heroDemoBtn").addEventListener("click", () => startDemo(false));
+document.getElementById("demoLoadBtn").addEventListener("click", () => startDemo(false));
+["demoResetBtn", "demoResetBtn2"].forEach(id => document.getElementById(id).addEventListener("click", () => {
+  startDemo(true);
+  showToast("Demoen er nulstillet til udgangspunktet.");
+}));
+["demoExitBtn", "demoExitBtn2"].forEach(id => document.getElementById(id).addEventListener("click", exitDemo));
+document.getElementById("resetClassBtn").addEventListener("click", async () => {
+  const ok = await confirmDialog(`Nulstil klasse ${activeClass}?`, "Alle godkendte, ventende og afviste indsendelser for klassen slettes i denne browser. Ugemålet beholdes. Det kan ikke fortrydes.", "Slet klassens data");
+  if (!ok) return;
+  const goal = classData().weeklyGoal;
+  state.classes[activeClass] = {...emptyClass(), weeklyGoal: goal};
+  saveState();
+  render();
+  startCooldownRefresh();
+  showToast(`Klasse ${activeClass} er nulstillet.`);
+});
+
+/* ---------- Start appen ---------- */
+const urlParams = new URLSearchParams(location.search);
+// Standard-PIN'en vises kun som hjælp, så længe den ikke er ændret (det er en demo-lås).
+document.getElementById("pinInput").placeholder = CONFIG.teacherPin === "1234" ? "Demo-PIN: 1234" : "Indtast PIN";
+setTheme(state.theme || (window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"), false);
+applyTeamData();
+renderMethods();
+document.getElementById("appSize").textContent = `${formatNumber(Math.round(APP_SIZE_BYTES / 1024))} kB`;
+setCalcValues(CALC_DEFAULTS);
+// ?demo=1 i adressen starter altid en frisk demo (praktisk til pitchen).
+if (urlParams.get("demo") === "1") startDemo(true);
 render();
-// Opdatér låsebeskeder automatisk, så cooldown-knapper åbner igen.
+routeFromHash(false);
+// Introduktionen vises automatisk første gang (men ikke i demo- eller pitch-tilstand).
+const startView = location.hash.slice(1).split("-")[0];
+if (!state.onboardingDone && !urlParams.has("demo") && !urlParams.has("pitch") && (!startView || startView === "klassen")) openOnboarding();
+// ?pitch=1 i adressen åbner præsentationstilstanden med det samme.
+if (urlParams.get("pitch") === "1") openPitch();
+// Hvis en cooldown stadig er aktiv efter genindlæsning, startes nedtællingen igen.
+startCooldownRefresh();
 </script>
 </body>
 </html>
