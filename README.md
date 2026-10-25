@@ -1,27 +1,57 @@
 # GroKlassen
 
+> **Bæredygtige vaner forsvinder, når ingen kan se dem.** GroKlassen gør dem synlige: Eleverne registrerer små grønne handlinger, læreren godkender, og klassens fælles plante vokser – helt uden persondata.
+
+GroKlassen er en prototype lavet af et gymnasiehold til Business Mind Programme (BMP) 2026 hos Fonden for Entreprenørskab. Det er en første idé til en forretningsmodel – ikke en færdig virksomhed.
+
 ## 1. Hvad er GroKlassen?
 
-GroKlassen er en bæredygtigheds-app til skoleklasser. Eleverne registrerer små grønne handlinger, og klassen samler point til en fælles plante. Appen gør bæredygtighed konkret, social og motiverende i hverdagen.
+En bæredygtigheds-app til skoleklasser. Klassen samler point til en fælles plante, der vokser fra frø til stort træ, når læreren godkender klassens grønne handlinger.
 
-Problemet, GroKlassen forsøger at løse, er, at bæredygtige valg kan være svære at fastholde, hvis de ikke bliver synlige. En fælles score og en plante i udvikling gør klassens indsats lettere at følge.
+| Rolle | Hvem | Værdi |
+|---|---|---|
+| **Brugere** | Elever | Ser at deres handlinger tæller. Ét fælles mål – ingen individuelle ranglister. |
+| **Daglige administratorer** | Lærere | Godkender indsendelser, følger udviklingen, får ugerapport og CSV. |
+| **Betalende kunder** | Skoler og kommuner | Et let værktøj til grøn dannelse uden persondata. |
 
-## 2. Funktioner
+## 2. Ingen persondata (GDPR)
 
-- Seks grønne udfordringer, fx cykling, affaldssortering og reparation.
-- Point samt vejledende CO₂- og vandbesparelser.
-- En SVG-plante, der udvikler sig gennem fem stadier.
-- Demo-klasseliga, så konceptet kan vises frem.
-- Lys og mørk tilstand.
-- Lærerområde med PIN-kode til godkendelse eller afvisning.
-- Responsivt design til mobil, tablet og computer.
-- Data gemmes lokalt i browseren.
+Appen indsamler **ingen** elevnavne, e-mails eller andet, der kan identificere en person. Alt er på klasseniveau (fx "7.A"), og data ligger kun i browseren på den enhed, der bruges. Der er ingen tracking, ingen cookies og ingen server i prototypen.
 
-## 3. Sådan virker point- og plantesystemet
+En senere version med lærerlogin vil behandle lærernes e-mail. Det kræver en databehandleraftale og en GDPR-vurdering, før den bruges i skoler.
 
-Hver udfordring giver et bestemt antal point. Når eleven sender en udfordring, bliver den først lagt i kø som **afventer**. Den tæller først med i klassens samlede point, når læreren godkender den.
+## 3. Funktioner
 
-| Plantestadie | Samlet antal godkendte point |
+**Klassen (elevernes side – `#klassen`)**
+- Ni grønne udfordringer med point og vejledende CO₂- og vandtal.
+- "Sådan har vi regnet": antagelse, udregning, kilder og faktatjek for hver udfordring.
+- Klassens plante i fem stadier – med fejring og animation, når den vokser (respekterer "reduceret bevægelse").
+- Klassens ugemål, som klassen selv sætter (5–75 point).
+- Klasseliga mellem klasser – aldrig elever. Starter forfra hver mandag.
+- Introduktion i 3 trin første gang (kan springes over og åbnes igen via "Sådan virker det").
+
+**For skoler (`#skoler`)** – mini-salgsside og pitch-støtte
+- Problem, løsning og det nye · tre roller · prisskitse (hypoteser) · økonomiberegner med break-even og graf · Business Model Canvas farvekodet efter BMP's fire perspektiver · mulige partnere og kanaler · ærlig sammenligning med alternativer · bæredygtighed på tre niveauer · næste skridt.
+
+**Lærer (`#laerer`, demo-PIN `1234`)**
+- Ventende indsendelser med alder, Godkend/Afvis pr. række, "Godkend alle fra i dag" og samlet behandling af ældre.
+- Graf over godkendte point pr. uge (med tabelvisning).
+- Eksport som CSV (åbner i Excel) og print-venlig ugerapport med spørgsmål til en klassesamtale.
+- Indlæs/nulstil demo-data og nulstil klassens egne data.
+
+**Til pitchen**
+- **Demo-tilstand:** knappen "Prøv med demo-data" eller `index.html?demo=1`. Indlæser 6 ugers opdigtede eksempeldata, tydeligt mærket "DEMO". Demo-data gemmes for sig, så klassens rigtige data aldrig røres. "Nulstil demo" gendanner udgangspunktet med det samme.
+- **Præsentationstilstand:** knappen "▶ Pitch" eller `index.html?pitch=1`. Seks trin (Problem → Løsning/demo → Kunder → Forretningsmodel → Bæredygtighed → Næste skridt). Styres med piletaster, swipe, trinknapper og `F` for fuld skærm. `Esc` lukker.
+- Kombinér dem: `index.html?demo=1&pitch=1`.
+- Demo-klassen 7.A står på 178 point – 2 point fra "Stort træ". Den første godkendelse i demoen får planten til at vokse.
+
+Appen virker på mobil, tablet og computer, i lys og mørk tilstand, helt offline og ved dobbeltklik på filen.
+
+## 4. Sådan virker point og planten
+
+En indsendelse lægges i kø som **afventer** og tæller først, når læreren godkender den.
+
+| Plantestadie | Samlede godkendte point |
 |---|---:|
 | Frø | 0 |
 | Spire | 20 |
@@ -29,28 +59,71 @@ Hver udfordring giver et bestemt antal point. Når eleven sender en udfordring, 
 | Ungt træ | 100 |
 | Stort træ | 180 |
 
-CO₂- og vandbesparelserne i prototypen er illustrative estimater. De varierer i virkeligheden efter blandt andet transportform, energikilde, produkt og lokale forhold. De bør ikke præsenteres som dokumenterede målinger.
+Point belønner indsats og vaner – ikke kun CO₂. Derfor giver fx "Sluk lyset" point, selvom CO₂-effekten er lille.
 
-## 4. Fusk-beskyttelse
+## 5. CO₂ og vand: vejledende skøn
 
-Prototypen har fire enkle regler:
+Alle tal er **forsigtige, vejledende skøn for én handling – ikke målinger**. Hver udfordring viser sin antagelse, udregning og kilder i "Sådan har vi regnet" i appen. Eksempler:
 
-1. **Én registrering pr. udfordring pr. dag pr. klasse.** Når en udfordring er indsendt eller godkendt, kan den ikke indsendes igen samme dag for den valgte klasse.
-2. **Dagligt pointloft på 15 point pr. klasse.** Både ventende og godkendte indsendelser tæller med i kontrollen af, om en ny indsendelse passer inden for loftet.
-3. **Lærergodkendelse.** Indsendelser tæller først med, når en lærer godkender dem. Standard-PIN er `1234` og kan ændres i toppen af JavaScript-koden i `index.html`.
-4. **Cooldown på 10 sekunder.** Der skal gå mindst 10 sekunder mellem indsendelser fra samme klasse i denne browser.
+| Udfordring | CO₂ (ca.) | Antagelse |
+|---|---:|---|
+| Cykel eller gå i skole | 400 g | Erstatter 2 km bilkørsel hver vej (4 km) × ca. 0,10 kg/km |
+| Plantebaseret frokost | 100 g | 50 g skinke erstattes af 50 g bønnepostej |
+| Reparér / byt eller køb brugt | 500 g | 10 % af en ny t-shirts aftryk (ca. 5,2 kg) |
+| Sortér affald | 50 g | 50 g plast genanvendes i stedet for at blive brændt |
+| Kort bad | 20 g + 15 L vand | 2 minutter kortere med sparebruser og fjernvarme |
+| Madpakke uden engangsplast | 20 g | Undgår ca. 10 g engangsplast |
+| Sluk lyset | 10 g | 30 min LED-lys i et tomt lokale, dansk strøm 2025 |
+| Sluk skærme og opladere | 7 g | Projektor 30 min + standby natten over |
 
-**Vigtig begrænsning:** Dette er en prototype, ikke et sikkert kontrolsystem. Data gemmes i browserens `localStorage`, og både data og PIN-kode kan manipuleres af en bruger, der kan ændre browserdata eller læse kildekoden. Reglerne gælder derfor kun som enkel demo-beskyttelse i den aktuelle browser. Forskellige enheder deler ikke data. Brug en serverbaseret løsning med login, database og servervalidering, før appen bruges i en rigtig skolekonkurrence.
+Dansk strøm og fjernvarme er så grønne, at lys, skærme og bad kun sparer få gram. De største gevinster kommer fra transport, mad og forbrug. Kun vand fra vandhanen tælles med. Prototypens gamle tal var for høje (fx lys 0,4 kg) og er rettet for at undgå greenwashing.
 
-## 5. Sådan kører du appen lokalt
+**Holdet skal faktatjekke tallene før pitchen** – se den gule "Til faktatjek"-note ved hver udfordring.
+
+## 6. Fusk-beskyttelse
+
+1. **Én registrering pr. udfordring pr. dag pr. klasse** – også hvis læreren har afvist den.
+2. **Dagligt pointloft på 15 point pr. klasse.** Både ventende og godkendte point tæller med. Ved godkendelse tjekkes loftet mod den dag, indsendelsen er fra.
+3. **Lærergodkendelse.** Standard-PIN er `1234` og kan ændres øverst i JavaScript-koden i `index.html` (`CONFIG.teacherPin`).
+4. **Cooldown på 10 sekunder** mellem indsendelser fra samme klasse – også efter genindlæsning af siden.
+
+**Vigtig begrænsning:** Dette er en prototype, ikke et sikkert kontrolsystem. Data gemmes i browserens `localStorage`, og både data og PIN-kode kan manipuleres af en bruger, der kan ændre browserdata eller læse kildekoden. Reglerne gælder kun i den aktuelle browser, og forskellige enheder deler ikke data. Brug en serverbaseret løsning med login, database og servervalidering, før appen bruges i en rigtig skolekonkurrence.
+
+## 7. Forretningsmodel (hypoteser)
+
+| Niveau | Hypotetisk pris (ekskl. moms) | Indhold |
+|---|---|---|
+| Prøve | 0 kr. – 1 klasse i 3 måneder | Udfordringer, plante, lærergodkendelse |
+| Skolelicens | ca. 1.500 kr. pr. skole pr. år | Alle klasser, liga, dashboard, rapporter, support |
+| Kommuneaftale | fra ca. 12.000 kr. pr. år for op til 10 skoler | Samlet rapport til kommunens klimaenhed (kun klasseniveau) |
+
+Økonomiberegnerens antagelser (kan ændres i appen og i `CALC_DEFAULTS` i koden): 25 skoler, 1.500 kr. pr. licens, 150 kr. variable omkostninger pr. skole, hosting 4.000 kr., support 6.000 kr. og udvikling 20.000 kr. pr. år. Faste omkostninger 30.000 kr. → **break-even ved ca. 23 skoler**.
+
+Referencepriser (set 25.10.2026 – faktatjek): Grøn Skole/Grønt Flag 3.600 kr./år for en grundskole, Klimakampen 500 kr. pr. klasse pr. 4-ugers kampagne, Gyldendals fagportaler ca. 1.300 kr. pr. klasse pr. år.
+
+**Priser og betalingsvilje skal valideres gennem interviews og pilotforsøg.** Partnere på "For skoler"-siden er mulige partnere – der er ingen aftaler.
+
+## 8. Bæredygtighed på tre niveauer
+
+- **Miljømæssigt:** synlige grønne vaner inden for transport, mad, affald, forbrug og energi – med ærlige, åbne tal.
+- **Socialt:** klassen arbejder mod ét fælles mål. Ingen elev bliver målt, rangeret eller udstillet. Mange forskellige udfordringer, så alle kan bidrage.
+- **Økonomisk:** en lille, billig app, hvor en skolelicens skal betale drift og udvikling.
+- **Verdensmål:** 4.7, 12 og 13.
+- **Appen selv er let:** én fil, ingen tracking, ingen server i prototypen, virker offline.
+
+## 9. Holdets egne data – udfyld før pitchen
+
+Øverst i `<script>` i `index.html` ligger `TEAM_DATA`. Alt, der står i `[INDSÆT: …]`, `[VALIDÉR: …]` eller `[FAKTATJEK: …]`, vises med gult i appen og i pitch-tilstanden. Ret teksten ét sted, så opdateres alle steder. **Skriv kun det, I faktisk har undersøgt.** Se også tjeklisten i `PITCH.md`.
+
+## 10. Sådan kører du appen lokalt
 
 1. Download eller kopiér filen `index.html` til en mappe på din computer.
 2. Dobbeltklik på `index.html`.
-3. Filen åbner i din browser. Du behøver ikke installere biblioteker eller starte en server.
+3. Filen åbner i din browser. Du behøver ikke installere noget eller have internet.
 
 Hvis browseren blokerer enkelte funktioner ved åbning af en lokal fil, kan du prøve en anden browser eller køre filen via en lokal webserver. GitHub Pages kører den som en almindelig webside.
 
-## 6. Sådan lægger du appen på GitHub og udgiver med GitHub Pages
+## 11. Sådan lægger du appen på GitHub og udgiver med GitHub Pages
 
 ### A. Opret et repository
 
@@ -65,11 +138,11 @@ Hvis browseren blokerer enkelte funktioner ved åbning af en lokal fil, kan du p
 
 1. Åbn dit nye repository.
 2. Klik på **Add file** og vælg **Upload files**.
-3. Træk `index.html` og `README.md` ind i uploadfeltet.
+3. Træk `index.html`, `README.md`, `PITCH.md` og `CHANGELOG.md` ind i uploadfeltet.
 4. Skriv fx `Tilføj GroKlassen prototype` i feltet **Commit changes**.
 5. Klik på **Commit changes**.
 
-Begge filer skal ligge direkte i roden af repository'et — ikke i en ekstra undermappe. Filen skal hedde præcis `index.html`.
+Filerne skal ligge direkte i roden af repository'et – ikke i en ekstra undermappe. Filen skal hedde præcis `index.html`. Mappen `.historik` og mappen `tests` behøver du ikke uploade.
 
 ### C. Aktivér GitHub Pages
 
@@ -81,40 +154,24 @@ Begge filer skal ligge direkte i roden af repository'et — ikke i en ekstra und
 6. Klik på **Save**.
 7. Vent et par minutter, og genindlæs siden **Settings → Pages**. GitHub viser adressen til din udgivne side dér.
 
-Adressen vil normalt ligne `https://DIT-GITHUB-NAVN.github.io/groklassen/`. Brug den præcise adresse, som GitHub viser. Hvis du ændrer filerne senere, uploader du de nye versioner og laver et nyt commit; GitHub Pages udgiver ændringerne automatisk.
+Adressen vil normalt ligne `https://DIT-GITHUB-NAVN.github.io/groklassen/`. Til pitchen kan du bruge `…/groklassen/?demo=1&pitch=1`. Hvis du ændrer filerne senere, uploader du de nye versioner og laver et nyt commit; GitHub Pages udgiver ændringerne automatisk.
 
-## 7. Forretningsmodel og bæredygtighed
+**Bemærk:** GitHub Pages må ikke bruges til at drive en kommerciel tjeneste. Det er fint til prototypen, men en betalt version skal flyttes til en anden hosting.
 
-### Forretningsmodel: skolelicenser
+## 12. Test (valgfrit)
 
-GroKlassen kan på sigt tilbydes som en årlig licens til skoler. En gratis prøveversion kan introducere konceptet, mens en betalt skolelicens kan give adgang til flere klasser, lærerdashboard, rapporter, fælles liga, elevadministration og support.
+Mappen `tests` indeholder en automatisk browsertest (`tests/e2e.cjs`), der tjekker hele flowet, fusk-reglerne, migrering, offline-brug, tastatur og layout ved 375, 768 og 1280 px i lys og mørk tilstand. Den kræver Node.js og Playwright – se kommentaren øverst i filen. Appen virker fint uden.
 
-Mulige indtægtskilder:
-- Årlig licens pr. skole eller pr. klasse.
-- Betalte udvidelser med rapporter og undervisningsmateriale.
-- Partnerskaber med kommuner eller organisationer, der arbejder med bæredygtighed.
+## 13. Videreudvikling
 
-Priser og betalingsvillighed skal undersøges gennem interviews og pilotforsøg med skoler, før en forretningsmodel fastlægges.
+- Supabase eller lignende (i en EU-region) til lærerlogin og fælles klassedata på tværs af enheder.
+- Servervalidering af pointloft, cooldown og godkendelse.
+- Rigtige klassekonti og en fælles liga.
+- Faktatjek af CO₂-tal med en fagperson og mulighed for lokale tal (fx egen varmeforsyning).
+- Databehandleraftale og privatlivsvurdering, før appen bruges med rigtige skoler.
 
-### Bæredygtighed på tre niveauer
+## 14. Licens og kontakt
 
-- **Miljømæssigt:** Appen kan gøre miljøvenlige valg mere synlige og motivere til vaner, der potentielt reducerer ressourceforbrug og udledning.
-- **Socialt:** Klassen arbejder mod et fælles mål, hvilket kan styrke samarbejde, ansvar og samtaler om bæredygtighed. Konkurrencen bør indrettes, så den inkluderer alle elever.
-- **Økonomisk:** Skolelicenser kan finansiere drift og videreudvikling. For skoler kan løsningen være et redskab i undervisningen, men den økonomiske værdi skal dokumenteres gennem afprøvning.
+**Licens:** Ingen open source-licens er valgt endnu. Vil I tillade andre at genbruge koden, kan I vælge fx MIT og tilføje en `LICENSE`-fil.
 
-## 8. Videreudvikling
-
-Næste version kan bygges videre med:
-
-- **Supabase** til login, database og fælles klassedata på tværs af enheder.
-- **Lærerdashboard** til at oprette klasser, invitere elever, godkende handlinger og følge udviklingen.
-- Serverbaseret validering af daglige grænser og cooldown, så reglerne ikke alene afhænger af browseren.
-- Rigtige klassekonti og en fælles liga med dokumenterede resultater.
-- Bedre dokumentation af CO₂- og vandestimater samt mulighed for at tilpasse beregningerne til lokale forhold.
-- Privatlivs- og databeskyttelsesvurdering, før appen anvendes med børn og elever.
-
-## 9. Licens og kontakt
-
-**Licens:** Ingen særlig open source-licens er valgt endnu. Hvis du vil tillade andre at genbruge og ændre koden, kan du vælge en licens, fx MIT, og tilføje en `LICENSE`-fil. Undlad at angive en licens, før du har besluttet, hvilke rettigheder andre skal have.
-
-**Kontakt:** Tilføj navn, e-mail eller projektets kontaktoplysninger her, når de er klar.
+**Kontakt:** [INDSÆT: projektets kontaktoplysninger – fx en fælles hold-mail, ikke private oplysninger]
