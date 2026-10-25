@@ -37,12 +37,12 @@
   header{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:16px}
   .brand{display:flex;align-items:center;gap:12px}
   .logo{width:48px;height:48px;border-radius:15px;background:var(--soft);display:grid;place-items:center;font-size:27px}
-  /* Logoet har gennemsigtig baggrund. I mørk tilstand får det en lys baggrund, så den mørkegrønne tekst kan ses. */
+  /* Logoet har gennemsigtig baggrund og står direkte på siden.
+     I mørk tilstand gøres farverne lidt lysere, så den mørkegrønne "Gro"-tekst kan ses mod den mørke baggrund. */
   .brand-logo{margin:0;line-height:0}
   .brand-logo img{height:84px;width:auto;display:block}
   .pitch-logo{height:44px;width:auto;display:block}
-  [data-theme="dark"] .brand-logo img{background:#f4f8f2;border-radius:16px;padding:4px 8px}
-  [data-theme="dark"] .pitch-logo{background:#f4f8f2;border-radius:10px;padding:2px 6px}
+  [data-theme="dark"] .brand-logo img,[data-theme="dark"] .pitch-logo{filter:brightness(1.35)}
   h1,h2,h3,p{margin-top:0}
   h1{font-size:clamp(1.55rem,4vw,2.2rem);margin-bottom:2px;letter-spacing:-.03em}
   h2{font-size:1.25rem;margin-bottom:12px}
