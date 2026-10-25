@@ -44,6 +44,7 @@
   .header-actions{display:flex;gap:8px;flex-wrap:wrap}
   .btn{border:1px solid var(--border);background:var(--panel);color:var(--text);border-radius:11px;padding:9px 13px;font-weight:650}
   .btn.primary{background:var(--primary);color:var(--on-primary);border-color:var(--primary)}
+  a.btn{display:inline-block;text-decoration:none}
   .btn.danger{color:var(--danger)}
   .btn.small-btn{padding:6px 10px;font-size:.88rem}
   .btn:hover{filter:brightness(.97)}
@@ -165,6 +166,30 @@
     #reportDialog::backdrop{display:none}
     .no-print{display:none !important}
   }
+  /* ---------- Klassekonkurrence ---------- */
+  .contest-card{background:linear-gradient(120deg,var(--warn-bg),var(--panel));border-color:var(--warning)}
+  .contest-head{display:flex;gap:16px;align-items:flex-start}
+  .contest-head h2{margin:8px 0 6px;font-size:clamp(1.3rem,3vw,1.7rem)}
+  .contest-head p{margin:0 0 4px}
+  .contest-trophy{font-size:2.8rem;line-height:1}
+  .contest-trophy.huge{font-size:clamp(4rem,12vw,7rem);text-align:center}
+  .contest-body{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;margin-top:14px;align-items:start}
+  .contest-body h3{margin-bottom:8px}
+  .contest-body .notice{background:var(--panel);border:1px solid var(--border)}
+  .contest-hero{background:linear-gradient(120deg,var(--warn-bg),var(--panel));border-color:var(--warning)}
+  .contest-form{display:grid;gap:4px}
+  .contest-form label{font-weight:650;margin-top:10px}
+  .contest-form .class-select{max-width:220px}
+  .contest-form .input.short{max-width:140px}
+  .contest-form .check{display:flex;gap:8px;align-items:flex-start;font-weight:500;margin-top:14px}
+  .contest-form .check input{margin-top:4px;width:18px;height:18px;flex:none}
+  .prize-vote{border:1px solid var(--border);border-radius:12px;padding:10px 12px;margin:14px 0 0}
+  .prize-vote legend{font-weight:650;padding:0 4px}
+  .prize-vote label{display:flex;gap:8px;align-items:flex-start;font-weight:500;margin-top:8px}
+  .prize-vote input{margin-top:4px;width:18px;height:18px;flex:none}
+  .prize-vote .small{display:block}
+  @media(max-width:780px){.contest-body{grid-template-columns:1fr}}
+  @media(max-width:470px){.contest-head{flex-direction:column;gap:6px}.contest-trophy{font-size:2.2rem}}
   /* ---------- Præsentationstilstand (pitch) ---------- */
   #pitch{width:100vw;height:100dvh;max-width:none;max-height:none;margin:0;border:0;border-radius:0;padding:0;display:none;flex-direction:column;background:var(--bg)}
   #pitch[open]{display:flex}
@@ -363,6 +388,29 @@
         <div class="stat"><div class="number" id="pendingTotal">0</div><div class="label">Afventer lærer</div></div>
       </section>
 
+      <!-- Klassekonkurrence: klasser dyster om en præmie til hele klassen (indstillinger i CONTEST i scriptet) -->
+      <section class="panel contest-card" id="contestCard" aria-labelledby="contestTitle">
+        <div class="contest-head">
+          <div class="contest-trophy" aria-hidden="true">🏆</div>
+          <div class="contest-text">
+            <span class="hyp contest-example">EKSEMPEL · FIKTIV KONKURRENCE</span>
+            <h2 id="contestTitle" data-contest="name">Klassekonkurrence</h2>
+            <p>Den klasse, der samler flest godkendte point fra <strong data-contest="period"></strong>, vinder <strong data-contest="prize"></strong> til hele klassen.</p>
+            <p class="small">Sponsor: <span data-contest="sponsor"></span></p>
+          </div>
+        </div>
+        <div class="contest-body">
+          <div>
+            <div id="contestStatus" class="notice"></div>
+            <div class="hero-actions"><a class="btn primary" href="#konkurrence" id="contestSignupLink">Tilmeld klassen</a><span class="small">Kun klassen tilmeldes – ingen persondata.</span></div>
+          </div>
+          <div>
+            <h3>Stillingen</h3>
+            <div class="league" id="contestBoard"></div>
+          </div>
+        </div>
+      </section>
+
       <div class="layout">
         <div>
           <section class="panel" aria-labelledby="challengesTitle">
@@ -422,6 +470,73 @@
           <section class="panel" aria-labelledby="pendingTitle">
             <div class="section-head"><h2 id="pendingTitle">Afventer godkendelse</h2><span class="tag" id="pendingBadge">0</span></div>
             <div id="pendingList"></div>
+          </section>
+        </aside>
+      </div>
+    </div>
+
+    <!-- ============ VISNING: KONKURRENCE – tilmeldingsside (#konkurrence) ============ -->
+    <div class="view" id="view-konkurrence" hidden>
+      <p style="margin:0 0 12px"><a href="#klassen">← Tilbage til klassen</a></p>
+      <section class="hero contest-hero" aria-labelledby="contestPageTitle">
+        <div>
+          <span class="hyp contest-example">EKSEMPEL · FIKTIV KONKURRENCE</span>
+          <h2 id="contestPageTitle" class="hero-title" tabindex="-1"><span aria-hidden="true">🏆</span> <span data-contest="name">Klassekonkurrence</span></h2>
+          <p class="hero-lead">Saml flest godkendte point fra <strong data-contest="period"></strong> – og vind <strong data-contest="prize"></strong> til hele klassen.</p>
+          <p class="small" style="margin-top:8px">Sponsor: <span data-contest="sponsor"></span></p>
+        </div>
+        <div class="contest-trophy huge" aria-hidden="true">🏆</div>
+      </section>
+
+      <div class="layout">
+        <div>
+          <section class="panel" aria-labelledby="contestFormTitle">
+            <h2 id="contestFormTitle" tabindex="-1">Tilmeld klassen</h2>
+            <form id="contestForm" class="contest-form" autocomplete="off">
+              <label for="contestClass">Klasse</label>
+              <select id="contestClass" class="class-select"></select>
+
+              <label for="contestTeam">Klassens holdnavn <span class="small">(valgfrit)</span></label>
+              <input id="contestTeam" class="input" type="text" maxlength="40" aria-describedby="contestTeamHelp">
+              <span class="small" id="contestTeamHelp">Fx "De Grønne Lyn". Skriv ikke elevernes navne.</span>
+
+              <label for="contestStudents">Antal elever i klassen</label>
+              <input id="contestStudents" class="input short" type="number" min="1" max="40" step="1" inputmode="numeric" required aria-describedby="contestStudentsHelp">
+              <span class="small" id="contestStudentsHelp">Bruges kun til at planlægge præmien (fx antal pladser i bussen).</span>
+
+              <fieldset class="prize-vote">
+                <legend>Hvilken præmie vil klassen helst kæmpe om? (afstemning)</legend>
+                <div id="contestPrizes"></div>
+              </fieldset>
+
+              <label class="check"><input type="checkbox" id="contestRules" required> Vi har læst reglerne, og vores lærer er med på, at klassen deltager.</label>
+              <div class="form-row"><button class="btn primary" type="submit">Tilmeld klassen</button></div>
+              <p class="small">Tilmeldingen gemmes kun i denne browser. Der sendes ingen data nogen steder hen, og der indsamles ingen persondata.</p>
+            </form>
+            <div id="contestDone" hidden>
+              <p class="notice" id="contestDoneText"></p>
+              <div class="form-row">
+                <a class="btn primary" href="#klassen">Gå til klassens udfordringer</a>
+                <button class="btn danger" type="button" id="contestCancel">Afmeld klassen</button>
+              </div>
+            </div>
+          </section>
+        </div>
+        <aside>
+          <section class="panel" aria-labelledby="contestRulesTitle">
+            <h2 id="contestRulesTitle">Regler</h2>
+            <ol class="plain-list">
+              <li>Kun klasser deltager – aldrig enkelte elever.</li>
+              <li>Det er godkendte point i konkurrenceperioden, der tæller. Fusk-reglerne gælder: højst 15 point om dagen, og læreren godkender.</li>
+              <li>Alle klasser har samme loft pr. dag, så små og store klasser har lige chancer.</li>
+              <li>Ved lige point vinder klassen, der har lavet flest forskellige slags udfordringer.</li>
+              <li>Præmien gives til hele klassen.</li>
+            </ol>
+          </section>
+          <section class="panel" aria-labelledby="contestIdeasTitle">
+            <h2 id="contestIdeasTitle">Præmie-idéer</h2>
+            <p class="small">Idéer til relevante præmier. Ingen af dem er aftalt – en præmie kræver en sponsor eller et budget.</p>
+            <ul class="plain-list" id="contestIdeas"></ul>
           </section>
         </aside>
       </div>
@@ -802,6 +917,18 @@
   </div>
 </dialog>
 
+<!-- Pop-up om klassekonkurrencen. Vises én gang (efter introduktionen). -->
+<dialog id="contestPopup" aria-labelledby="contestPopupTitle" aria-describedby="contestPopupText">
+  <div class="contest-trophy" style="text-align:center" aria-hidden="true">🏆</div>
+  <p style="text-align:center;margin:6px 0"><span class="hyp contest-example">EKSEMPEL · FIKTIV</span></p>
+  <h2 id="contestPopupTitle" style="text-align:center">Ny konkurrence: <span data-contest="name"></span>!</h2>
+  <p id="contestPopupText" class="muted" style="text-align:center">Saml flest godkendte point fra <strong data-contest="period"></strong> – og vind <strong data-contest="prize"></strong> til hele klassen.</p>
+  <div class="dialog-actions" style="justify-content:center">
+    <button class="btn" type="button" id="contestPopupLater">Senere</button>
+    <button class="btn primary" type="button" id="contestPopupGo">Se konkurrencen og tilmeld</button>
+  </div>
+</dialog>
+
 <!-- Fejring, når planten når et nyt stadie -->
 <dialog id="celebration" aria-labelledby="celebrateTitle" aria-describedby="celebrateText">
   <div class="leaves" id="leaves" aria-hidden="true"></div>
@@ -857,6 +984,25 @@ const CALC_DEFAULTS = {
   hosting: 4000,    // Database i EU + webhosting + domæne
   support: 6000,    // Lærersupport og fejlrettelser
   dev: 20000        // Udvikling, sikkerhed, GDPR-rådgivning
+};
+
+/* ---------- KLASSEKONKURRENCE – ret her ----------
+   Konkurrencen er et FIKTIVT EKSEMPEL, indtil I har en rigtig aftale med en sponsor.
+   Skriv aldrig, at en virksomhed er sponsor, før den har sagt ja – sæt så isExample til false. */
+const CONTEST = {
+  isExample: true,                 // true = vis "Eksempel · fiktiv konkurrence" overalt
+  name: "Grøn Klasse-Cup",
+  prize: "en klassetur til en forlystelsespark",
+  sponsor: "[INDSÆT: sponsor – ingen aftale endnu]",
+  start: null,                     // Fx "2026-11-30". null = starter mandag i denne uge (praktisk til demo)
+  weeks: 4,                        // Konkurrencens længde i uger
+  prizeIdeas: [
+    {id:"park",   title:"Klassetur til en forlystelsespark (fx BonBon-Land)", note:"Sjovt og motiverende – kræver en aftale med parken eller en anden sponsor."},
+    {id:"nature", title:"Klassetur til et naturcenter eller science center", note:"Passer godt til bæredygtighed og natur/teknologi."},
+    {id:"trees",  title:"Frugttræer eller en skolehave til klassen", note:"En præmie, der selv vokser – ligesom klassens plante."},
+    {id:"bikes",  title:"Cykelværksted-dag, hvor klassens cykler bliver tjekket", note:"Belønner den grønneste transport."},
+    {id:"party",  title:"Klimavenlig klassefest med plantebaseret mad", note:"Billig præmie, som skolen måske selv kan give."}
+  ]
 };
 
 /* ---------- Udfordringer ----------
@@ -953,7 +1099,7 @@ function emptyClass() {
 function defaultState() {
   const classes = {};
   CLASS_NAMES.forEach(name => { classes[name] = emptyClass(); });
-  return {version:2, theme:null, onboardingDone:false, activeClass:CLASS_NAMES[0], classes};
+  return {version:2, theme:null, onboardingDone:false, contestPopupSeen:false, activeClass:CLASS_NAMES[0], classes, contest:{}};
 }
 // Tjekker at en gemt indsendelse ser fornuftig ud. Ødelagte rækker springes over i stedet for at crashe appen.
 function cleanItem(item) {
@@ -998,6 +1144,21 @@ function normalizeState(parsed) {
   fresh.theme = parsed.theme === "dark" || parsed.theme === "light" ? parsed.theme : null;
   fresh.onboardingDone = parsed.onboardingDone === true;
   fresh.activeClass = CLASS_NAMES.includes(parsed.activeClass) ? parsed.activeClass : CLASS_NAMES[0];
+  fresh.contestPopupSeen = parsed.contestPopupSeen === true;
+  // Tilmeldinger til konkurrencen – kun klassens navn, holdnavn, antal elever og præmie-afstemning.
+  if (parsed.contest && typeof parsed.contest === "object") {
+    CLASS_NAMES.forEach(name => {
+      const s = parsed.contest[name];
+      if (!s || s.signedUp !== true) return;
+      fresh.contest[name] = {
+        signedUp: true,
+        team: String(s.team || "").slice(0, 40),
+        students: Math.min(40, Math.max(1, Math.round(Number(s.students) || 1))),
+        vote: CONTEST.prizeIdeas.some(p => p.id === s.vote) ? s.vote : CONTEST.prizeIdeas[0].id,
+        signedAt: Number(s.signedAt) || 0
+      };
+    });
+  }
   return fresh;
 }
 function loadState() {
@@ -1869,6 +2030,8 @@ function buildDemoState() {
   });
   // 4) Én afvist indsendelse, så CSV og rapport viser alle tre statusser
   if (lastDays[0]) a.rejected.push({...makeItem(challengeById("repair"), lastDays[0], seededRandom(7)), id: "demo-rejected", rejectedAt: Date.now()});
+  demo.contest["7.B"] = {signedUp:true, team:"De Grønne Lyn", students:24, vote:"park", signedAt:Date.now()};
+  demo.contest["8.A"] = {signedUp:true, team:"Team Træstamme", students:22, vote:"nature", signedAt:Date.now()};
   demo.activeClass = "7.A";
   return demo;
 }
@@ -2064,12 +2227,125 @@ function finishOnboarding() {
   saveState();
   const dialog = document.getElementById("onboarding");
   if (dialog.open) dialog.close();
+  setTimeout(maybeShowContestPopup, 300);
+}
+
+/* ---------- Klassekonkurrence ---------- */
+function contestStore() { return (demoState || state).contest; }
+// Konkurrencens første og sidste dag (som "ÅÅÅÅ-MM-DD").
+function contestPeriod() {
+  const start = CONTEST.start || mondayOf(todayKey());
+  return {start, end: addDays(start, CONTEST.weeks * 7 - 1)};
+}
+// Godkendte point i konkurrenceperioden + antal forskellige udfordringer (bruges ved lige point).
+function contestScore(name) {
+  const {start, end} = contestPeriod();
+  const items = classData(name).approved.filter(item => item.date >= start && item.date <= end);
+  return {points: items.reduce((sum, item) => sum + item.points, 0), kinds: new Set(items.map(item => item.challengeId)).size};
+}
+function contestStandings() {
+  return CLASS_NAMES.filter(name => contestStore()[name])
+    .map(name => ({name, team: contestStore()[name].team, ...contestScore(name)}))
+    .sort((a, b) => b.points - a.points || b.kinds - a.kinds);
+}
+function renderContest() {
+  const {start, end} = contestPeriod();
+  const today = todayKey();
+  const periodText = `${formatDate(start)} til ${formatDate(end)}`;
+  const values = {name: CONTEST.name, prize: CONTEST.prize, sponsor: CONTEST.sponsor, period: periodText};
+  document.querySelectorAll("[data-contest]").forEach(el => {
+    const value = values[el.dataset.contest] || "";
+    el.textContent = value;
+    el.classList.toggle("ph", value.trim().startsWith("["));
+  });
+  document.querySelectorAll(".contest-example").forEach(el => { el.hidden = !CONTEST.isExample; });
+  // Klassens status på klassens side
+  const entry = contestStore()[activeClass];
+  const standings = contestStandings();
+  const status = document.getElementById("contestStatus");
+  const link = document.getElementById("contestSignupLink");
+  const daysLeft = Math.round((parseDateKey(end) - parseDateKey(today)) / 86400000);
+  const timeText = today < start ? `Starter ${formatDate(start)}.` : daysLeft < 0 ? "Konkurrencen er slut." : `${daysLeft + 1} dage tilbage.`;
+  if (entry) {
+    const place = standings.findIndex(s => s.name === activeClass) + 1;
+    status.textContent = `Klasse ${activeClass}${entry.team ? ` ("${entry.team}")` : ""} er tilmeldt · nr. ${place} af ${standings.length} · ${contestScore(activeClass).points} point. ${timeText}`;
+    link.textContent = "Se tilmelding";
+  } else {
+    status.textContent = `Klasse ${activeClass} er ikke tilmeldt endnu. ${timeText}`;
+    link.textContent = "Tilmeld klassen";
+  }
+  // Stillingen – kun tilmeldte klasser
+  const board = document.getElementById("contestBoard");
+  board.innerHTML = standings.length ? "" : '<div class="empty">Ingen klasser er tilmeldt endnu. Bliv den første!</div>';
+  standings.forEach((s, i) => {
+    const row = document.createElement("div");
+    row.className = "league-row" + (s.name === activeClass ? " current" : "");
+    row.innerHTML = `<div class="rank">${i + 1}</div><div><strong>${safeText(s.name)}</strong><div class="small">${safeText(s.team || "Uden holdnavn")}${demoState ? " · demo" : ""}</div></div><div class="points">${s.points} pt.</div>`;
+    board.appendChild(row);
+  });
+  // Tilmeldingssiden (præmievalgene bygges kun én gang, så et valg ikke nulstilles)
+  const prizes = document.getElementById("contestPrizes");
+  if (!prizes.children.length) prizes.innerHTML = CONTEST.prizeIdeas.map((p, i) =>
+    `<label><input type="radio" name="contestPrize" value="${p.id}"${i === 0 ? " checked" : ""}><span>${safeText(p.title)}<span class="small">${safeText(p.note)}</span></span></label>`).join("");
+  document.getElementById("contestIdeas").innerHTML = CONTEST.prizeIdeas.map(p => `<li><strong>${safeText(p.title)}</strong> – ${safeText(p.note)}</li>`).join("");
+  renderContestForm();
+}
+// Viser enten formularen eller kvitteringen for den valgte klasse.
+function renderContestForm() {
+  const select = document.getElementById("contestClass");
+  if (!select.value) select.value = activeClass;
+  const entry = contestStore()[select.value];
+  document.getElementById("contestForm").hidden = !!entry;
+  document.getElementById("contestDone").hidden = !entry;
+  if (entry) {
+    const voted = CONTEST.prizeIdeas.find(p => p.id === entry.vote);
+    document.getElementById("contestDoneText").textContent = `🎉 Klasse ${select.value}${entry.team ? ` ("${entry.team}")` : ""} er tilmeldt ${CONTEST.name}! Klassen stemte på: ${voted ? voted.title : "–"}. Stillingen kan ses på klassens side.`;
+  }
+}
+function submitContest(event) {
+  event.preventDefault();
+  const name = document.getElementById("contestClass").value;
+  const students = Number(document.getElementById("contestStudents").value);
+  if (!document.getElementById("contestRules").checked) { showToast("Sæt kryds ved reglerne, før klassen tilmeldes.", true); return; }
+  if (!Number.isInteger(students) || students < 1 || students > 40) { showToast("Skriv antal elever mellem 1 og 40.", true); return; }
+  const vote = (document.querySelector('input[name="contestPrize"]:checked') || {}).value || CONTEST.prizeIdeas[0].id;
+  contestStore()[name] = {signedUp: true, team: document.getElementById("contestTeam").value.trim().slice(0, 40), students, vote, signedAt: Date.now()};
+  if (name !== activeClass) setActiveClass(name);
+  saveState();
+  render();
+  showToast(`Klasse ${name} er tilmeldt ${CONTEST.name}!`);
+  document.getElementById("contestFormTitle").focus();
+}
+async function cancelContest() {
+  const name = document.getElementById("contestClass").value;
+  const ok = await confirmDialog(`Afmeld klasse ${name}?`, "Klassen fjernes fra konkurrencen. Klassens point bliver ikke slettet.", "Afmeld");
+  if (!ok) return;
+  delete contestStore()[name];
+  saveState();
+  render();
+  showToast(`Klasse ${name} er afmeldt konkurrencen.`);
+  document.getElementById("contestFormTitle").focus();
+}
+// Pop-up'en vises kun én gang – og aldrig oven i introduktionen, demoen eller pitchen.
+function maybeShowContestPopup() {
+  const params = new URLSearchParams(location.search);
+  if (state.contestPopupSeen || params.has("demo") || params.has("pitch")) return;
+  if (document.querySelector("dialog[open]")) return;
+  document.getElementById("contestPopup").showModal();
+  document.getElementById("contestPopupGo").focus();
+}
+function closeContestPopup(goToSignup) {
+  state.contestPopupSeen = true;
+  saveState();
+  const dialog = document.getElementById("contestPopup");
+  if (dialog.open) dialog.close();
+  if (goToSignup) location.hash = "konkurrence";
 }
 
 /* ---------- Visninger (faneblade) ----------
    Adressen efter # bestemmer, hvilken visning der vises: #klassen, #skoler eller #laerer.
    Et afsnit på en side kan nås med fx #skoler-priser. Det virker også, når filen åbnes direkte fra computeren. */
-const VIEWS = ["klassen", "skoler", "laerer"];
+const VIEWS = ["klassen", "skoler", "laerer", "konkurrence"];
 function showView(name, moveFocus) {
   VIEWS.forEach(view => { document.getElementById(`view-${view}`).hidden = view !== name; });
   document.querySelectorAll(".tabs a").forEach(link => {
@@ -2078,6 +2354,7 @@ function showView(name, moveFocus) {
   });
   if (name === "laerer") renderTeacher();
   if (name === "skoler") renderCalc();
+  if (name === "konkurrence") { document.getElementById("contestClass").value = activeClass; renderContestForm(); }
   if (moveFocus) {
     const target = name === "laerer" && !teacherUnlocked ? document.getElementById("pinInput") : document.getElementById("main");
     target.focus({preventScroll:true});
@@ -2112,6 +2389,7 @@ function render() {
   renderGoal();
   renderLeague();
   renderDemoControls();
+  renderContest();
   renderTeacher();
 }
 function setActiveClass(name) {
@@ -2216,6 +2494,14 @@ document.getElementById("obClasses").addEventListener("click", event => {
   renderOnboarding();
 });
 document.getElementById("celebrateClose").addEventListener("click", () => document.getElementById("celebration").close());
+// Klassekonkurrence
+document.getElementById("contestClass").innerHTML = CLASS_NAMES.map(name => `<option value="${name}">${name}</option>`).join("");
+document.getElementById("contestClass").addEventListener("change", renderContestForm);
+document.getElementById("contestForm").addEventListener("submit", submitContest);
+document.getElementById("contestCancel").addEventListener("click", cancelContest);
+document.getElementById("contestPopupGo").addEventListener("click", () => closeContestPopup(true));
+document.getElementById("contestPopupLater").addEventListener("click", () => closeContestPopup(false));
+document.getElementById("contestPopup").addEventListener("close", () => { if (!state.contestPopupSeen) { state.contestPopupSeen = true; saveState(); } });
 // Præsentationstilstand
 document.getElementById("pitchBtn").addEventListener("click", openPitch);
 document.getElementById("pitchClose").addEventListener("click", closePitch);
@@ -2305,6 +2591,8 @@ const startView = location.hash.slice(1).split("-")[0];
 if (!state.onboardingDone && !urlParams.has("demo") && !urlParams.has("pitch") && (!startView || startView === "klassen")) openOnboarding();
 // ?pitch=1 i adressen åbner præsentationstilstanden med det samme.
 if (urlParams.get("pitch") === "1") openPitch();
+// Konkurrence-pop-up'en (kun én gang, og kun hvis intet andet er åbent).
+if (state.onboardingDone) setTimeout(maybeShowContestPopup, 600);
 // Hvis en cooldown stadig er aktiv efter genindlæsning, startes nedtællingen igen.
 startCooldownRefresh();
 </script>
