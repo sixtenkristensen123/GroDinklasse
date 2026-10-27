@@ -5,6 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#26734d">
 <title>GroKlassen – Små handlinger, stor forskel</title>
+<meta name="description" content="GroKlassen gør skoleklassers grønne vaner synlige: eleverne registrerer små grønne handlinger, læreren godkender, og klassens fælles plante vokser – helt uden persondata. Prototype fra Business Mind Programme 2026.">
+<!-- Sådan ser linket ud, når det deles i en besked (Open Graph). Intet billede, så filen forbliver lille. -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="GroKlassen">
+<meta property="og:locale" content="da_DK">
+<meta property="og:title" content="GroKlassen – Små handlinger, stor forskel">
+<meta property="og:description" content="En app til skoleklasser: små grønne handlinger, lærergodkendelse og en fælles plante, der vokser. Uden persondata. Prøv demoen.">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌱</text></svg>">
 <script>
   // Sæt farvetemaet, før siden tegnes, så den ikke blinker hvid i mørk tilstand.
@@ -28,7 +35,7 @@
     --warn-bg:#3b3019; --focus:#8cc8ff; --on-primary:#102017; --input-border:#6f8a78;
   }
   *{box-sizing:border-box}
-  body{margin:0;background:var(--bg);color:var(--text);font:16px/1.5 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+  body{margin:0;background:var(--bg);color:var(--text);font:100%/1.5 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
   button,input,select{font:inherit}
   button{cursor:pointer}
   a{color:var(--primary)}
@@ -44,6 +51,7 @@
   .pitch-logo{height:44px;width:auto;display:block}
   [data-theme="dark"] .brand-logo img,[data-theme="dark"] .pitch-logo{filter:brightness(1.35)}
   h1,h2,h3,p{margin-top:0}
+  h1,h2,h3{line-height:1.25}
   h1{font-size:clamp(1.55rem,4vw,2.2rem);margin-bottom:2px;letter-spacing:-.03em}
   h2{font-size:1.25rem;margin-bottom:12px}
   h3{font-size:1rem;margin-bottom:5px}
@@ -55,7 +63,18 @@
   .btn.danger{color:var(--danger)}
   .btn.small-btn{padding:6px 10px;font-size:.88rem}
   .btn:hover{filter:brightness(.97)}
+  /* Feedback på selve trykket (pointer-down) – knappen giver lidt efter med det samme */
+  .btn,.tabs a,.jump a,.linklike{touch-action:manipulation;transition:transform .1s ease-out}
+  .btn:active:not(:disabled):not([aria-disabled="true"]),.tabs a:active,.jump a:active{transform:scale(.97)}
+  @media (prefers-reduced-motion: reduce){.btn,.tabs a,.jump a,.linklike{transition:none}.btn:active:not(:disabled):not([aria-disabled="true"]),.tabs a:active,.jump a:active{transform:none;filter:brightness(.9)}}
   #themeBtn[aria-pressed="true"]{background:var(--soft)}
+  .btn-icon{width:1.05em;height:1.05em;vertical-align:-.15em;display:inline-block}
+  .btn.icon-only{padding:9px 11px;line-height:1}
+  .btn.icon-only .btn-icon{width:1.2em;height:1.2em;vertical-align:middle}
+  /* QR-kode: altid sort på hvidt, så den kan scannes i både lys og mørk tilstand */
+  .qr-box{background:#fff;border-radius:12px;padding:6px;width:min(100%,232px);margin:12px auto;line-height:0}
+  .qr{width:100%;height:auto;display:block}
+  .chart-head{font-size:.88rem;margin:16px 0 2px;color:var(--muted)}
   .btn:disabled,.btn[aria-disabled="true"]{cursor:not-allowed;opacity:.58;filter:none}
   .skip-link{position:absolute;left:-9999px;top:8px;background:var(--panel);color:var(--text);padding:8px 12px;border-radius:10px;z-index:30}
   .skip-link:focus{left:8px}
@@ -172,9 +191,35 @@
     #reportDialog{position:static;border:0;box-shadow:none;width:auto;max-width:none;padding:0;color:#000;background:#fff}
     #reportDialog::backdrop{display:none}
     .no-print{display:none !important}
+    /* A4-oversigten: kun arket udskrives, altid sort på hvidt */
+    @page{size:A4;margin:12mm}
+    body.printing-a4 > *:not(#a4Sheet){display:none !important}
+    body.printing-a4{background:#fff;color:#000}
+    body.printing-a4 #a4Sheet{display:block}
   }
+  .a4-sheet{display:none;color:#000;background:#fff;font:10.5pt/1.42 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .a4-sheet h1{font-size:24pt;margin:0;letter-spacing:-.02em;line-height:1.1}
+  .a4-sheet h2{font-size:13pt;margin:0 0 5px;letter-spacing:-.01em}
+  .a4-sheet p{margin:0 0 4px}
+  .a4-sheet ul{margin:0 0 4px;padding-left:16px}
+  .a4-head{display:flex;gap:14px;align-items:center;border-bottom:2px solid #26734d;padding-bottom:8px;margin-bottom:10px}
+  .a4-logo{height:72px;width:auto}
+  .a4-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .a4-box{border:1px solid #c9d6cc;border-left:5px solid var(--a4,#26734d);border-radius:8px;padding:11px 13px;break-inside:avoid}
+  .a4-vp{--a4:#2a78d6}.a4-cs{--a4:#eb6834}.a4-ec{--a4:#4a3aa7}.a4-sus{--a4:#26734d}
+  .a4-qr{text-align:center;--a4:#183326}
+  .a4-qrcode{width:46mm;margin:0 auto 4px;line-height:0}
+  .a4-big{font-size:19pt;font-weight:800;letter-spacing:-.02em;line-height:1.15}
+  .a4-small{font-size:9pt;color:#333}
+  .a4-url{font-size:7.5pt;overflow-wrap:anywhere}
+  .a4-hyp{font-size:7pt;font-weight:800;text-transform:uppercase;letter-spacing:.06em;border:1px solid #8b5b13;color:#8b5b13;border-radius:4px;padding:0 4px;vertical-align:2px}
+  .a4-sheet footer.a4-foot{margin-top:14px;border-top:2px solid #26734d;padding:10px 0 0;color:#000;text-align:left;font-size:inherit}
+  .a4-ask{font-size:15pt;font-weight:800;letter-spacing:-.01em}
+  .a4-sheet .ph{background:#fbefd5;color:#8b5b13;border:1px dashed #8b5b13}
   /* ---------- Klassekonkurrence ---------- */
-  .contest-card{background:linear-gradient(120deg,var(--warn-bg),var(--panel));border-color:var(--warning)}
+  /* Konkurrencekortet på klassens side er bevidst afdæmpet – kerneproduktet (udfordringer og plante) skal fylde mest */
+  .contest-card .contest-head h2{font-size:1.15rem}
+  .contest-card .contest-trophy{font-size:1.9rem}
   .contest-head{display:flex;gap:16px;align-items:flex-start}
   .contest-head h2{margin:8px 0 6px;font-size:clamp(1.3rem,3vw,1.7rem)}
   .contest-head p{margin:0 0 4px}
@@ -205,11 +250,19 @@
   .pitch-top .logo{width:38px;height:38px;font-size:21px;border-radius:12px}
   .pitch-tools{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
   .pitch-count{font-weight:800;color:var(--muted);font-variant-numeric:tabular-nums}
-  .pitch-stage{flex:1;overflow:auto;display:flex;align-items:center;justify-content:center;padding:clamp(8px,2vw,24px) clamp(16px,5vw,64px);touch-action:pan-y}
-  .pitch-slide{width:min(100%,1100px);animation:slideIn .35s ease-out}
-  @keyframes slideIn{from{opacity:0;transform:translateX(18px)}to{opacity:1;transform:none}}
+  .pitch-stage{flex:1;overflow-x:hidden;overflow-y:auto;display:flex;align-items:center;justify-content:center;padding:clamp(8px,2vw,24px) clamp(16px,5vw,64px);touch-action:pan-y}
+  .pitch-slide{width:min(100%,1100px);animation:slideIn .35s ease-out;--dir:1}
+  .pitch-slide.back{--dir:-1}
+  @keyframes slideIn{from{opacity:0;transform:translateX(calc(18px * var(--dir)))}to{opacity:1;transform:none}}
   .pitch-kicker{font-size:clamp(.85rem,1.6vw,1.05rem);font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);display:flex;gap:8px;align-items:center}
   .pitch-kicker i{width:14px;height:14px;border-radius:4px;background:var(--p, var(--primary));display:inline-block}
+  .pitch-kicker{flex-wrap:wrap}
+  .persp-sus{--p:var(--primary)}
+  .persp-chip{border:2px solid var(--p, var(--primary));border-radius:999px;padding:1px 10px;font-size:.78em;letter-spacing:.04em;color:var(--text);margin-left:4px}
+  .pitch-ask{font-size:clamp(1.25rem,2.8vw,2rem);font-weight:800;line-height:1.2;letter-spacing:-.01em;margin:24px 0 0}
+  .pitch-qr{margin:0;text-align:center}
+  .pitch-qr .qr-box{width:min(100%,250px)}
+  .pitch-qr figcaption{font-weight:800;font-size:clamp(1rem,1.8vw,1.3rem)}
   .pitch-slide h2{font-size:clamp(1.8rem,5vw,3.6rem);line-height:1.1;letter-spacing:-.03em;margin:10px 0 18px}
   .pitch-slide h2:focus{outline:none}
   .pitch-points{list-style:none;padding:0;margin:0;display:grid;gap:clamp(8px,1.5vw,16px)}
@@ -222,16 +275,19 @@
   .pitch-flow{display:flex;align-items:center;gap:clamp(6px,1.5vw,16px);flex-wrap:wrap;font-size:clamp(1.15rem,2.8vw,2rem);font-weight:800;margin-bottom:16px}
   .pitch-flow .step{white-space:nowrap}
   .pitch-flow .arrow{color:var(--muted);margin:0 2px}
-  .pitch-split .pitch-flow{font-size:clamp(1rem,2vw,1.45rem)}
+  .pitch-split .pitch-flow,.pitch-flow.compact{font-size:clamp(1rem,2vw,1.45rem)}
   .pitch-split{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,.8fr);gap:clamp(12px,3vw,36px);align-items:center}
   .pitch-plant svg{width:min(100%,320px);height:auto;display:block;margin:auto}
   .pitch-note{font-size:clamp(.9rem,1.5vw,1.1rem);color:var(--muted);margin-top:16px}
   .pitch-dots{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
   .pitch-dots button{width:34px;height:34px;border-radius:50%;border:1px solid var(--input-border);background:var(--panel);color:var(--text);font-weight:800;padding:0}
   .pitch-dots button[aria-current="step"]{background:var(--primary);color:var(--on-primary);border-color:var(--primary)}
-  @media(max-width:700px){.pitch-cols,.pitch-split{grid-template-columns:1fr}.pitch-plant svg{width:130px}.pitch-plant .pitch-note{display:none}.pitch-flow .step{white-space:normal}}
+  @media(max-width:700px){.pitch-qr .qr-box{width:150px}.pitch-ask{margin-top:14px}.pitch-cols,.pitch-split{grid-template-columns:1fr}.pitch-plant svg{width:130px}.pitch-plant .pitch-note{display:none}.pitch-flow .step{white-space:normal}}
   @media(max-width:480px){.pitch-dots{display:none}.pitch-top strong{display:none}.pitch-top,.pitch-bottom{flex-wrap:nowrap}.pitch-slide h2{margin-bottom:12px}}
   @media (prefers-reduced-motion: reduce){.pitch-slide{animation:none}}
+  /* Mens et trin trækkes, følger det fingeren/musen – ingen markering af tekst undervejs */
+  .pitch-stage.dragging{cursor:grabbing;user-select:none;-webkit-user-select:none}
+  .pitch-stage.dragging .pitch-slide{will-change:transform,opacity}
   /* "Sådan har vi regnet" */
   .est{display:inline-block;font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;border:1px solid var(--input-border);border-radius:5px;padding:0 4px;margin-left:2px;vertical-align:1px}
   details > summary{list-style-position:outside}
@@ -264,6 +320,10 @@
   .hyp{display:inline-block;background:var(--warn-bg);color:var(--warning);border:1px solid var(--warning);border-radius:6px;padding:0 6px;font-size:.72rem;font-weight:800;letter-spacing:.05em;vertical-align:2px}
   /* Pladsholdere, som holdet selv skal udfylde (gule) */
   .ph{background:var(--warn-bg);color:var(--warning);border:1px dashed var(--warning);border-radius:6px;padding:0 5px;font-weight:700}
+  /* Noter til holdet vises kun i udkast-tilstand (?udkast=1) */
+  html:not(.draft) .draft-only{display:none !important}
+  .draft-banner{background:var(--warn-bg);color:var(--text);border-bottom:2px dashed var(--warning);padding:9px 16px;display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap;font-size:.88rem}
+  .draft-banner[hidden]{display:none}
   .card-grid{display:grid;gap:12px}
   .card-grid.three{grid-template-columns:repeat(3,minmax(0,1fr))}
   .card-grid.two{grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -279,8 +339,13 @@
   .steps li{margin-bottom:8px}
   /* Økonomiberegner */
   .calc{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:start}
-  .calc-inputs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
-  .calc-inputs label{font-size:.85rem;font-weight:650;display:grid;gap:4px}
+  .calc-inputs{display:grid;gap:10px}
+  .calc-group{border:1px solid var(--border);border-radius:12px;padding:8px 12px 12px;margin:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;min-width:0}
+  .calc-group legend{font-weight:750;font-size:.92rem;padding:0 4px}
+  .calc-inputs label{font-size:.85rem;font-weight:650;display:grid;gap:4px;align-content:start}
+  .scenarios{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:0 0 12px}
+  .scenarios .btn[aria-pressed="true"]{background:var(--primary);color:var(--on-primary);border-color:var(--primary)}
+  .data-table tr.be-row td{font-weight:800}
   .calc-inputs .small{font-weight:400}
   .calc-kpis{grid-template-columns:repeat(2,1fr);margin-top:0}
   .kpi .number.negative{color:var(--danger)}
@@ -297,11 +362,17 @@
   @media(max-width:780px){.card-grid.three,.card-grid.two{grid-template-columns:1fr}}
   @media(max-width:560px){
     .bmc{grid-template-columns:1fr;grid-template-areas:"vp" "cs" "cr" "ch" "ka" "kr" "kp" "rs" "co"}
-    .calc-inputs{grid-template-columns:1fr}
+    .calc-group{grid-template-columns:1fr}
   }
   /* Dialog (bruges i stedet for confirm()/alert()) */
   dialog{border:1px solid var(--border);border-radius:18px;padding:22px;background:var(--panel);color:var(--text);width:min(92vw,440px);max-height:calc(100dvh - 24px);overflow:auto;box-shadow:0 20px 80px #0005}
-  dialog::backdrop{background:#07140dcc}
+  dialog::backdrop{background:#07140da6;-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
+  @media (prefers-reduced-transparency: reduce){dialog::backdrop{background:#07140de6;-webkit-backdrop-filter:none;backdrop-filter:none}}
+  /* Højere kontrast efter brugerens ønske: tydeligere kanter og mørkere hjælpetekst */
+  @media (prefers-contrast: more){
+    :root:not([data-theme="dark"]){--border:#7d9284;--muted:#33463a}
+    [data-theme="dark"]{--border:#8aa596;--muted:#d0ddd4}
+  }
   .dialog-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:18px;flex-wrap:wrap}
   /* Introduktion i 3 trin (vises første gang) */
   #onboarding{width:min(94vw,520px)}
@@ -332,10 +403,25 @@
   .toast.error{background:var(--danger);color:#fff}
   [data-theme="dark"] .toast.error{color:#2a0d0b}
   .toast button{background:none;border:0;color:inherit;font-weight:800;padding:0 4px;line-height:1.2}
+  .toast{text-align:left}.toast > span{flex:1}
+  .toast .toast-action{text-decoration:underline;text-underline-offset:2px;white-space:nowrap}
   @keyframes toastIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  .toast.leaving{animation:toastOut .18s ease-in forwards}
+  @keyframes toastOut{to{opacity:0;transform:translateY(8px)}}
   @media (prefers-reduced-motion: reduce){.toast{animation:none}.progress-fill{transition:none}}
   @media(max-width:780px){.hero{grid-template-columns:1fr}.hero-art{min-height:120px}.hero-art svg{width:150px}.layout{grid-template-columns:1fr}.stats,.kpis{grid-template-columns:repeat(2,1fr)}}
-  @media(max-width:470px){.brand-logo img{height:68px}.wrap{padding:13px}.header-actions{width:100%}header{align-items:flex-start;flex-direction:column}.challenge{grid-template-columns:1fr}.challenge-action{align-items:flex-start;min-width:0}.status{text-align:left;max-width:none}.section-head{align-items:flex-start;flex-direction:column}.class-select{max-width:none}.pending-row{grid-template-columns:1fr}.tabs{width:100%}.tabs a{flex:1;text-align:center}}
+  /* Mobil: headeren holdes på én linje, og hero + de fire tal + starten på udfordringerne står over folden */
+  @media(max-width:470px){
+    header{gap:8px;margin-bottom:12px}.brand-logo img{height:50px}.subtitle{display:none}
+    .header-actions{flex-wrap:nowrap;gap:6px}.header-actions .btn{padding:8px 10px}.header-actions .btn.icon-only{padding:8px 9px}
+    .tabs{margin-bottom:12px;gap:2px;padding:4px}.tabs a{padding:8px 6px;font-size:.92rem}
+    .hero{position:relative;padding:15px;gap:0;margin-bottom:12px}.hero-title{margin:10px 0 6px}#view-klassen .hero-title{padding-right:74px}.hero .hero-lead{font-size:1rem}
+    .hero-points{display:none}.hero-actions{margin-top:10px}
+    .hero-art{position:absolute;top:8px;right:10px;min-height:0;width:74px}.hero-art svg{width:74px}
+    .stats{gap:8px;margin-bottom:12px}.stat{padding:9px 11px}.stat .number{font-size:1.3rem}.stat .label{font-size:.76rem;line-height:1.3}
+    .hide-mobile{display:none}.demo-banner{padding:7px 10px;gap:5px 8px;font-size:.82rem}.demo-banner .btn{padding:4px 9px}
+  }
+  @media(max-width:470px){.wrap{padding:13px}.challenge{grid-template-columns:1fr}.challenge-action{align-items:flex-start;min-width:0}.status{text-align:left;max-width:none}.section-head{align-items:flex-start;flex-direction:column}.class-select{max-width:none}.pending-row{grid-template-columns:1fr}.tabs{width:100%}.tabs a{flex:1;text-align:center}}
 </style>
 </head>
 <body>
@@ -343,21 +429,27 @@
 <!-- Vises kun i demo-tilstand, så ingen kan forveksle eksempeldata med rigtige resultater -->
 <div class="demo-banner" id="demoBanner" role="region" aria-label="Demo-tilstand" hidden>
   <span class="demo-chip">DEMO</span>
-  <span>Opdigtede eksempeldata til at vise appen – ikke rigtige resultater. Klassens egne data er gemt og urørt.</span>
+  <span>Opdigtede <span class="hide-mobile">eksempel</span>data<span class="hide-mobile"> til at vise appen</span> – ikke rigtige resultater.<span class="hide-mobile"> Klassens egne data er gemt og urørt.</span></span>
   <button class="btn small-btn" type="button" id="demoResetBtn">Nulstil demo</button>
   <button class="btn small-btn" type="button" id="demoExitBtn">Afslut demo</button>
+</div>
+<!-- Vises kun med ?udkast=1: hvilke felter i TEAM_DATA holdet mangler at udfylde -->
+<div class="draft-banner" id="draftBanner" role="region" aria-label="Udkast-tilstand" hidden>
+  <span class="demo-chip">UDKAST</span>
+  <span id="draftText"></span>
 </div>
 <div class="wrap">
   <header>
     <div class="brand">
-      <!-- Logoet ligger inde i filen (base64), så appen stadig er én fil og virker offline -->
-      <h1 class="brand-logo"><img id="brandLogo" src="data:image/png;base64,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" alt="GroKlassen" width="98" height="88"></h1>
+      <!-- Logoet ligger inde i filen (base64) ÉN gang, så appen stadig er én fil og virker offline.
+           Pitch, Del og A4-oversigten genbruger samme kilde via data-logo. -->
+      <h1 class="brand-logo"><img id="brandLogo" src="data:image/png;base64,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" alt="GroKlassen" width="98" height="88"></h1>
       <div class="subtitle">Små handlinger.<br>Stor forskel.</div>
     </div>
     <div class="header-actions">
-      <button class="btn" id="helpBtn" type="button">Sådan virker det</button>
+      <button class="btn" id="shareBtn" type="button" aria-haspopup="dialog"><svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM5 5v3h3V5zM16 5v3h3V5zM5 16v3h3v-3zM14 14h3v3h-3zM18 18h3v3h-3zM18 14h3v2h-3zM14 18h2v3h-2z" fill="currentColor" fill-rule="evenodd"/></svg> Del</button>
       <button class="btn" id="pitchBtn" type="button"><span aria-hidden="true">▶</span> Pitch</button>
-      <button class="btn" id="themeBtn" type="button" aria-pressed="false">Mørk tilstand</button>
+      <button class="btn icon-only" id="themeBtn" type="button" aria-pressed="false" aria-label="Mørk tilstand" title="Mørk tilstand"><svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 14.6A8.5 8.5 0 0 1 9.4 3.5a8.5 8.5 0 1 0 11.1 11.1z" fill="currentColor"/></svg></button>
     </div>
   </header>
 
@@ -394,29 +486,6 @@
         <div class="stat"><div class="number" id="co2Total">0 kg</div><div class="label">Anslået CO₂ sparet <span class="est">vejledende</span></div></div>
         <div class="stat"><div class="number" id="waterTotal">0 L</div><div class="label">Anslået vand sparet <span class="est">vejledende</span></div></div>
         <div class="stat"><div class="number" id="pendingTotal">0</div><div class="label">Afventer lærer</div></div>
-      </section>
-
-      <!-- Klassekonkurrence: klasser dyster om en præmie til hele klassen (indstillinger i CONTEST i scriptet) -->
-      <section class="panel contest-card" id="contestCard" aria-labelledby="contestTitle">
-        <div class="contest-head">
-          <div class="contest-trophy" aria-hidden="true">🏆</div>
-          <div class="contest-text">
-            <span class="hyp contest-example">EKSEMPEL · FIKTIV KONKURRENCE</span>
-            <h2 id="contestTitle" data-contest="name">Klassekonkurrence</h2>
-            <p>Den klasse, der samler flest godkendte point fra <strong data-contest="period"></strong>, vinder <strong data-contest="prize"></strong> til hele klassen.</p>
-            <p class="small">Sponsor: <span data-contest="sponsor"></span></p>
-          </div>
-        </div>
-        <div class="contest-body">
-          <div>
-            <div id="contestStatus" class="notice"></div>
-            <div class="hero-actions"><a class="btn primary" href="#konkurrence" id="contestSignupLink">Tilmeld klassen</a><span class="small">Kun klassen tilmeldes – ingen persondata.</span></div>
-          </div>
-          <div>
-            <h3>Stillingen</h3>
-            <div class="league" id="contestBoard"></div>
-          </div>
-        </div>
       </section>
 
       <div class="layout">
@@ -469,6 +538,8 @@
               <button class="btn" type="submit">Gem mål</button>
             </form>
             <p class="small" style="margin:10px 0 0">Beslut målet sammen i klassen. Det er et fælles mål – ingen enkeltpersoner bliver målt.</p>
+            <h3 class="chart-head">Point pr. uge – de seneste 8 uger</h3>
+            <div class="viz" id="classChart"></div>
           </section>
           <section class="panel" aria-labelledby="leagueTitle">
             <h2 id="leagueTitle">Klasseliga – denne uge</h2>
@@ -481,6 +552,29 @@
           </section>
         </aside>
       </div>
+
+      <!-- Klassekonkurrence (eksempel): står under udfordringer og plante, så kerneproduktet kommer først. Indstillinger i CONTEST i scriptet. -->
+      <section class="panel contest-card" id="contestCard" aria-labelledby="contestTitle">
+        <div class="contest-head">
+          <div class="contest-trophy" aria-hidden="true">🏆</div>
+          <div class="contest-text">
+            <span class="hyp contest-example">EKSEMPEL · FIKTIV KONKURRENCE</span>
+            <h2 id="contestTitle" data-contest="name">Klassekonkurrence</h2>
+            <p>Den klasse, der samler flest godkendte point fra <strong data-contest="period"></strong>, vinder <strong data-contest="prize"></strong> til hele klassen.</p>
+            <p class="small">Sponsor: <span data-team="sponsor"></span></p>
+          </div>
+        </div>
+        <div class="contest-body">
+          <div>
+            <div id="contestStatus" class="notice"></div>
+            <div class="hero-actions"><a class="btn primary" href="#konkurrence" id="contestSignupLink">Tilmeld klassen</a><span class="small">Kun klassen tilmeldes – ingen persondata.</span></div>
+          </div>
+          <div>
+            <h3>Stillingen</h3>
+            <div class="league" id="contestBoard"></div>
+          </div>
+        </div>
+      </section>
     </div>
 
     <!-- ============ VISNING: KONKURRENCE – tilmeldingsside (#konkurrence) ============ -->
@@ -491,7 +585,7 @@
           <span class="hyp contest-example">EKSEMPEL · FIKTIV KONKURRENCE</span>
           <h2 id="contestPageTitle" class="hero-title" tabindex="-1"><span aria-hidden="true">🏆</span> <span data-contest="name">Klassekonkurrence</span></h2>
           <p class="hero-lead">Saml flest godkendte point fra <strong data-contest="period"></strong> – og vind <strong data-contest="prize"></strong> til hele klassen.</p>
-          <p class="small" style="margin-top:8px">Sponsor: <span data-contest="sponsor"></span></p>
+          <p class="small" style="margin-top:8px">Sponsor: <span data-team="sponsor"></span></p>
         </div>
         <div class="contest-trophy huge" aria-hidden="true">🏆</div>
       </section>
@@ -558,6 +652,7 @@
           <h2 id="schoolsTitle" class="hero-title">Grønne vaner, der kan ses – for hele klassen.</h2>
           <p class="hero-lead">GroKlassen er et let værktøj, hvor klassen samler grønne handlinger, læreren godkender, og en fælles plante viser fremskridtet. Uden elevnavne og uden persondata.</p>
           <p class="small" style="margin-top:10px"><span class="hyp">PROTOTYPE</span> Priser, tal og partnere på denne side er hypoteser fra et gymnasiehold. De skal testes i pilotforsøg, før de er rigtige.</p>
+          <div class="hero-actions"><button class="btn primary" type="button" id="a4Btn">Print A4-oversigt</button><span class="small">Én side til dommerne: værditilbud, kunder, priser, break-even, bæredygtighed og QR-kode.</span></div>
         </div>
         <nav class="jump" aria-label="Indhold på siden">
           <a href="#skoler-vaerdi">Værdi</a><a href="#skoler-roller">Kunder</a><a href="#skoler-priser">Priser</a><a href="#skoler-oekonomi">Økonomi</a><a href="#skoler-canvas">Forretningsmodel</a><a href="#skoler-partnere">Partnere</a><a href="#skoler-alternativer">Alternativer</a><a href="#skoler-baeredygtighed">Bæredygtighed</a><a href="#skoler-naeste">Næste skridt</a>
@@ -569,10 +664,11 @@
         <div class="persp-label"><i aria-hidden="true"></i>Værditilbud</div>
         <h2 id="valueTitle">Problemet og løsningen</h2>
         <div class="card-grid three">
-          <div class="mini-card"><h3>😕 Problemet</h3><p>Bæredygtige vaner forsvinder, når ingen kan se dem. Plakater og temauger er gode til at starte – men hvem holder fast, når ugen er slut?</p><p class="small">Vores hypotese. 
+          <div class="mini-card"><h3>😕 Problemet</h3><p>Bæredygtige vaner forsvinder, når ingen kan se dem. Plakater og temauger er gode til at starte – men hvem holder fast, når ugen er slut?</p><p class="small">Vores hypotese. <span data-team="interviewFinding" data-before="Hvad lærerne selv siger: "></span></p></div>
           <div class="mini-card"><h3>🌱 Løsningen</h3><p>Klassen registrerer små grønne handlinger. Læreren godkender. En fælles plante vokser – og et ugemål giver klassen noget at samles om hver uge.</p></div>
           <div class="mini-card"><h3>✨ Det nye</h3><p>Fællesskab i stedet for individuelle ranglister. Lærergodkendelse i stedet for blind tillid. Åbne, ærlige beregninger. Og ingen persondata om eleverne – det gør det lettere for skolen at sige ja.</p></div>
         </div>
+        <p class="small" style="margin-top:12px"><span data-team="ideaOrigin" data-before="Sådan fik vi idéen: "></span></p>
       </section>
 
       <!-- Kundeperspektiv: tre roller -->
@@ -584,7 +680,7 @@
           <div class="mini-card"><h3>📋 Lærere</h3><div class="role">Daglige administratorer</div><ul><li>Godkend indsendelser enkeltvis eller samlet</li><li>Graf over klassens udvikling og print-venlig ugerapport</li><li>Spørgsmål til en kort klassesamtale hver uge</li></ul></div>
           <div class="mini-card"><h3>🏫 Skoler og kommuner</h3><div class="role">Betalende kunder</div><ul><li>Et konkret værktøj til grøn dannelse i hverdagen</li><li>Rapporter og CSV på klasseniveau – ingen persondata</li><li>Kan understøtte skolens grønne handleplan eller kommunens klimaplan</li></ul></div>
         </div>
-        <p class="small" style="margin-top:12px">Målgruppe: <span data-team="targetGrades"></span> · Interviews indtil nu: <span data-team="interviewsTeachers"></span></p>
+        <p class="small" style="margin-top:12px">Målgruppe: <span data-team="targetGrades"></span> · Interviews indtil nu: <span data-team="interviewsTeachers" data-after=" lærere"></span></p>
       </section>
 
       <!-- Økonomi: prisskitse -->
@@ -599,51 +695,69 @@
         </div>
         <details style="margin-top:12px">
           <summary>Hvorfor netop disse priser? (referencer)</summary>
-          <p class="small">Vi har lagt prisen lavt, fordi GroKlassen er et nyt og ubevist værktøj. Til sammenligning (priser set på udbydernes egne hjemmesider 25.10.2026 – <strong>faktatjek før pitchen</strong>):</p>
+          <p class="small">Vi har lagt prisen lavt, fordi GroKlassen er et nyt og ubevist værktøj. Til sammenligning (priser set på udbydernes egne hjemmesider 25.10.2026<span class="draft-only"> – <strong>faktatjek før pitchen</strong></span>):</p>
           <ul class="small">
             <li>Grøn Skole/Grønt Flag (Friluftsrådet): 3.600 kr. pr. skoleår for en grundskole – et helt program med netværk og certificering.</li>
             <li>Klimakampen: 500 kr. pr. klasse for en kampagne på 4 uger.</li>
             <li>Gyldendals digitale fagportaler: ca. 1.300 kr. pr. klasse pr. år.</li>
             <li>Matematik-Tjek: 645–2.045 kr. pr. skole pr. år afhængigt af antal klasser.</li>
           </ul>
-          <p class="small">Betalingsvilje ifølge vores egne samtaler: <span data-team="willingnessToPay"></span></p>
+          <p class="small"><span data-team="willingnessToPay" data-before="Betalingsvilje ifølge vores egne samtaler: "></span></p>
         </details>
       </section>
 
       <!-- Økonomi: beregner -->
       <section class="panel persp-ec" id="skoler-oekonomi" tabindex="-1" aria-labelledby="calcTitle">
-        <div class="persp-label"><i aria-hidden="true"></i>Økonomi · omkostninger og break-even</div>
+        <div class="persp-label"><i aria-hidden="true"></i>Økonomi · indtægter, omkostninger og break-even</div>
         <h2 id="calcTitle">Økonomiberegner</h2>
-        <p class="muted">Skift tallene og se, hvor mange skoler der skal til, før GroKlassen kan betale for sig selv. Alle standardværdier er <span class="hyp">ANTAGELSER</span>.</p>
+        <p class="muted">Vælg et scenarie, eller skift tallene selv, og se, hvor mange skoler der skal til, før GroKlassen kan betale for sig selv. Alle tal er <span class="hyp">ANTAGELSER</span> – ikke rigtige kunder, aftaler eller tilbud.</p>
+        <div class="scenarios" role="group" aria-label="Vælg scenarie (antagelser)">
+          <button class="btn small-btn" type="button" data-scenario="careful" aria-pressed="false">Forsigtig</button>
+          <button class="btn small-btn" type="button" data-scenario="expected" aria-pressed="true">Forventet</button>
+          <button class="btn small-btn" type="button" data-scenario="optimistic" aria-pressed="false">Optimistisk</button>
+          <span class="small" id="scenarioNote"></span>
+        </div>
         <form class="calc" id="calcForm" autocomplete="off">
           <div class="calc-inputs">
-            <label>Antal skoler<input class="input" type="number" id="calcSchools" min="0" max="500" step="1" inputmode="numeric"><span class="small">Eksempel</span></label>
-            <label>Pris pr. skolelicens pr. år (kr.)<input class="input" type="number" id="calcPrice" min="0" max="100000" step="100" inputmode="numeric"><span class="small">Hypotese</span></label>
-            <label>Variable omkostninger pr. skole pr. år (kr.)<input class="input" type="number" id="calcVariable" min="0" max="100000" step="50" inputmode="numeric"><span class="small">Onboarding, fakturering, support</span></label>
-            <label>Hosting og database pr. år (kr.)<input class="input" type="number" id="calcHosting" min="0" max="1000000" step="500" inputmode="numeric"><span class="small">Fx database i EU + webhosting + domæne</span></label>
-            <label>Support pr. år (kr.)<input class="input" type="number" id="calcSupport" min="0" max="1000000" step="500" inputmode="numeric"><span class="small">Lærersupport og fejlrettelser</span></label>
-            <label>Udvikling pr. år (kr.)<input class="input" type="number" id="calcDev" min="0" max="1000000" step="1000" inputmode="numeric"><span class="small">Fx sikkerhed, GDPR-rådgivning, nye funktioner</span></label>
+            <fieldset class="calc-group">
+              <legend>Indtægter pr. år <span class="hyp">ANTAGELSER</span></legend>
+              <label>Skoler med skolelicens<input class="input" type="number" id="calcSchools" min="0" max="500" step="1" inputmode="numeric"><span class="small">Antal betalende skoler</span></label>
+              <label>Pris pr. skolelicens (kr.)<input class="input" type="number" id="calcPrice" min="0" max="100000" step="100" inputmode="numeric"><span class="small">Hypotese</span></label>
+              <label>Kommuneaftaler<input class="input" type="number" id="calcMunis" min="0" max="98" step="1" inputmode="numeric"><span class="small">Antal aftaler med kommuner</span></label>
+              <label>Pris pr. kommuneaftale (kr.)<input class="input" type="number" id="calcMuniPrice" min="0" max="1000000" step="500" inputmode="numeric"><span class="small">Hypotese: fra ca. 12.000 kr.</span></label>
+              <label>Skoler pr. kommuneaftale<input class="input" type="number" id="calcMuniSchools" min="0" max="50" step="1" inputmode="numeric"><span class="small">Prisskitsen: op til 10 skoler</span></label>
+            </fieldset>
+            <fieldset class="calc-group">
+              <legend>Omkostninger pr. år <span class="hyp">ANTAGELSER</span></legend>
+              <label>Variable omkostninger pr. skole (kr.)<input class="input" type="number" id="calcVariable" min="0" max="100000" step="50" inputmode="numeric"><span class="small">Onboarding, fakturering, support – gælder alle skoler</span></label>
+              <label>Hosting og database (kr.)<input class="input" type="number" id="calcHosting" min="0" max="1000000" step="500" inputmode="numeric"><span class="small">Fx database i EU + webhosting + domæne</span></label>
+              <label>Support (kr.)<input class="input" type="number" id="calcSupport" min="0" max="1000000" step="500" inputmode="numeric"><span class="small">Lærersupport og fejlrettelser</span></label>
+              <label>Udvikling (kr.)<input class="input" type="number" id="calcDev" min="0" max="1000000" step="1000" inputmode="numeric"><span class="small">Fx sikkerhed, GDPR-rådgivning, nye funktioner</span></label>
+              <label>Løn til drift og udvikling (kr.) <span class="small">(valgfri)</span><input class="input" type="number" id="calcSalary" min="0" max="5000000" step="5000" inputmode="numeric" aria-describedby="calcSalaryHelp"><span class="small" id="calcSalaryHelp">0 kr. = frivilligt arbejde i prototypefasen. Skriv fx en deltidsløn for at se, hvad det betyder.</span></label>
+            </fieldset>
           </div>
           <div class="calc-results" aria-live="polite">
             <div class="kpis calc-kpis">
-              <div class="kpi"><div class="number" id="calcRevenue">0</div><div class="label">Indtægt pr. år</div></div>
+              <div class="kpi"><div class="number" id="calcRevenue">0</div><div class="label">Samlet indtægt pr. år</div></div>
               <div class="kpi"><div class="number" id="calcCosts">0</div><div class="label">Omkostninger pr. år</div></div>
               <div class="kpi"><div class="number" id="calcResult">0</div><div class="label">Resultat pr. år</div></div>
-              <div class="kpi"><div class="number" id="calcBreakEven">0</div><div class="label">Break-even (antal skoler)</div></div>
+              <div class="kpi"><div class="number" id="calcBreakEven">0</div><div class="label" id="calcBreakEvenLabel">Break-even (skoler med licens)</div></div>
             </div>
+            <p class="small" id="calcRevenueSplit" style="margin-top:10px"></p>
             <p class="small" id="calcExplain"></p>
           </div>
         </form>
+        <h3 class="chart-head">Indtægt og omkostninger ved flere skoler med licens</h3>
         <div class="viz" id="breakEvenChart"></div>
         <div class="legend" aria-hidden="true"><span><i style="background:var(--series-a)"></i>Indtægt</span><span><i style="background:var(--series-b)"></i>Omkostninger</span></div>
         <details style="margin-top:8px"><summary>Vis som tabel</summary><div class="table-scroll" id="breakEvenTable"></div></details>
-        <div class="form-row"><button class="btn small-btn" type="button" id="calcReset">Gendan antagelser</button></div>
+        <div class="form-row"><button class="btn small-btn" type="button" id="calcReset">Gendan antagelser (forventet)</button></div>
       </section>
 
       <!-- Business Model Canvas -->
       <section class="panel" id="skoler-canvas" tabindex="-1" aria-labelledby="bmcTitle">
         <h2 id="bmcTitle">Business Model Canvas</h2>
-        <p class="muted">De 9 felter er farvekodet efter de fire perspektiver, som Business Mind Programme bedømmer. Gule felter skal holdet selv udfylde med rigtige data.</p>
+        <p class="muted">De 9 felter er farvekodet efter de fire perspektiver, som Business Mind Programme bedømmer.<span class="draft-only"> Gule felter skal holdet selv udfylde med rigtige data.</span></p>
         <div class="legend persp-legend">
           <span class="persp-key vp"><i></i>Værditilbud</span>
           <span class="persp-key cs"><i></i>Kundeperspektiv</span>
@@ -658,8 +772,8 @@
           <article class="bmc-cell persp-cs" style="grid-area:cr"><div class="persp-label"><i aria-hidden="true"></i>Kunde</div><h3>Kunderelationer</h3><ul><li>Gratis prøve → selvbetjening</li><li>Ugerapport og ugemål holder klassen i gang</li><li>Personlig hjælp i pilotperioden</li></ul></article>
           <article class="bmc-cell persp-cs" style="grid-area:ch"><div class="persp-label"><i aria-hidden="true"></i>Kunde</div><h3>Kanaler</h3><ul><li>Direkte kontakt via pilotlærere</li><li>Lærernetværk og faglige foreninger</li><li>Kommunernes klimaenheder</li><li>Fagmesser for lærere</li><li>Webapp – ingen installation</li></ul></article>
           <article class="bmc-cell persp-cs" style="grid-area:cs"><div class="persp-label"><i aria-hidden="true"></i>Kunde</div><h3>Kundesegmenter</h3><ul><li><strong>Brugere:</strong> elever i skoleklasser</li><li><strong>Administratorer:</strong> lærere</li><li><strong>Betalende:</strong> skoleledelser og kommuner</li></ul><p class="small">Klassetrin: <span data-team="targetGrades"></span></p></article>
-          <article class="bmc-cell persp-ec" style="grid-area:co"><div class="persp-label"><i aria-hidden="true"></i>Økonomi</div><h3>Omkostningsstruktur</h3><ul><li>Udvikling og vedligehold</li><li>Hosting og database (ca. 4.000 kr./år – antagelse)</li><li>Support og onboarding</li><li>GDPR-rådgivning og databehandleraftale, når lærere får login</li><li>Markedsføring, fx messer</li></ul></article>
-          <article class="bmc-cell persp-ec" style="grid-area:rs"><div class="persp-label"><i aria-hidden="true"></i>Økonomi</div><h3>Indtægtsstrømme</h3><ul><li>Årlig skolelicens (hypotese: ca. 1.500 kr.)</li><li>Kommuneaftaler for flere skoler (hypotese)</li><li>Gratis prøve som indgang (freemium)</li></ul><p class="small">Betalingsvilje: <span data-team="willingnessToPay"></span></p></article>
+          <article class="bmc-cell persp-ec" style="grid-area:co"><div class="persp-label"><i aria-hidden="true"></i>Økonomi</div><h3>Omkostningsstruktur</h3><ul><li>Udvikling og vedligehold</li><li>Hosting og database (ca. 4.000 kr./år – antagelse)</li><li>Support og onboarding</li><li>GDPR-rådgivning og databehandleraftale, når lærere får login</li><li>Markedsføring, fx messer</li><li>Holdets tid: 0 kr. i løn i prototypefasen (frivilligt arbejde)</li></ul></article>
+          <article class="bmc-cell persp-ec" style="grid-area:rs"><div class="persp-label"><i aria-hidden="true"></i>Økonomi</div><h3>Indtægtsstrømme</h3><ul><li>Årlig skolelicens (hypotese: ca. 1.500 kr.)</li><li>Kommuneaftaler for flere skoler (hypotese: fra ca. 12.000 kr. for op til 10 skoler)</li><li>Gratis prøve som indgang (freemium)</li></ul><p class="small"><span data-team="willingnessToPay" data-before="Betalingsvilje: "></span></p></article>
         </div>
       </section>
 
@@ -687,12 +801,12 @@
               <li><strong>Lærernetværk og fagblade</strong> – fx naturfagslærernes blade og kurser.</li>
               <li><strong>Kommunerne</strong> – én aftale kan nå mange skoler på én gang.</li>
               <li><strong>Grønne netværk for skoler</strong> – skoler, der allerede arbejder med bæredygtighed.</li>
-              <li><strong>Fagmesser</strong> – fx Lærfest for grundskolen (dato faktatjekkes).</li>
+              <li><strong>Fagmesser</strong> – fx Lærfest for grundskolen<span class="draft-only"> (dato faktatjekkes)</span>.</li>
               <li><strong>Selve appen</strong> – virker i browseren uden installation, så det er let at prøve.</li>
             </ul>
           </div>
         </div>
-        <p class="small">Hvem har vi talt med, og hvad ændrede vi bagefter? <span data-team="feedbackUsed"></span></p>
+        <p class="small"><span data-team="feedbackUsed" data-before="Hvem har vi talt med, og hvad ændrede vi bagefter? "></span></p>
       </section>
 
       <!-- Alternativer -->
@@ -716,7 +830,7 @@
           <div class="mini-card"><h3>Vores svagheder – ærligt</h3><ul><li>Ingen rigtige brugere endnu – kun en prototype</li><li>Data ligger kun i én browser (ingen login eller fælles database endnu)</li><li>CO₂-tallene er skøn, ikke målinger</li><li>Der findes allerede konkurrenter med færdige apps</li></ul></div>
           <div class="mini-card"><h3>Kan idéen beskyttes?</h3><p>En idé kan ikke beskyttes i sig selv. Vores forspring skal komme fra pilotskoler, et stærkt navn og åbne beregninger, der skaber tillid. Navnet kan måske registreres som varemærke: <span data-team="nameCheck"></span></p></div>
         </div>
-        <p class="small" style="margin-top:10px">Oplysninger om andre løsninger er fra deres egne hjemmesider (set 25.10.2026) og skal faktatjekkes. Vi påstår intet om deres svagheder.</p>
+        <p class="small" style="margin-top:10px">Oplysninger om andre løsninger er fra deres egne hjemmesider (set 25.10.2026)<span class="draft-only"> og skal faktatjekkes</span>. Vi påstår intet om deres svagheder.</p>
       </section>
 
       <!-- Bæredygtighed på tre niveauer -->
@@ -728,8 +842,8 @@
           <div class="mini-card"><h3>💰 Økonomisk</h3><ul><li>En skolelicens skal finansiere drift og udvikling, så værktøjet kan leve videre</li><li>Lav pris, fordi appen er lille og billig at drive</li><li>Om skolerne får økonomisk værdi, skal pilotforsøg vise – det påstår vi ikke endnu</li></ul></div>
         </div>
         <div class="card-grid three" style="margin-top:12px">
-          <div class="mini-card"><h3>🌐 Verdensmål</h3><p><strong>4.7</strong> Uddannelse for bæredygtig udvikling · <strong>12</strong> Ansvarligt forbrug og produktion · <strong>13</strong> Klimaindsats.</p><p class="small">Forklar selv med jeres egne ord, hvordan GroKlassen bidrager – og hvor lidt eller meget.</p></div>
-          <div class="mini-card"><h3>🪶 Appen selv er let</h3><ul><li>Én fil på ca. <strong id="appSize">–</strong> – ingen billeder eller biblioteker at hente</li><li>Ingen tracking, ingen cookies, ingen reklamer</li><li>Ingen server i prototypen – virker offline</li><li>Mørk tilstand og reduceret animation</li></ul></div>
+          <div class="mini-card"><h3>🌐 Verdensmål</h3><p><strong>4.7</strong> Uddannelse for bæredygtig udvikling · <strong>12</strong> Ansvarligt forbrug og produktion · <strong>13</strong> Klimaindsats.</p><p class="small draft-only">Forklar selv med jeres egne ord, hvordan GroKlassen bidrager – og hvor lidt eller meget.</p></div>
+          <div class="mini-card"><h3>🪶 Appen selv er let</h3><ul><li>Én fil på ca. <strong id="appSize">–</strong> – ingen biblioteker eller eksterne filer at hente (logoet ligger inde i filen)</li><li>Ingen tracking, ingen cookies, ingen reklamer</li><li>Ingen server i prototypen – virker offline</li><li>Mørk tilstand og reduceret animation</li></ul></div>
           <div class="mini-card"><h3>♿ Tilgængelighed og inklusion</h3><ul><li>Alle elever kan bidrage – mange slags udfordringer, og ingen kræver at man køber noget</li><li>Bygget til tastatur og skærmlæser: labels, synligt fokus og beskeder, der læses op</li><li>Virker på mobil, tablet og computer</li><li>Ingen individuelle point eller ranglister</li></ul></div>
         </div>
         <div class="mini-card privacy" style="margin-top:12px">
@@ -742,8 +856,8 @@
       <section class="panel" id="skoler-naeste" tabindex="-1" aria-labelledby="nextTitle">
         <h2 id="nextTitle">Næste skridt: fra hypotese til viden</h2>
         <ol class="steps">
-          <li><strong>Interviews:</strong> tal med <span data-team="interviewsTeachers"></span> lærere og skoleledere om behov og pris.</li>
-          <li><strong>Pilotforsøg:</strong> <span data-team="pilotClasses"></span> klasser bruger GroKlassen i 4 uger. Vi måler, om klasserne bliver ved, og hvad lærerne siger. Resultat: <span data-team="pilotResult"></span></li>
+          <li><strong>Interviews:</strong> tal med lærere og skoleledere om behov og pris. Indtil nu: <span data-team="interviewsTeachers" data-after=" lærere"></span>.</li>
+          <li><strong>Pilotforsøg:</strong> <span data-team="pilotClasses" data-after=" klasser bruger GroKlassen i 4 uger."></span> Vi måler, om klasserne bliver ved, og hvad lærerne siger. Resultat: <span data-team="pilotResult"></span></li>
           <li><strong>Faktatjek:</strong> CO₂-tallene tjekkes af <span data-team="factChecker"></span>.</li>
           <li><strong>Version 2:</strong> login for lærere, fælles database i EU, servervalidering af fusk-reglerne, GDPR-vurdering og databehandleraftale.</li>
           <li><strong>Test af pris:</strong> spørg skoleledelser, om de vil betale fx 1.000, 1.500 eller 3.000 kr. om året.</li>
@@ -853,6 +967,9 @@
   <footer>GroKlassen · Prototype til læring om bæredygtighed · <strong>Ingen persondata</strong> · Ingen tracking · Data gemmes kun i denne browser</footer>
 </div>
 
+<!-- A4-oversigt til dommerne. Bygges af buildA4() og vises kun, når den udskrives (se @media print). -->
+<div id="a4Sheet" class="a4-sheet" aria-hidden="true"></div>
+
 <!-- Her vises feedbackbeskeder. aria-live="polite" betyder, at skærmlæsere læser dem højt. -->
 <div id="toastRegion" class="toast-region" aria-live="polite" aria-atomic="false"></div>
 
@@ -936,6 +1053,21 @@
   </div>
 </dialog>
 
+<!-- Del: QR-kode og link til en demo med opdigtede eksempeldata -->
+<dialog id="shareDialog" aria-labelledby="shareTitle" aria-describedby="shareText">
+  <h2 id="shareTitle">Del GroKlassen</h2>
+  <p id="shareText" class="muted">Scan koden med mobilen. Den åbner en demo med opdigtede eksempeldata, der er tydeligt mærket "DEMO".</p>
+  <div class="qr-box" id="shareQr"></div>
+  <label for="shareUrl" class="small" style="font-weight:650">Link til demoen</label>
+  <input id="shareUrl" class="input" type="text" readonly>
+  <div class="dialog-actions">
+    <button class="btn" type="button" id="shareClose">Luk</button>
+    <button class="btn" type="button" id="shareNative" hidden>Del …</button>
+    <button class="btn primary" type="button" id="shareCopy">Kopiér link</button>
+  </div>
+  <p class="small" id="shareStatus" aria-live="polite" style="margin:8px 0 0;text-align:right"></p>
+</dialog>
+
 <!-- Fejring, når planten når et nyt stadie -->
 <dialog id="celebration" aria-labelledby="celebrateTitle" aria-describedby="celebrateText">
   <div class="leaves" id="leaves" aria-hidden="true"></div>
@@ -965,46 +1097,76 @@ const CONFIG = {
 };
 const CLASS_NAMES = ["7.A", "7.B", "8.A"];
 
-/* ---------- HOLDETS EGNE DATA – udfyld før pitchen ----------
-   Alt i [INDSÆT: ...], [VALIDÉR: ...] og [FAKTATJEK: ...] er pladsholdere og vises med gult i appen.
-   Ret teksten her ét sted, så opdateres både "For skoler"-siden og pitch-tilstanden.
-   Skriv KUN det, I faktisk har undersøgt – opfind aldrig tal, citater eller skolenavne. */
+/* ---------- HOLDETS EGNE DATA – udfyld før pitchen (det ENESTE sted, I skal rette) ----------
+   Skriv jeres rigtige data mellem anførselstegnene. Et tomt felt ("") viser en ærlig reservetekst
+   (se TEAM_FALLBACK nedenfor), så siden aldrig ser ufærdig ud for dommerne.
+   Åbn index.html?udkast=1 for at se, hvilke felter der stadig mangler (de vises med gult).
+   Skriv KUN det, I faktisk har undersøgt – opfind aldrig tal, citater, brugere, skoler eller sponsorer.
+   Ingen persondata: brug fx en fælles hold-mail, ikke private navne, telefonnumre eller mails. */
 const TEAM_DATA = {
-  ideaOrigin:        "[INDSÆT: hvordan I fik idéen – 1 sætning]",
-  interviewsTeachers:"[INDSÆT: antal interviewede lærere]",
-  interviewFinding:  "[INDSÆT: vigtigste fund fra jeres interviews med lærere]",
-  targetGrades:      "[VALIDÉR: klassetrin, fx 4.–9. klasse]",
-  willingnessToPay:  "[INDSÆT: hvad skoleledere/lærere sagde om pris og betalingsvilje]",
-  feedbackUsed:      "[INDSÆT: hvem I har talt med, og hvad I ændrede bagefter]",
-  pilotClasses:      "[INDSÆT: antal pilotklasser]",
-  pilotResult:       "[INDSÆT: hvad pilotforsøget viste]",
-  factChecker:       "[INDSÆT: hvem der faktatjekker CO₂-tallene, fx en biologilærer]",
-  nameCheck:         "[FAKTATJEK: er navnet GroKlassen og et domæne ledigt?]"
+  ideaOrigin:         "", // Hvordan I fik idéen – 1 sætning. Vises: For skoler → Problemet og løsningen.
+  interviewsTeachers: "", // Antal lærere, I har interviewet – kun tallet, fx "6". Vises: For skoler → Kunder + Næste skridt, pitch trin 3.
+  interviewFinding:   "", // Vigtigste fund fra interviewene med lærere – 1 kort sætning. Vises: For skoler → Problemet, pitch trin 1.
+  targetGrades:       "", // Klassetrin, I har valideret, fx "4.–9. klasse". Vises: For skoler → Kunder og Business Model Canvas.
+  willingnessToPay:   "", // Hvad skoleledere/lærere sagde om pris og betalingsvilje. Vises: Prisskitse, Canvas, pitch trin 4.
+  feedbackUsed:       "", // Hvem I har talt med (fx "3 lærere og 1 skoleleder"), og hvad I ændrede bagefter. Vises: For skoler → Partnere.
+  pilotClasses:       "", // Antal pilotklasser – kun tallet, fx "3". Vises: For skoler → Næste skridt, pitch trin 6.
+  pilotResult:        "", // Hvad pilotforsøget viste – 1 sætning. Vises: For skoler → Næste skridt.
+  factChecker:        "", // Hvem der faktatjekker CO₂-tallene, fx "en biologilærer på vores skole". Vises: Næste skridt, pitch trin 6.
+  nameCheck:          "", // Resultat af jeres tjek af navn/varemærke og domæne. Vises: For skoler → Alternativer.
+  sponsor:            "", // Navnet på en sponsor, der HAR sagt ja til konkurrencen. Vises: Konkurrence. (Sæt også CONTEST.isExample til false.)
+  pitchAsk:           "", // Jeres opfordring på sidste slide, fx "Vi søger 3 pilotskoler – vil I være med?". Vises: pitch trin 6 og A4-oversigten.
+  teamName:           "", // Holdets navn og evt. skole, fx "Hold 3, X Gymnasium". Vises: A4-oversigten.
+  contact:            "", // Fælles kontakt til holdet, fx en hold-mail (ingen private oplysninger). Vises: A4-oversigten.
+  publicUrl: "https://sixtenkristensen123.github.io/GroDinklasse/" // Den udgivne adresse. QR-koden peger herhen med ?demo=1.
 };
 
-/* ---------- Økonomiberegnerens antagelser (kr. pr. år, ekskl. moms) ----------
-   Alle tal er HYPOTESER til pitchen – se README for begrundelser og kilder. */
-const CALC_DEFAULTS = {
-  schools: 25,      // Eksempel på antal betalende skoler
-  price: 1500,      // Skolelicens pr. år (hypotese)
-  variable: 150,    // Pr. skole: onboarding, fakturering, support
-  hosting: 4000,    // Database i EU + webhosting + domæne
-  support: 6000,    // Lærersupport og fejlrettelser
-  dev: 20000        // Udvikling, sikkerhed, GDPR-rådgivning
+/* Ærlige reservetekster, der vises, når et felt i TEAM_DATA er tomt.
+   todo = det, der vises med gult i ?udkast=1, så holdet kan se, hvad der mangler.
+   text = det, alle andre ser. Teksten passer ind i sætningen, hvor feltet bruges. */
+const TEAM_FALLBACK = {
+  ideaOrigin:         {todo:"INDSÆT: hvordan I fik idéen – 1 sætning", text:"GroKlassen er udviklet af et gymnasiehold til Business Mind Programme 2026."},
+  interviewsTeachers: {todo:"INDSÆT: antal interviewede lærere", text:"vi er i gang med at interviewe lærere"},
+  interviewFinding:   {todo:"INDSÆT: vigtigste fund fra jeres interviews med lærere", text:"Vi er i gang med at interviewe lærere om problemet."},
+  targetGrades:       {todo:"VALIDÉR: klassetrin, fx 4.–9. klasse", text:"grundskolens klasser – de præcise klassetrin testes i pilotforsøget"},
+  willingnessToPay:   {todo:"INDSÆT: hvad skoleledere/lærere sagde om pris og betalingsvilje", text:"Betalingsviljen er ikke undersøgt endnu – den tester vi i interviews og pilotforsøg."},
+  feedbackUsed:       {todo:"INDSÆT: hvem I har talt med, og hvad I ændrede bagefter", text:"Vi er i gang med at samle feedback fra lærere."},
+  pilotClasses:       {todo:"INDSÆT: antal pilotklasser", text:"4 uger med rigtige klasser er planlagt."},
+  pilotResult:        {todo:"INDSÆT: hvad pilotforsøget viste", text:"Pilotforsøget er ikke gennemført endnu."},
+  factChecker:        {todo:"INDSÆT: hvem der faktatjekker CO₂-tallene, fx en biologilærer", text:"en fagperson, før appen bruges i skoler"},
+  nameCheck:          {todo:"FAKTATJEK: er navnet GroKlassen og et domæne ledigt?", text:"det har vi ikke undersøgt endnu."},
+  sponsor:            {todo:"INDSÆT: sponsor – ingen aftale endnu", text:"ingen sponsor endnu – præmien er kun et eksempel"},
+  pitchAsk:           {todo:"INDSÆT: jeres opfordring, fx \"Vi søger 3 pilotskoler\"", text:"Vi søger pilotklasser, der vil teste GroKlassen i 4 uger."},
+  teamName:           {todo:"INDSÆT: holdets navn og evt. skole", text:"Et gymnasiehold i Business Mind Programme 2026"},
+  contact:            {todo:"INDSÆT: fælles kontakt, fx en hold-mail", text:"Spørg holdet – vi står klar efter pitchen."},
+  publicUrl:          {todo:"INDSÆT: den udgivne adresse", text:"https://sixtenkristensen123.github.io/GroDinklasse/"}
 };
+// ?udkast=1 i adressen viser de gule pladsholdere i stedet for reserveteksterne.
+const DRAFT_MODE = new URLSearchParams(location.search).get("udkast") === "1";
+
+/* ---------- Økonomiberegnerens scenarier (kr. pr. år, ekskl. moms) ----------
+   Alle tal er ANTAGELSER til pitchen – ikke rigtige kunder, aftaler eller tilbud. Se README for begrundelser.
+   schools = skoler med egen skolelicens · munis = kommuneaftaler · muniSchools = skoler pr. kommuneaftale
+   variable = variable omkostninger pr. skole (både licens- og kommuneskoler) · salary = løn til holdets tid
+   (0 kr., fordi holdet arbejder frivilligt i prototypefasen). "expected" er standard. */
+const CALC_SCENARIOS = {
+  careful:    {label:"Forsigtig",   schools:10, price:1000, munis:0, muniPrice:12000, muniSchools:10, variable:200, hosting:4000, support:6000,  dev:20000, salary:0},
+  expected:   {label:"Forventet",   schools:25, price:1500, munis:1, muniPrice:12000, muniSchools:10, variable:150, hosting:4000, support:6000,  dev:20000, salary:0},
+  optimistic: {label:"Optimistisk", schools:40, price:1500, munis:3, muniPrice:12000, muniSchools:10, variable:150, hosting:6000, support:10000, dev:20000, salary:0}
+};
+const CALC_DEFAULTS = CALC_SCENARIOS.expected;
 
 /* ---------- KLASSEKONKURRENCE – ret her ----------
    Konkurrencen er et FIKTIVT EKSEMPEL, indtil I har en rigtig aftale med en sponsor.
    Skriv aldrig, at en virksomhed er sponsor, før den har sagt ja – sæt så isExample til false. */
 const CONTEST = {
-  isExample: true,                 // true = vis "Eksempel · fiktiv konkurrence" overalt
+  isExample: true,                 // true = vis "Eksempel · fiktiv konkurrence" overalt (og ingen pop-up)
   name: "Grøn Klasse-Cup",
   prize: "en klassetur til en forlystelsespark",
-  sponsor: "[INDSÆT: sponsor – ingen aftale endnu]",
   start: null,                     // Fx "2026-11-30". null = starter mandag i denne uge (praktisk til demo)
   weeks: 4,                        // Konkurrencens længde i uger
   prizeIdeas: [
-    {id:"park",   title:"Klassetur til en forlystelsespark (fx BonBon-Land)", note:"Sjovt og motiverende – kræver en aftale med parken eller en anden sponsor."},
+    {id:"park",   title:"Klassetur til en forlystelsespark", note:"Sjovt og motiverende – kræver en sponsor eller et budget."},
     {id:"nature", title:"Klassetur til et naturcenter eller science center", note:"Passer godt til bæredygtighed og natur/teknologi."},
     {id:"trees",  title:"Frugttræer eller en skolehave til klassen", note:"En præmie, der selv vokser – ligesom klassens plante."},
     {id:"bikes",  title:"Cykelværksted-dag, hvor klassens cykler bliver tjekket", note:"Belønner den grønneste transport."},
@@ -1041,7 +1203,7 @@ const CHALLENGES = [
    method:"Antagelse: madkasse og drikkedunk erstatter ca. 10 g engangsplast (fx en frysepose og lidt film). Det koster ca. 1,9 kg CO₂ at lave 1 kg af den slags plast: 0,01 kg × 1,9 ≈ 0,02 kg.",
    waterMethod:"0 L – madkasse og dunk skal vaskes op, så der spares ikke vand.",
    check:"Tallet 1,9 kg CO₂ pr. kg plast (LDPE) er kun set i søgeresultater – bekræft det. Vej en typisk frysepose. Madkassen giver kun en gevinst, hvis den bruges mange gange.",
-   sources:[{label:"PlasticsEurope: miljøprofil for polyethylen (ikke åbnet – faktatjek)", url:"https://www.pedagogie.ac-aix-marseille.fr/upload/docs/application/pdf/2015-11/4-_eco-profile_pe_2014-04.pdf"}]},
+   sources:[{label:"PlasticsEurope: miljøprofil for polyethylen (ikke verificeret)", url:"https://www.pedagogie.ac-aix-marseille.fr/upload/docs/application/pdf/2015-11/4-_eco-profile_pe_2014-04.pdf"}]},
   {id:"lights", title:"Sluk lyset", description:"Sluk lyset, når klasselokalet står tomt.", points:2, co2:0.01, water:0, icon:"💡", confidence:"middel",
    method:"Antagelse: lyset slukkes i 30 minutter i et tomt klasselokale på 60 m² med LED-lys (ca. 7 W/m² = 0,42 kW). Det sparer ca. 0,21 kWh × 0,06 kg CO₂/kWh (dansk strøm 2025) ≈ 0,01 kg.",
    waterMethod:"0 L – ingen direkte vandbesparelse.",
@@ -1280,16 +1442,34 @@ function safeText(value) {
 }
 // Viser en kort besked (toast) nederst på skærmen. Den forsvinder selv efter nogle sekunder.
 // Beskeden ligger i sit eget område, så statuslinjen ikke kan overskrive den.
-function showToast(message, error=false) {
-  const region = document.getElementById("toastRegion");
+// action = {label, run} giver en knap i beskeden (bruges til "Fortryd").
+function showToast(message, error = false, action = null) {
+  const region = toastRegion();
   const toast = document.createElement("div");
   toast.className = "toast" + (error ? " error" : "");
-  toast.innerHTML = `<span>${safeText(message)}</span><button type="button" aria-label="Luk besked">×</button>`;
-  toast.querySelector("button").addEventListener("click", () => toast.remove());
+  toast.innerHTML = `<span>${safeText(message)}</span>${action ? `<button type="button" class="toast-action" title="${safeText(action.title || "")}">${safeText(action.label)}</button>` : ""}<button type="button" class="toast-close" aria-label="Luk besked">×</button>`;
+  toast.querySelector(".toast-close").addEventListener("click", () => hideToast(toast));
+  if (action) toast.querySelector(".toast-action").addEventListener("click", () => { hideToast(toast); action.run(); });
   region.appendChild(toast);
   // Vis højst tre beskeder ad gangen.
   while (region.children.length > 3) region.firstElementChild.remove();
-  setTimeout(() => toast.remove(), error ? 7000 : 4500);
+  setTimeout(() => hideToast(toast), action ? 8000 : error ? 7000 : 4500);
+  return toast;
+}
+// Modale dialoger ligger i browserens øverste lag, og alt uden for dem kan ikke klikkes.
+// Er en dialog åben (fx fejringen), flyttes beskedområdet derfor ind i den – og tilbage, når den lukker.
+function toastRegion() {
+  const region = document.getElementById("toastRegion");
+  const host = [...document.querySelectorAll("dialog[open]")].pop() || document.body;
+  if (region.parentElement !== host) host.appendChild(region);
+  return region;
+}
+function hideToast(toast) {
+  if (!toast.isConnected) return;
+  if (prefersReducedMotion()) { toast.remove(); return; }
+  toast.classList.add("leaving");
+  toast.addEventListener("animationend", () => toast.remove(), {once: true});
+  setTimeout(() => toast.remove(), 400); // Sikkerhed, hvis animationen ikke kører (fx i en skjult fane)
 }
 // Viser en bekræftelsesdialog og svarer med true (OK) eller false (Annullér).
 function confirmDialog(title, text, okText = "OK") {
@@ -1459,7 +1639,7 @@ function renderMethods() {
       <h3 id="method-title-${c.id}"><span aria-hidden="true">${c.icon}</span> ${safeText(c.title)} <span class="tag">ca. ${formatCo2(c.co2)} CO₂</span><span class="tag">${c.water} L vand</span><span class="conf">${levels[c.confidence] || ""}</span></h3>
       <p><strong>Antagelse og udregning:</strong> ${safeText(c.method)}</p>
       <p><strong>Vand:</strong> ${safeText(c.waterMethod)}</p>
-      <p class="check"><span class="ph">Til faktatjek</span> ${safeText(c.check)}</p>
+      <p class="check">${DRAFT_MODE ? '<span class="ph">Til faktatjek</span>' : "<strong>Usikkert – tjek selv:</strong>"} ${safeText(c.check)}</p>
       <p class="small">Kilder (set 25.10.2026): ${c.sources.map(s => `<a href="${safeText(s.url)}" target="_blank" rel="noopener">${safeText(s.label)}</a>`).join(" · ")}</p>
     </article>`).join("");
 }
@@ -1551,13 +1731,15 @@ function weeklySeries(data, weeks = 8) {
   }
   return series;
 }
-function renderWeekChart() {
+// Tegnes både i lærerområdet (med tabel og tastaturfokus på søjlerne) og som en lille graf på klassens side.
+function renderWeekChart(boxId = "weekChart", tableId = "weekTable", H = 230) {
   const data = classData();
   const series = weeklySeries(data);
   const goal = data.weeklyGoal;
+  const focusable = !!tableId;
   // Mål og marginer for grafen. Bredden følger boksen, så teksten er lige stor på mobil og computer.
-  const box = document.getElementById("weekChart");
-  const W = chartWidth(box), H = 230, left = 34, right = 62, top = 16, bottom = 30;
+  const box = document.getElementById(boxId);
+  const W = chartWidth(box), left = 34, right = 62, top = 16, bottom = 30;
   const plotW = W - left - right, plotH = H - top - bottom;
   const maxValue = Math.max(goal, ...series.map(s => s.points), 10);
   const yMax = Math.ceil(maxValue / 10) * 10;
@@ -1578,7 +1760,7 @@ function renderWeekChart() {
     // Søjle med 4px runde hjørner i toppen og flad bund
     const path = h > 0 ? `M${x},${y(0)} V${y(s.points) + r} Q${x},${y(s.points)} ${x + r},${y(s.points)} H${x + barW - r} Q${x + barW},${y(s.points)} ${x + barW},${y(s.points) + r} V${y(0)} Z` : "";
     // Usynligt, større område gør det let at holde musen over eller tabbe til søjlen
-    svg += `<rect class="bar-hit" x="${cx - slot / 2 + 1}" y="${top}" width="${slot - 2}" height="${plotH}" tabindex="0" data-tip="Uge ${s.week}|${s.points} point" aria-label="Uge ${s.week}: ${s.points} point"/>`;
+    svg += `<rect class="bar-hit" x="${cx - slot / 2 + 1}" y="${top}" width="${slot - 2}" height="${plotH}"${focusable ? ' tabindex="0"' : ""} data-tip="Uge ${s.week}|${s.points} point" aria-label="Uge ${s.week}: ${s.points} point"/>`;
     svg += `<path class="bar" d="${path}"/>`;
     const isCurrent = i === series.length - 1;
     svg += `<text x="${cx}" y="${H - 10}" text-anchor="middle" class="${isCurrent ? "label-strong" : ""}">${isCurrent ? (W < 420 ? "Nu" : "Denne uge") : (W < 420 ? "" : "u.") + s.week}</text>`;
@@ -1593,8 +1775,9 @@ function renderWeekChart() {
   svg += `</svg><div class="viz-tip" hidden></div>`;
   box.innerHTML = svg;
   attachTooltips(box);
+  if (!tableId) return;
   // Tabelvisning – samme tal uden graf (til skærmlæsere og til dem, der foretrækker tal)
-  document.getElementById("weekTable").innerHTML = `<table class="data-table"><thead><tr><th>Uge</th><th>Starter</th><th class="num">Godkendte point</th><th class="num">Ugemål nået?</th></tr></thead><tbody>${
+  document.getElementById(tableId).innerHTML = `<table class="data-table"><thead><tr><th>Uge</th><th>Starter</th><th class="num">Godkendte point</th><th class="num">Ugemål nået?</th></tr></thead><tbody>${
     series.map(s => `<tr><td>Uge ${s.week}</td><td>${safeText(formatDate(s.monday))}</td><td class="num">${s.points}</td><td class="num">${s.points >= goal ? "Ja" : "Nej"}</td></tr>`).join("")
   }</tbody></table>`;
 }
@@ -1658,19 +1841,203 @@ function estimateFor(item) {
   return challenge ? {co2: challenge.co2, water: challenge.water} : {co2: item.co2 || 0, water: item.water || 0};
 }
 
-/* ---------- Holdets pladsholdere ---------- */
-// Indsætter TEAM_DATA i alle elementer med data-team="...". Pladsholdere (der starter med "[") bliver gule.
+/* ---------- QR-kode (uden biblioteker) ----------
+   En lille QR-generator efter standarden (ISO/IEC 18004): byte-tilstand, fejlkorrektion M, version 1–10
+   (op til ca. 200 tegn). makeQr(tekst) giver en matrix af true/false, qrSvg(tekst) giver en SVG. */
+const QR_ECC_PER_BLOCK = [0, 10, 16, 26, 18, 24, 16, 18, 22, 22, 26]; // Fejlkorrektion M, version 1–10
+const QR_BLOCKS        = [0, 1, 1, 1, 2, 2, 4, 4, 4, 5, 5];
+function qrRawModules(ver) {
+  let n = (16 * ver + 128) * ver + 64;
+  if (ver >= 2) { const align = Math.floor(ver / 7) + 2; n -= (25 * align - 10) * align - 55; if (ver >= 7) n -= 36; }
+  return n;
+}
+function qrDataCodewords(ver) { return Math.floor(qrRawModules(ver) / 8) - QR_ECC_PER_BLOCK[ver] * QR_BLOCKS[ver]; }
+// Multiplikation i Galois-feltet GF(256), som Reed-Solomon-fejlkorrektionen regner i.
+function qrMul(x, y) {
+  let z = 0;
+  for (let i = 7; i >= 0; i--) { z = (z << 1) ^ ((z >>> 7) * 0x11d); z ^= ((y >>> i) & 1) * x; }
+  return z;
+}
+function qrEcc(data, degree) {
+  const divisor = new Array(degree).fill(0); divisor[degree - 1] = 1;
+  let root = 1;
+  for (let i = 0; i < degree; i++) {
+    for (let j = 0; j < degree; j++) { divisor[j] = qrMul(divisor[j], root); if (j + 1 < degree) divisor[j] ^= divisor[j + 1]; }
+    root = qrMul(root, 2);
+  }
+  const rest = new Array(degree).fill(0);
+  data.forEach(b => {
+    const factor = b ^ rest.shift(); rest.push(0);
+    divisor.forEach((coef, i) => { rest[i] ^= qrMul(coef, factor); });
+  });
+  return rest;
+}
+function makeQr(text) {
+  const bytes = [...new TextEncoder().encode(text)];
+  let ver = 1;
+  while (ver <= 10 && 4 + (ver < 10 ? 8 : 16) + bytes.length * 8 > qrDataCodewords(ver) * 8) ver++;
+  if (ver > 10) throw new Error("Teksten er for lang til QR-koden");
+  // 1) Data som bits: tilstand (0100 = byte), længde, selve bytes, afslutning og fyld.
+  const bits = [];
+  const put = (value, len) => { for (let i = len - 1; i >= 0; i--) bits.push((value >>> i) & 1); };
+  put(4, 4); put(bytes.length, ver < 10 ? 8 : 16); bytes.forEach(b => put(b, 8));
+  const capacity = qrDataCodewords(ver) * 8;
+  put(0, Math.min(4, capacity - bits.length));
+  put(0, (8 - bits.length % 8) % 8);
+  for (let pad = 0xec; bits.length < capacity; pad ^= 0xec ^ 0x11) put(pad, 8);
+  const data = [];
+  for (let i = 0; i < bits.length; i += 8) data.push(parseInt(bits.slice(i, i + 8).join(""), 2));
+  // 2) Del i blokke, tilføj fejlkorrektion, og flet blokkene sammen.
+  const blocks = QR_BLOCKS[ver], eccLen = QR_ECC_PER_BLOCK[ver], raw = Math.floor(qrRawModules(ver) / 8);
+  const shortBlocks = blocks - raw % blocks, shortLen = Math.floor(raw / blocks);
+  const parts = [];
+  for (let i = 0, k = 0; i < blocks; i++) {
+    const chunk = data.slice(k, k + shortLen - eccLen + (i < shortBlocks ? 0 : 1));
+    k += chunk.length;
+    const ecc = qrEcc(chunk, eccLen);
+    if (i < shortBlocks) chunk.push(0);
+    parts.push(chunk.concat(ecc));
+  }
+  const codewords = [];
+  for (let i = 0; i < parts[0].length; i++) parts.forEach((part, j) => { if (i !== shortLen - eccLen || j >= shortBlocks) codewords.push(part[i]); });
+  // 3) Tegn de faste mønstre (findere, timing, alignment, version) og reservér formatfelterne.
+  const size = ver * 4 + 17;
+  const grid = Array.from({length: size}, () => new Array(size).fill(false));
+  const fixed = Array.from({length: size}, () => new Array(size).fill(false));
+  const set = (x, y, dark) => { grid[y][x] = dark; fixed[y][x] = true; };
+  for (let i = 0; i < size; i++) { set(6, i, i % 2 === 0); set(i, 6, i % 2 === 0); }
+  [[3, 3], [size - 4, 3], [3, size - 4]].forEach(([cx, cy]) => {
+    for (let dy = -4; dy <= 4; dy++) for (let dx = -4; dx <= 4; dx++) {
+      const x = cx + dx, y = cy + dy, d = Math.max(Math.abs(dx), Math.abs(dy));
+      if (x >= 0 && x < size && y >= 0 && y < size) set(x, y, d !== 2 && d !== 4);
+    }
+  });
+  const align = [];
+  if (ver > 1) {
+    const count = Math.floor(ver / 7) + 2, step = Math.ceil((ver * 4 + 4) / (count * 2 - 2)) * 2;
+    align.push(6);
+    for (let pos = size - 7; align.length < count; pos -= step) align.splice(1, 0, pos);
+  }
+  align.forEach((ax, i) => align.forEach((ay, j) => {
+    if ((i === 0 && j === 0) || (i === 0 && j === align.length - 1) || (i === align.length - 1 && j === 0)) return;
+    for (let dy = -2; dy <= 2; dy++) for (let dx = -2; dx <= 2; dx++) set(ax + dx, ay + dy, Math.max(Math.abs(dx), Math.abs(dy)) !== 1);
+  }));
+  const drawFormat = mask => {
+    const value = (0 << 3) | mask; // 0 = fejlkorrektion M
+    let rem = value;
+    for (let i = 0; i < 10; i++) rem = (rem << 1) ^ ((rem >>> 9) * 0x537);
+    const f = ((value << 10) | rem) ^ 0x5412;
+    const bit = i => ((f >>> i) & 1) === 1;
+    for (let i = 0; i <= 5; i++) set(8, i, bit(i));
+    set(8, 7, bit(6)); set(8, 8, bit(7)); set(7, 8, bit(8));
+    for (let i = 9; i < 15; i++) set(14 - i, 8, bit(i));
+    for (let i = 0; i < 8; i++) set(size - 1 - i, 8, bit(i));
+    for (let i = 8; i < 15; i++) set(8, size - 15 + i, bit(i));
+    set(8, size - 8, true);
+  };
+  drawFormat(0);
+  if (ver >= 7) {
+    let rem = ver;
+    for (let i = 0; i < 12; i++) rem = (rem << 1) ^ ((rem >>> 11) * 0x1f25);
+    const v = (ver << 12) | rem;
+    for (let i = 0; i < 18; i++) { const dark = ((v >>> i) & 1) === 1, a = size - 11 + i % 3, b = Math.floor(i / 3); set(a, b, dark); set(b, a, dark); }
+  }
+  // 4) Placér data i zigzag nedefra og op, to kolonner ad gangen.
+  let n = 0;
+  for (let right = size - 1; right >= 1; right -= 2) {
+    if (right === 6) right = 5;
+    for (let vert = 0; vert < size; vert++) for (let j = 0; j < 2; j++) {
+      const x = right - j, y = ((right + 1) & 2) === 0 ? size - 1 - vert : vert;
+      if (!fixed[y][x] && n < codewords.length * 8) { grid[y][x] = ((codewords[n >>> 3] >>> (7 - (n & 7))) & 1) === 1; n++; }
+    }
+  }
+  // 5) Prøv alle 8 masker, og vælg den, der giver færrest forvirrende mønstre (strafpoint efter standarden).
+  const masks = [
+    (x, y) => (x + y) % 2 === 0, (x, y) => y % 2 === 0, (x, y) => x % 3 === 0, (x, y) => (x + y) % 3 === 0,
+    (x, y) => (Math.floor(x / 3) + Math.floor(y / 2)) % 2 === 0, (x, y) => x * y % 2 + x * y % 3 === 0,
+    (x, y) => (x * y % 2 + x * y % 3) % 2 === 0, (x, y) => ((x + y) % 2 + x * y % 3) % 2 === 0
+  ];
+  const applyMask = m => { for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) if (!fixed[y][x] && masks[m](x, y)) grid[y][x] = !grid[y][x]; };
+  const penalty = () => {
+    let score = 0, dark = 0;
+    const line = get => {
+      let run = 1;
+      for (let i = 1; i <= size; i++) {
+        if (i < size && get(i) === get(i - 1)) run++;
+        else { if (run >= 5) score += run - 2; run = 1; }
+      }
+      for (let i = 0; i + 11 <= size; i++) {
+        const s = Array.from({length: 11}, (_, k) => get(i + k) ? 1 : 0).join("");
+        if (s === "10111010000" || s === "00001011101") score += 40;
+      }
+    };
+    for (let k = 0; k < size; k++) { line(i => grid[k][i]); line(i => grid[i][k]); }
+    for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) {
+      if (grid[y][x]) dark++;
+      if (x < size - 1 && y < size - 1 && grid[y][x] === grid[y][x + 1] && grid[y][x] === grid[y + 1][x] && grid[y][x] === grid[y + 1][x + 1]) score += 3;
+    }
+    return score + Math.floor(Math.abs(dark * 20 - size * size * 10) / (size * size)) * 10;
+  };
+  let best = 0, bestScore = Infinity;
+  for (let m = 0; m < 8; m++) {
+    applyMask(m); drawFormat(m);
+    const score = penalty();
+    if (score < bestScore) { best = m; bestScore = score; }
+    applyMask(m);
+  }
+  applyMask(best); drawFormat(best);
+  return grid;
+}
+// QR-koden som SVG: sort på hvidt med en hvid kant (4 moduler), så den kan scannes i både lys og mørk tilstand.
+function qrSvg(text, label) {
+  const grid = makeQr(text), size = grid.length, total = size + 8;
+  let path = "";
+  grid.forEach((row, y) => row.forEach((dark, x) => { if (dark) path += `M${x + 4} ${y + 4}h1v1h-1z`; }));
+  return `<svg class="qr" viewBox="0 0 ${total} ${total}" role="img" aria-label="${safeText(label || "QR-kode")}" shape-rendering="crispEdges"><rect width="${total}" height="${total}" fill="#fff"/><path d="${path}" fill="#000"/></svg>`;
+}
+
+/* ---------- Holdets data (TEAM_DATA) ---------- */
+function teamFilled(key) { return String(TEAM_DATA[key] || "").trim() !== ""; }
+// Holdets tekst som HTML: det udfyldte felt (med tekst før/efter), ellers den ærlige reservetekst.
+// I ?udkast=1 vises i stedet en gul pladsholder, så holdet kan se, hvad der mangler.
+function teamHtml(key, before = "", after = "") {
+  if (teamFilled(key)) return safeText(before + String(TEAM_DATA[key]).trim() + after);
+  const fallback = TEAM_FALLBACK[key] || {todo: key, text: ""};
+  if (DRAFT_MODE) return `${safeText(before)}<span class="ph">[${safeText(fallback.todo)}]</span>${safeText(after)}`;
+  return safeText(fallback.text);
+}
+// Indsætter holdets data i alle elementer med data-team="..." (og evt. data-before/data-after).
 function applyTeamData(root = document) {
   root.querySelectorAll("[data-team]").forEach(el => {
-    const value = TEAM_DATA[el.dataset.team] || "";
-    el.textContent = value;
-    el.classList.toggle("ph", value.trim().startsWith("["));
+    el.innerHTML = teamHtml(el.dataset.team, el.dataset.before || "", el.dataset.after || "");
   });
+}
+// Udkast-banneret viser, hvor mange felter i TEAM_DATA holdet mangler at udfylde.
+function renderDraftBanner() {
+  const banner = document.getElementById("draftBanner");
+  banner.hidden = !DRAFT_MODE;
+  if (!DRAFT_MODE) return;
+  const keys = Object.keys(TEAM_FALLBACK);
+  const missing = keys.filter(key => !teamFilled(key));
+  document.getElementById("draftText").textContent = missing.length
+    ? `${missing.length} af ${keys.length} felter i TEAM_DATA mangler: ${missing.join(", ")}. Gule felter er pladsholdere.`
+    : `Alle ${keys.length} felter i TEAM_DATA er udfyldt.`;
+}
+// Adressen, som QR-koden og "Del" peger på.
+function publicUrl() {
+  if (teamFilled("publicUrl")) return String(TEAM_DATA.publicUrl).trim();
+  return /^https?:$/.test(location.protocol) ? location.origin + location.pathname : TEAM_FALLBACK.publicUrl.text;
+}
+function demoUrl() {
+  const url = new URL(publicUrl());
+  url.searchParams.set("demo", "1");
+  return url.href;
 }
 
 /* ---------- Økonomiberegner ---------- */
-const CALC_FIELDS = {schools:"calcSchools", price:"calcPrice", variable:"calcVariable", hosting:"calcHosting", support:"calcSupport", dev:"calcDev"};
-function formatKr(value) { return `${formatNumber(Math.round(value))} kr.`; }
+const CALC_FIELDS = {schools:"calcSchools", price:"calcPrice", munis:"calcMunis", muniPrice:"calcMuniPrice", muniSchools:"calcMuniSchools",
+  variable:"calcVariable", hosting:"calcHosting", support:"calcSupport", dev:"calcDev", salary:"calcSalary"};
+function formatKr(value) { return `${value < 0 ? "−" : ""}${formatNumber(Math.abs(Math.round(value)))} kr.`; }
 function readCalc() {
   const values = {};
   Object.entries(CALC_FIELDS).forEach(([key, id]) => {
@@ -1679,17 +2046,28 @@ function readCalc() {
   });
   return values;
 }
-// Selve regnestykket – holdt for sig selv, så det er let at forklare:
-//   indtægt = skoler × pris
-//   omkostninger = faste omkostninger + skoler × variable omkostninger
-//   break-even = faste omkostninger ÷ (pris − variable omkostninger), rundet op
+// Selve regnestykket – holdt for sig selv, så det er let at forklare (og så tekst, tabel og graf bruger samme tal):
+//   indtægt(s)      = kommuneaftaler × pris pr. aftale + s × pris pr. skolelicens
+//   omkostninger(s) = faste omkostninger (hosting + support + udvikling + løn)
+//                     + (s + kommuneaftaler × skoler pr. aftale) × variable omkostninger
+//   break-even      = det mindste antal skoler med licens, hvor indtægt ≥ omkostninger
 function calcEconomy(v) {
-  const fixed = v.hosting + v.support + v.dev;
-  const margin = v.price - v.variable; // dækningsbidrag pr. skole
-  const revenue = v.schools * v.price;
-  const costs = fixed + v.schools * v.variable;
-  const breakEven = margin > 0 ? Math.ceil(fixed / margin) : null;
-  return {fixed, margin, revenue, costs, result: revenue - costs, breakEven};
+  const fixed = v.hosting + v.support + v.dev + v.salary;
+  const margin = v.price - v.variable;                                 // dækningsbidrag pr. skolelicens
+  const muniRevenue = v.munis * v.muniPrice;
+  const muniContribution = muniRevenue - v.munis * v.muniSchools * v.variable; // kommuneaftalernes bidrag efter variable omkostninger
+  const revenueAt = s => muniRevenue + s * v.price;
+  const costsAt = s => fixed + (s + v.munis * v.muniSchools) * v.variable;
+  const remaining = fixed - muniContribution;                          // det, skolelicenserne skal dække
+  const breakEven = remaining <= 0 ? 0 : margin > 0 ? Math.ceil(remaining / margin) : null;
+  const revenue = revenueAt(v.schools), costs = costsAt(v.schools);
+  return {fixed, margin, muniRevenue, muniContribution, remaining, revenueAt, costsAt, revenue, costs, result: revenue - costs, breakEven};
+}
+function plural(n, one, many) { return `${formatNumber(n)} ${n === 1 ? one : many}`; }
+// Kort tekst til KPI, pitch og A4: fx "15 skoler + 1 kommuneaftale"
+function breakEvenText(v, e) {
+  if (e.breakEven === null) return "–";
+  return plural(e.breakEven, "skole", "skoler") + (v.munis ? ` + ${plural(v.munis, "kommuneaftale", "kommuneaftaler")}` : "");
 }
 function renderCalc() {
   const v = readCalc();
@@ -1697,12 +2075,24 @@ function renderCalc() {
   document.getElementById("calcRevenue").textContent = formatKr(e.revenue);
   document.getElementById("calcCosts").textContent = formatKr(e.costs);
   const result = document.getElementById("calcResult");
-  result.textContent = (e.result >= 0 ? "+" : "−") + formatKr(Math.abs(e.result));
+  result.textContent = (e.result >= 0 ? "+" : "") + formatKr(e.result);
   result.classList.toggle("negative", e.result < 0);
-  document.getElementById("calcBreakEven").textContent = e.breakEven === null ? "–" : `${e.breakEven} skoler`;
-  document.getElementById("calcExplain").textContent = e.breakEven === null
-    ? "Prisen skal være højere end de variable omkostninger pr. skole – ellers kan GroKlassen aldrig tjene penge."
-    : `Faste omkostninger: ${formatKr(e.fixed)} om året. Hver skole bidrager med ${formatKr(e.margin)} efter variable omkostninger (dækningsbidrag), så der skal ${e.breakEven} skoler til at dække de faste omkostninger.`;
+  document.getElementById("calcBreakEven").textContent = e.breakEven === null ? "–" : plural(e.breakEven, "skole", "skoler");
+  document.getElementById("calcBreakEvenLabel").textContent = v.munis
+    ? `Break-even: skoler med licens (+ ${plural(v.munis, "kommuneaftale", "kommuneaftaler")})`
+    : "Break-even (skoler med licens)";
+  document.getElementById("calcRevenueSplit").textContent =
+    `Indtægt: ${plural(v.schools, "skolelicens", "skolelicenser")} × ${formatKr(v.price)} = ${formatKr(v.schools * v.price)}` +
+    ` + ${plural(v.munis, "kommuneaftale", "kommuneaftaler")} × ${formatKr(v.muniPrice)} = ${formatKr(e.muniRevenue)}` +
+    ` → samlet ${formatKr(e.revenue)} om året.`;
+  const salaryText = v.salary ? ` (heraf ${formatKr(v.salary)} i løn)` : " (ingen løn – holdet arbejder frivilligt i prototypefasen)";
+  const muniText = v.munis ? ` ${plural(v.munis, "kommuneaftale", "kommuneaftaler")} bidrager med ${formatKr(e.muniContribution)} efter variable omkostninger.` : "";
+  let explain;
+  if (e.breakEven === null) explain = `Faste omkostninger: ${formatKr(e.fixed)} om året${salaryText}.${muniText} Prisen pr. skolelicens skal være højere end de variable omkostninger pr. skole – ellers kan skolelicenserne aldrig betale resten.`;
+  else if (e.breakEven === 0) explain = `Faste omkostninger: ${formatKr(e.fixed)} om året${salaryText}.${muniText} Det dækker allerede de faste omkostninger, så break-even nås uden skolelicenser.`;
+  else explain = `Faste omkostninger: ${formatKr(e.fixed)} om året${salaryText}.${muniText} Hver skolelicens bidrager med ${formatKr(e.margin)} efter variable omkostninger (dækningsbidrag), så der skal ${plural(e.breakEven, "skole", "skoler")} med licens til at dække ${v.munis ? "resten" : "de faste omkostninger"}.`;
+  document.getElementById("calcExplain").textContent = explain;
+  renderScenarioButtons(v);
   renderBreakEvenChart(v, e);
   renderPitchNumbers();
 }
@@ -1710,13 +2100,26 @@ function setCalcValues(values) {
   Object.entries(CALC_FIELDS).forEach(([key, id]) => { document.getElementById(id).value = values[key]; });
   renderCalc();
 }
-// Linjediagram: indtægt og omkostninger ved 0..N skoler. Hvor linjerne krydser, er break-even.
+// Hvilket scenarie svarer tallene til? (null = egne tal)
+function currentScenario(v = readCalc()) {
+  return Object.keys(CALC_SCENARIOS).find(key => Object.keys(CALC_FIELDS).every(f => CALC_SCENARIOS[key][f] === v[f])) || null;
+}
+function renderScenarioButtons(v) {
+  const active = currentScenario(v);
+  document.querySelectorAll("[data-scenario]").forEach(btn => btn.setAttribute("aria-pressed", String(btn.dataset.scenario === active)));
+  document.getElementById("scenarioNote").textContent = active ? `Viser scenariet "${CALC_SCENARIOS[active].label}" (antagelser).` : "Egne tal (antagelser).";
+}
+// Linjediagram: indtægt og omkostninger ved 0..N skoler med licens. Hvor linjerne krydser, er break-even.
 function renderBreakEvenChart(v, e) {
-  const maxSchools = Math.max(10, Math.ceil(Math.max(v.schools, (e.breakEven || 0) * 1.6) / 5) * 5);
+  const CAP = 600; // Grafen viser højst 600 skoler – ligger break-even længere ude, står det i teksten og tabellen.
+  const maxSchools = Math.min(CAP, Math.max(10, Math.ceil(Math.max(v.schools, (e.breakEven || 0) * 1.6) / 5) * 5));
+  const beInside = e.breakEven !== null && e.breakEven <= maxSchools;
+  const xStep = maxSchools <= 20 ? 5 : maxSchools <= 60 ? 10 : maxSchools <= 150 ? 25 : maxSchools <= 300 ? 50 : 100;
+  const hitStep = Math.max(1, Math.ceil(maxSchools / 100));
   const points = [];
-  for (let s = 0; s <= maxSchools; s++) points.push({s, revenue: s * v.price, costs: e.fixed + s * v.variable});
+  for (let s = 0; s <= maxSchools; s++) points.push({s, revenue: e.revenueAt(s), costs: e.costsAt(s)});
   const box = document.getElementById("breakEvenChart");
-  const W = chartWidth(box), H = 250, left = 56, right = W < 420 ? 82 : 96, top = 24, bottom = 34;
+  const W = chartWidth(box), H = 250, left = 62, right = W < 420 ? 82 : 96, top = 24, bottom = 34;
   const plotW = W - left - right, plotH = H - top - bottom;
   const yMaxRaw = Math.max(...points.map(p => Math.max(p.revenue, p.costs)), 1);
   const step = Math.pow(10, Math.floor(Math.log10(yMaxRaw / 4)));
@@ -1725,81 +2128,88 @@ function renderBreakEvenChart(v, e) {
   const x = s => left + (s / maxSchools) * plotW;
   const y = val => top + plotH - (val / yMax) * plotH;
   const line = key => points.map((p, i) => `${i ? "L" : "M"}${x(p.s).toFixed(1)},${y(p[key]).toFixed(1)}`).join(" ");
-  let svg = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Indtægt og omkostninger ved 0 til ${maxSchools} skoler. Break-even ved ${e.breakEven ?? "ingen"} skoler.">`;
+  const beLabel = e.breakEven === null ? "Ingen break-even med disse tal" : `Break-even: ${breakEvenText(v, e)}`;
+  let svg = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Indtægt og omkostninger ved 0 til ${maxSchools} skoler med licens. ${beLabel}.">`;
   for (let val = 0; val <= yMax + 1; val += nice) {
     svg += `<line x1="${left}" x2="${W - right}" y1="${y(val)}" y2="${y(val)}" stroke="var(--viz-grid)" stroke-width="1"/>`;
     svg += `<text x="${left - 6}" y="${y(val) + 4}" text-anchor="end">${formatNumber(val)}</text>`;
   }
-  const xStep = maxSchools <= 20 ? 5 : maxSchools <= 60 ? 10 : 20;
   for (let s = 0; s <= maxSchools; s += xStep) svg += `<text x="${x(s)}" y="${H - 14}" text-anchor="middle">${s}</text>`;
-  svg += `<text x="${left + plotW / 2}" y="${H}" text-anchor="middle">Antal skoler</text>`;
+  svg += `<text x="${left + plotW / 2}" y="${H}" text-anchor="middle">Antal skoler med licens</text>`;
   svg += `<line x1="${left}" x2="${W - right}" y1="${y(0)}" y2="${y(0)}" stroke="var(--viz-axis)" stroke-width="1"/>`;
   svg += `<path d="${line("costs")}" fill="none" stroke="var(--series-b)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`;
   svg += `<path d="${line("revenue")}" fill="none" stroke="var(--series-a)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`;
   const last = points[points.length - 1];
   svg += `<text x="${W - right + 8}" y="${y(last.revenue) + 4}" class="label-strong">Indtægt</text>`;
   svg += `<text x="${W - right + 8}" y="${y(last.costs) + (Math.abs(y(last.costs) - y(last.revenue)) < 14 ? 16 : 4)}" class="label-strong">Omkostninger</text>`;
-  if (e.breakEven !== null && e.breakEven <= maxSchools) {
-    const bx = x(e.breakEven), by = y(e.breakEven * v.price);
+  if (beInside) {
+    const bx = x(e.breakEven), by = y(e.revenueAt(e.breakEven));
     svg += `<circle cx="${bx}" cy="${by}" r="5" fill="var(--text)" stroke="var(--panel)" stroke-width="2"/>`;
     // Etiketten placeres over og til venstre for punktet, så den ikke ligger oven på linjerne.
-    const roomLeft = bx - left > 140; // Er der plads til teksten til venstre for punktet?
-    svg += `<text x="${roomLeft ? bx - 8 : bx + 8}" y="${roomLeft ? by - 12 : by + 20}" text-anchor="${roomLeft ? "end" : "start"}" class="label-strong">Break-even: ${e.breakEven} skoler</text>`;
+    const roomLeft = bx - left > 170; // Er der plads til teksten til venstre for punktet?
+    svg += `<text class="label-strong be-label" x="${roomLeft ? bx - 8 : bx + 8}" y="${roomLeft ? by - 12 : by + 20}" text-anchor="${roomLeft ? "end" : "start"}">Break-even: ${plural(e.breakEven, "skole", "skoler")}</text>`;
+  } else {
+    svg += `<text class="label-strong be-label" x="${left + 8}" y="${top + 4}">${e.breakEven === null ? "Ingen break-even med disse tal" : `Break-even (${plural(e.breakEven, "skole", "skoler")}) ligger uden for grafen`}</text>`;
   }
   // Markér det valgte antal skoler med en lodret linje
   if (v.schools <= maxSchools) svg += `<line x1="${x(v.schools)}" x2="${x(v.schools)}" y1="${top}" y2="${y(0)}" stroke="var(--text)" stroke-width="1" opacity=".35"/>`;
-  // Usynlige områder til tooltip: ét pr. antal skoler
-  points.forEach(p => {
-    const w = plotW / maxSchools;
+  // Usynlige områder til tooltip
+  points.filter(p => p.s % hitStep === 0).forEach(p => {
+    const w = plotW / maxSchools * hitStep;
     svg += `<rect class="bar-hit" x="${x(p.s) - w / 2}" y="${top}" width="${w}" height="${plotH}" data-tip="${p.s} skoler|Indtægt ${formatKr(p.revenue)} · Omkostninger ${formatKr(p.costs)}"${p.s % xStep === 0 ? ' tabindex="0"' : ""} aria-label="${p.s} skoler: indtægt ${formatKr(p.revenue)}, omkostninger ${formatKr(p.costs)}"/>`;
   });
   svg += `</svg><div class="viz-tip" hidden></div>`;
   box.innerHTML = svg;
   attachTooltips(box);
-  const rows = points.filter(p => p.s % xStep === 0 || p.s === e.breakEven || p.s === v.schools);
-  document.getElementById("breakEvenTable").innerHTML = `<table class="data-table"><thead><tr><th class="num">Skoler</th><th class="num">Indtægt</th><th class="num">Omkostninger</th><th class="num">Resultat</th></tr></thead><tbody>${
-    rows.map(p => `<tr><td class="num">${p.s}${p.s === e.breakEven ? " (break-even)" : ""}</td><td class="num">${formatKr(p.revenue)}</td><td class="num">${formatKr(p.costs)}</td><td class="num">${formatKr(p.revenue - p.costs)}</td></tr>`).join("")
+  // Tabellen regnes med de samme funktioner – også break-even, selvom det ligger uden for grafen.
+  const rowsAt = new Set();
+  for (let s = 0; s <= maxSchools; s += xStep) rowsAt.add(s);
+  rowsAt.add(Math.min(v.schools, 100000));
+  if (e.breakEven !== null) { rowsAt.add(e.breakEven); if (e.breakEven > 0) rowsAt.add(e.breakEven - 1); }
+  const rows = [...rowsAt].sort((a, b) => a - b);
+  document.getElementById("breakEvenTable").innerHTML = `<table class="data-table"><thead><tr><th class="num">Skoler med licens</th><th class="num">Indtægt</th><th class="num">Omkostninger</th><th class="num">Resultat</th></tr></thead><tbody>${
+    rows.map(s => `<tr${s === e.breakEven ? ' class="be-row"' : ""}><td class="num">${formatNumber(s)}${s === e.breakEven ? " (break-even)" : ""}${s === v.schools ? " (valgt)" : ""}</td><td class="num">${formatKr(e.revenueAt(s))}</td><td class="num">${formatKr(e.costsAt(s))}</td><td class="num">${formatKr(e.revenueAt(s) - e.costsAt(s))}</td></tr>`).join("")
   }</tbody></table>`;
 }
 // Hvis pitch-tilstanden er åben, opdateres tallene fra beregneren med det samme.
 function renderPitchNumbers() {
-  if (document.getElementById("pitch").open) renderPitch(false);
+  if (document.getElementById("pitch").open) renderPitch(false, false);
 }
 
 /* ---------- Præsentationstilstand (pitch) ----------
    6 trin: Problem → Løsning/demo → Kunder → Forretningsmodel → Bæredygtighed → Næste skridt.
    Teksterne er korte stikord – selve fortællingen står i PITCH.md. */
 let pitchIndex = 0;
-// Viser en pladsholder fra TEAM_DATA (gul, hvis den ikke er udfyldt endnu).
 // Laver en kæde af trin med pile imellem. Hvert trin holdes samlet på én linje.
-function flow(items) {
-  return `<div class="pitch-flow">${items.map((text, i) => `<span class="step">${text}${i < items.length - 1 ? ' <span class="arrow" aria-hidden="true">→</span>' : ""}</span>`).join("")}</div>`;
+function flow(items, extraClass = "") {
+  return `<div class="pitch-flow ${extraClass}">${items.map((text, i) => `<span class="step">${text}${i < items.length - 1 ? ' <span class="arrow" aria-hidden="true">→</span>' : ""}</span>`).join("")}</div>`;
 }
-function team(key) {
-  const value = TEAM_DATA[key] || "";
-  return value.trim().startsWith("[") ? `<span class="ph">${safeText(value)}</span>` : safeText(value);
+// Hvert trin viser, hvilket perspektiv dommerne kan bedømme det på (samme farver som på "For skoler").
+const PERSPECTIVES = {vp:"Værditilbud", cs:"Kundeperspektiv", ka:"Aktivitetsperspektiv", ec:"Økonomi", sus:"Bæredygtighed"};
+function kicker(n, title, persp) {
+  return `<div class="pitch-kicker persp-${persp}"><i></i>${n} · ${title}<span class="persp-chip">${persp === "sus" ? "Bedømmes også" : "BMC"}: ${PERSPECTIVES[persp]}</span></div>`;
 }
+// Højst 3 korte punkter pr. trin, så 4 minutter kan holdes. Selve fortællingen står i PITCH.md.
 const PITCH_SLIDES = [
   () => `
-    <div class="pitch-kicker persp-vp"><i></i>1 · Problemet</div>
+    ${kicker(1, "Problemet", "vp")}
     <h2 id="pitchSlideTitle" tabindex="-1">Bæredygtige vaner forsvinder, når ingen kan se dem.</h2>
     <ul class="pitch-points persp-vp">
       <li>Gode intentioner i klassen – men ingen fælles opfølgning</li>
       <li>Plakater og temauger starter noget. Hvem holder fast bagefter?</li>
-      <li>Lærerne siger: ${team("interviewFinding")}</li>
+      <li>${teamHtml("interviewFinding", "Lærerne siger: ")}</li>
     </ul>`,
   () => {
     const total = totalApproved(classData()).points;
     return `
-    <div class="pitch-kicker persp-vp"><i></i>2 · Løsningen</div>
+    ${kicker(2, "Løsningen", "vp")}
     <h2 id="pitchSlideTitle" tabindex="-1">GroKlassen gør vanerne synlige.</h2>
     <div class="pitch-split">
       <div>
         ${flow(["1. Klassen registrerer", "2. Læreren godkender", "3. Planten vokser"])}
         <ul class="pitch-points persp-vp">
-          <li>Fælles klassemål – ingen individuelle ranglister</li>
-          <li>Fair play: 1 gang pr. dag, pointloft og lærergodkendelse</li>
-          <li>Ingen persondata – kun klassen</li>
+          <li>Ét fælles klassemål – ingen elev bliver rangeret</li>
+          <li>Fair play og lærergodkendelse – uden persondata</li>
         </ul>
         <div class="form-row" style="margin-top:18px"><button class="btn primary" type="button" id="pitchDemoBtn">Vis live-demo</button></div>
       </div>
@@ -1807,53 +2217,60 @@ const PITCH_SLIDES = [
     </div>`;
   },
   () => `
-    <div class="pitch-kicker persp-cs"><i></i>3 · Kunderne</div>
+    ${kicker(3, "Kunderne", "cs")}
     <h2 id="pitchSlideTitle" tabindex="-1">Én bruger, én administrator, én betaler.</h2>
     <div class="pitch-cols persp-cs">
       <div class="pitch-col"><div class="big">🎒 Elever</div><p>Brugerne – ser at deres handlinger tæller</p></div>
       <div class="pitch-col"><div class="big">📋 Lærere</div><p>Daglige administratorer – godkender og får ugerapport</p></div>
       <div class="pitch-col"><div class="big">🏫 Skoler og kommuner</div><p>Betaler – en licens pr. år</p></div>
     </div>
-    <p class="pitch-note">Vejen til kunden: pilotlærere · lærernetværk · kommunernes klimaenheder. Interviews: ${team("interviewsTeachers")}.</p>`,
+    <p class="pitch-note">Vejen til kunden: pilotlærere · lærernetværk · kommunernes klimaenheder. Interviews: ${teamHtml("interviewsTeachers", "", " lærere")}.</p>`,
   () => {
-    const e = calcEconomy(readCalc());
     const v = readCalc();
+    const e = calcEconomy(v);
+    const scenario = currentScenario(v);
     return `
-    <div class="pitch-kicker persp-ec"><i></i>4 · Forretningsmodellen</div>
+    ${kicker(4, "Forretningsmodellen", "ec")}
     <h2 id="pitchSlideTitle" tabindex="-1">Gratis at prøve. Skolen betaler for at fortsætte.</h2>
-    ${flow(["🌱 Prøve: 0 kr.", `🌳 Skole: ca. ${formatKr(v.price)}/år`, "🏙️ Kommuneaftale"])}
+    ${flow(["🌱 Prøve: 0 kr.", `🌳 Skole: ${formatKr(v.price)}/år`, `🏙️ Kommune: ${formatKr(v.muniPrice)}/år`], "compact")}
     <div class="pitch-cols persp-ec">
-      <div class="pitch-col"><div class="big">${formatKr(e.fixed)}</div><p>Faste omkostninger pr. år: udvikling, hosting, support</p></div>
-      <div class="pitch-col"><div class="big">${e.breakEven === null ? "–" : e.breakEven + " skoler"}</div><p>Break-even med vores antagelser</p></div>
-      <div class="pitch-col persp-ka" style="--p:var(--p-ka)"><div class="big">Partnere</div><p>Mulige: kommuner, grønne skoleprogrammer, fagpersoner</p></div>
+      <div class="pitch-col"><div class="big">${formatKr(e.revenue)}</div><p>Indtægt pr. år – scenariet "${scenario ? safeText(CALC_SCENARIOS[scenario].label.toLowerCase()) : "egne tal"}"</p></div>
+      <div class="pitch-col"><div class="big">${formatKr(e.fixed)}</div><p>Faste omkostninger pr. år${v.salary ? " inkl. løn" : " – ingen løn i prototypefasen"}</p></div>
+      <div class="pitch-col"><div class="big">${breakEvenText(v, e)}</div><p>Break-even med vores antagelser</p></div>
     </div>
-    <p class="pitch-note"><span class="hyp">HYPOTESE</span> Priserne skal valideres i pilotforsøg. Betalingsvilje: ${team("willingnessToPay")}</p>`;
+    <p class="pitch-note"><span class="hyp">ANTAGELSER</span> ${teamHtml("willingnessToPay", "Betalingsvilje: ")}</p>`;
   },
   () => `
-    <div class="pitch-kicker"><i></i>5 · Bæredygtighed</div>
+    ${kicker(5, "Bæredygtighed", "sus")}
     <h2 id="pitchSlideTitle" tabindex="-1">Bæredygtig på tre niveauer – og ærlig om tallene.</h2>
-    <div class="pitch-cols">
+    <div class="pitch-cols persp-sus">
       <div class="pitch-col"><div class="big">🌍 Miljø</div><p>Vaner inden for transport, mad, affald og forbrug</p></div>
       <div class="pitch-col"><div class="big">🤝 Socialt</div><p>Fællesskab – ingen elev bliver udstillet</p></div>
       <div class="pitch-col"><div class="big">💰 Økonomi</div><p>Lille, let app – licensen betaler driften</p></div>
     </div>
     <p class="pitch-note">Ærlige tal: at cykle i stedet for at blive kørt sparer ca. 400 g CO₂ – at slukke lyset kun ca. 10 g. Alle beregninger er åbne i appen. Verdensmål 4.7, 12 og 13.</p>`,
   () => `
-    <div class="pitch-kicker"><i></i>6 · Næste skridt</div>
+    ${kicker(6, "Næste skridt", "ka")}
     <h2 id="pitchSlideTitle" tabindex="-1">Fra prototype til pilot.</h2>
-    <ul class="pitch-points">
-      <li>Pilot med ${team("pilotClasses")} klasser i 4 uger</li>
-      <li>CO₂-tallene faktatjekkes af ${team("factChecker")}</li>
-      <li>Version 2: lærerlogin, database i EU og GDPR-vurdering</li>
-      <li>Test af pris med skoleledere</li>
-    </ul>
-    <p class="pitch-note" style="font-size:clamp(1.2rem,2.6vw,1.8rem);font-weight:800;color:var(--text)">GroKlassen – små handlinger, stor forskel. 🌱</p>`
+    <div class="pitch-split pitch-end">
+      <div>
+        <ul class="pitch-points persp-ka">
+          <li>Pilotforsøg: ${teamHtml("pilotClasses", "", " klasser i 4 uger")}</li>
+          <li>CO₂-tallene faktatjekkes af ${teamHtml("factChecker")}</li>
+          <li>Version 2: lærerlogin, database i EU og GDPR-vurdering</li>
+        </ul>
+        <p class="pitch-ask">${teamHtml("pitchAsk")}</p>
+        <p class="pitch-note">GroKlassen – små handlinger, stor forskel. 🌱</p>
+      </div>
+      <figure class="pitch-qr"><div class="qr-box">${qrSvg(demoUrl(), "QR-kode til demoen")}</div><figcaption>Scan og prøv demoen</figcaption></figure>
+    </div>`
 ];
-function renderPitch(moveFocus) {
+function renderPitch(moveFocus, animate = true) {
   const slide = document.getElementById("pitchSlide");
   slide.innerHTML = PITCH_SLIDES[pitchIndex]();
-  // Genstart den lille glide-animation
-  slide.style.animation = "none"; void slide.offsetWidth; slide.style.animation = "";
+  // Genstart den lille glide-animation (ikke når swipe selv styrer bevægelsen, eller når tallene blot opdateres)
+  slide.style.animation = "none";
+  if (animate) { void slide.offsetWidth; slide.style.animation = ""; }
   document.getElementById("pitchCount").textContent = `${pitchIndex + 1} / ${PITCH_SLIDES.length}`;
   document.getElementById("pitchPrev").disabled = pitchIndex === 0;
   document.getElementById("pitchNext").disabled = pitchIndex === PITCH_SLIDES.length - 1;
@@ -1870,13 +2287,18 @@ function renderPitch(moveFocus) {
   if (moveFocus) document.getElementById("pitchSlideTitle").focus({preventScroll:true});
 }
 function goPitch(index) {
-  pitchIndex = Math.max(0, Math.min(PITCH_SLIDES.length - 1, index));
+  stopSwipeAnimation(true);
+  const next = Math.max(0, Math.min(PITCH_SLIDES.length - 1, index));
+  document.getElementById("pitchSlide").classList.toggle("back", next < pitchIndex);
+  pitchIndex = next;
   renderPitch(true);
 }
 function openPitch() {
   const dialog = document.getElementById("pitch");
   document.getElementById("pitchDots").innerHTML = PITCH_SLIDES.map((_, i) => `<button type="button" aria-label="Trin ${i + 1}">${i + 1}</button>`).join("");
   pitchIndex = 0;
+  stopSwipeAnimation(true);
+  document.getElementById("pitchSlide").classList.remove("back");
   if (!dialog.open) dialog.showModal();
   renderPitch(true);
 }
@@ -1885,10 +2307,182 @@ function closePitch() {
   if (document.fullscreenElement && document.exitFullscreen) document.exitFullscreen().catch(() => {});
   if (dialog.open) dialog.close();
 }
+/* ---------- Swipe i pitchen ----------
+   Trinnet følger fingeren (eller musen) 1:1 og giver elastisk modstand ved første og sidste trin.
+   Ved slip bruges fingerens hastighed: hvor ville trinnet ende, hvis det fik lov at glide videre?
+   Ligger det punkt mere end halvvejs ude (højst 280 px – ellers er det tungt på en stor skærm), skiftes trin;
+   ellers fjedrer trinnet tilbage.
+   Bevægelsen er en kritisk dæmpet fjeder (ingen overshoot), der starter med fingerens hastighed,
+   og trinnet kan gribes igen midt i bevægelsen. Ved "reduceret bevægelse" skiftes der blot trin. */
+const pitchStage = document.getElementById("pitchStage");
+const pitchSlideEl = document.getElementById("pitchSlide");
+let swipe = null;      // Igangværende træk: {id, startX, startY, startOffset, axis, samples}
+let swipeOffset = 0;   // Trinnets nuværende vandrette forskydning i px – det, man ser på skærmen
+let swipeRaf = 0;
+function setSwipeOffset(x) {
+  swipeOffset = x;
+  const width = pitchStage.clientWidth || 1;
+  pitchSlideEl.style.transform = x ? `translateX(${x.toFixed(1)}px)` : "";
+  pitchSlideEl.style.opacity = x ? String(Math.max(0, 1 - Math.abs(x) / width * 1.6)) : "";
+}
+function stopSwipeAnimation(reset) {
+  cancelAnimationFrame(swipeRaf);
+  swipeRaf = 0;
+  if (reset) { swipe = null; pitchStage.classList.remove("dragging"); setSwipeOffset(0); }
+}
+// Elastisk modstand: jo længere ud over kanten, jo mindre følger trinnet med.
+function rubberband(overshoot, dimension, constant = 0.55) {
+  return (overshoot * dimension * constant) / (dimension + constant * Math.abs(overshoot));
+}
+// Hvor langt et kast med hastigheden v (px/s) ville glide – samme formel som Apples rulle-deceleration.
+function projectFlick(v, rate = 0.998) { return (v / 1000) * rate / (1 - rate); }
+// Kritisk dæmpet fjeder (damping 1, response 0,35 s) fra den nuværende position og med den givne hastighed.
+// until(x) kan stoppe fjederen undervejs (bruges, når trinnet skiftes halvvejs ude).
+function springTo(target, velocity, onDone, until) {
+  cancelAnimationFrame(swipeRaf);
+  const response = 0.35, stiffness = Math.pow(2 * Math.PI / response, 2), damping = 4 * Math.PI / response;
+  let x = swipeOffset, v = velocity, last = performance.now();
+  const step = now => {
+    const dt = Math.min(0.05, Math.max(0, (now - last) / 1000)), n = Math.max(1, Math.ceil(dt / 0.004));
+    last = now;
+    for (let i = 0; i < n; i++) { v += (-stiffness * (x - target) - damping * v) * (dt / n); x += v * (dt / n); }
+    if (until && until(x)) { setSwipeOffset(x); swipeRaf = 0; onDone(x, v); return; }
+    if (Math.abs(x - target) < 0.5 && Math.abs(v) < 10) { setSwipeOffset(target); swipeRaf = 0; if (onDone) onDone(target, 0); return; }
+    setSwipeOffset(x);
+    swipeRaf = requestAnimationFrame(step);
+  };
+  swipeRaf = requestAnimationFrame(step);
+}
+// Skift trin med et kast: det gamle trin glider ud til halvvejs, og det nye fortsætter fra den modsatte side
+// med samme hastighed – som om trinnene lå ved siden af hinanden.
+function swipeToSlide(dir, velocity) {
+  const width = pitchStage.clientWidth || 1;
+  springTo(-dir * width, velocity, (x, v) => {
+    pitchIndex += dir;
+    pitchSlideEl.classList.toggle("back", dir < 0);
+    renderPitch(true, false);
+    setSwipeOffset(x + dir * width);
+    springTo(0, v);
+  }, x => Math.abs(x) >= width / 2);
+}
+function startSwipe(event) {
+  if (event.button !== 0 || event.target.closest("button, a, input, select, textarea, summary")) return;
+  cancelAnimationFrame(swipeRaf); // Grib trinnet midt i en bevægelse – det fortsætter fra, hvor det er
+  swipeRaf = 0;
+  swipe = {id: event.pointerId, startX: event.clientX, startY: event.clientY, startOffset: swipeOffset, axis: null, samples: [{x: event.clientX, t: event.timeStamp}]};
+  if (swipeOffset) lockSwipe(event); // Var trinnet i bevægelse, er retningen allerede vandret
+}
+function lockSwipe(event) {
+  swipe.axis = "x";
+  swipe.startX = event.clientX; // Start fra den nuværende position, så trinnet ikke hopper
+  pitchStage.setPointerCapture(event.pointerId);
+  pitchStage.classList.add("dragging");
+  pitchSlideEl.style.animation = "none";
+}
+function moveSwipe(event) {
+  if (!swipe || event.pointerId !== swipe.id) return;
+  if (!swipe.axis) {
+    const dx = event.clientX - swipe.startX, dy = event.clientY - swipe.startY;
+    if (Math.hypot(dx, dy) < 10) return;                            // Lille dødzone, før retningen afgøres
+    if (Math.abs(dy) >= Math.abs(dx)) { swipe = null; return; }     // Lodret træk = rul i trinnet
+    lockSwipe(event);
+  }
+  swipe.samples.push({x: event.clientX, t: event.timeStamp});
+  swipe.samples = swipe.samples.filter(s => event.timeStamp - s.t <= 100);
+  if (prefersReducedMotion()) return;                                // Ved reduceret bevægelse flytter trinnet sig ikke
+  const width = pitchStage.clientWidth || 1;
+  let x = swipe.startOffset + (event.clientX - swipe.startX);
+  if (x > 0 && pitchIndex === 0) x = rubberband(x, width);
+  if (x < 0 && pitchIndex === PITCH_SLIDES.length - 1) x = -rubberband(-x, width);
+  setSwipeOffset(x);
+}
+function endSwipe(event, cancelled) {
+  if (!swipe || event.pointerId !== swipe.id) return;
+  const s = swipe;
+  swipe = null;
+  pitchStage.classList.remove("dragging");
+  if (!s.axis) return; // Et tryk – ikke et træk
+  if (prefersReducedMotion()) {
+    const dx = event.clientX - s.startX;
+    if (!cancelled && Math.abs(dx) > 40) goPitch(pitchIndex + (dx < 0 ? 1 : -1));
+    return;
+  }
+  let velocity = 0;
+  if (!cancelled) {
+    s.samples.push({x: event.clientX, t: event.timeStamp});
+    const recent = s.samples.filter(p => event.timeStamp - p.t <= 100), first = recent[0], last = recent[recent.length - 1];
+    if (first && last.t > first.t) velocity = (last.x - first.x) / (last.t - first.t) * 1000;
+  }
+  const width = pitchStage.clientWidth || 1;
+  const projected = swipeOffset + projectFlick(velocity), threshold = Math.min(width / 2, 280);
+  const dir = cancelled ? 0 : projected < -threshold ? 1 : projected > threshold ? -1 : 0;
+  if (dir && pitchIndex + dir >= 0 && pitchIndex + dir < PITCH_SLIDES.length) swipeToSlide(dir, velocity);
+  else springTo(0, velocity);
+}
 function toggleFullscreen() {
   if (!document.fullscreenEnabled) return;
   if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
   else document.documentElement.requestFullscreen().catch(() => {});
+}
+
+/* ---------- Del (QR-kode og link) ---------- */
+function openShare() {
+  const url = demoUrl();
+  document.getElementById("shareQr").innerHTML = qrSvg(url, `QR-kode til ${url}`);
+  document.getElementById("shareUrl").value = url;
+  document.getElementById("shareNative").hidden = !navigator.share;
+  document.getElementById("shareStatus").textContent = "";
+  document.getElementById("shareDialog").showModal();
+  document.getElementById("shareCopy").focus();
+}
+async function copyShareLink() {
+  const input = document.getElementById("shareUrl");
+  const status = document.getElementById("shareStatus");
+  let ok = false;
+  try { await navigator.clipboard.writeText(input.value); ok = true; }
+  catch (e) { input.select(); try { ok = document.execCommand("copy"); } catch (err) { ok = false; } }
+  // Beskeden står i dialogen (en toast ville ligge bag dialogen).
+  status.textContent = ok ? "Linket er kopieret." : "Markér linket, og kopiér det selv (Ctrl/Cmd + C).";
+}
+
+/* ---------- A4-oversigt til dommerne ----------
+   Én side, som holdet kan efterlade hos dommerne. Tallene kommer fra beregneren og TEAM_DATA. */
+function buildA4() {
+  const v = readCalc(), e = calcEconomy(v);
+  const scenario = currentScenario(v);
+  const url = demoUrl();
+  return `
+    <header class="a4-head"><img class="a4-logo" src="${document.getElementById("brandLogo").src}" alt="GroKlassen"><div><h1>GroKlassen</h1><p>Små handlinger. Stor forskel. En app, der gør skoleklassers grønne vaner synlige – uden persondata.</p></div></header>
+    <div class="a4-grid">
+      <section class="a4-box a4-vp"><h2>Værditilbud</h2>
+        <p><strong>Problem:</strong> Bæredygtige vaner forsvinder, når ingen kan se dem.</p>
+        <p><strong>Løsning:</strong> Klassen registrerer små grønne handlinger, læreren godkender, og en fælles plante vokser.</p>
+        <p><strong>Det nye:</strong> Fællesskab frem for individuelle ranglister, lærergodkendelse, åbne CO₂-beregninger og ingen persondata.</p></section>
+      <section class="a4-box a4-cs"><h2>Kunder</h2>
+        <ul><li><strong>Elever</strong> – brugere, ét fælles mål</li><li><strong>Lærere</strong> – godkender og får ugerapport</li><li><strong>Skoler og kommuner</strong> – betaler en licens</li></ul>
+        <p class="a4-small">Målgruppe: ${teamHtml("targetGrades")}</p></section>
+      <section class="a4-box a4-ec"><h2>Prisskitse <span class="a4-hyp">hypotese</span></h2>
+        <ul><li>Prøve: 0 kr. – 1 klasse i 3 måneder</li><li>Skolelicens: ca. ${formatKr(v.price)} pr. skole pr. år</li><li>Kommuneaftale: fra ca. ${formatKr(v.muniPrice)} pr. år (op til 10 skoler)</li></ul>
+        <p class="a4-small">Ekskl. moms. ${teamHtml("willingnessToPay", "Betalingsvilje: ")}</p></section>
+      <section class="a4-box a4-ec"><h2>Break-even <span class="a4-hyp">antagelser</span></h2>
+        <p class="a4-big">${breakEvenText(v, e)}</p>
+        <p class="a4-small">Scenarie: ${scenario ? safeText(CALC_SCENARIOS[scenario].label.toLowerCase()) : "egne tal"}. Faste omkostninger ${formatKr(e.fixed)} pr. år${v.salary ? ` (heraf ${formatKr(v.salary)} i løn)` : " (ingen løn – frivilligt arbejde i prototypefasen)"}. Ved ${plural(v.schools, "skolelicens", "skolelicenser")}${v.munis ? ` og ${plural(v.munis, "kommuneaftale", "kommuneaftaler")}` : ""}: indtægt ${formatKr(e.revenue)}, resultat ${e.result >= 0 ? "+" : ""}${formatKr(e.result)}</p></section>
+      <section class="a4-box a4-sus"><h2>Bæredygtighed</h2>
+        <ul><li><strong>Miljø:</strong> vaner inden for transport, mad, affald og forbrug – med ærlige, vejledende CO₂-tal</li><li><strong>Socialt:</strong> ét fælles mål – ingen elev bliver rangeret eller udstillet</li><li><strong>Økonomi:</strong> lille, let app – licensen betaler driften</li></ul>
+        <p class="a4-small">Verdensmål 4.7, 12 og 13.</p></section>
+      <section class="a4-box a4-qr"><div class="a4-qrcode">${qrSvg(url, "QR-kode til demoen")}</div><p><strong>Scan og prøv demoen</strong></p><p class="a4-small a4-url">${safeText(url)}</p></section>
+    </div>
+    <footer class="a4-foot">
+      <p class="a4-ask">${teamHtml("pitchAsk")}</p>
+      <p>${teamHtml("teamName")} · Kontakt: ${teamHtml("contact")}</p>
+      <p class="a4-small">Prototype. Priser og tal er hypoteser, der skal testes i pilotforsøg. Ingen persondata – alt er på klasseniveau.</p>
+    </footer>`;
+}
+function printA4() {
+  document.getElementById("a4Sheet").innerHTML = buildA4();
+  document.body.classList.remove("printing-report");
+  document.body.classList.add("printing-a4");
+  window.print();
 }
 
 /* ---------- Ugerapport ---------- */
@@ -2083,6 +2677,7 @@ function readTeacherSession() {
 }
 function setTeacherUnlocked(value) {
   teacherUnlocked = value;
+  if (!value && lastUndo) { hideToast(lastUndo.toast); lastUndo = null; } // Når læreren låser, kan intet fortrydes
   try { value ? sessionStorage.setItem("groklassen-laerer", "1") : sessionStorage.removeItem("groklassen-laerer"); } catch (e) {}
   renderTeacher();
 }
@@ -2122,6 +2717,7 @@ function renderTeacher() {
 // Godkender en eller flere indsendelser. Loftet tjekkes mod hver indsendelses EGEN dato.
 function approveItems(ids) {
   const data = classData();
+  const before = snapshotClass(data);
   const stageBefore = getStage(totalApproved(data).points);
   const thisMonday = mondayOf(todayKey());
   const goalReachedBefore = weekPoints(data, thisMonday) >= data.weeklyGoal;
@@ -2138,8 +2734,8 @@ function approveItems(ids) {
   });
   saveState();
   render();
-  if (done.length === 1) showToast(`Godkendt: ${done[0].title} tæller nu med i klassens resultat.`);
-  else if (done.length > 1) showToast(`${done.length} indsendelser er godkendt og tæller nu med.`);
+  if (done.length === 1) offerUndo(before, `Godkendt: ${done[0].title} tæller nu med i klassens resultat.`);
+  else if (done.length > 1) offerUndo(before, `${done.length} indsendelser er godkendt og tæller nu med.`);
   if (skipped.length) showToast(`${skipped.length} kunne ikke godkendes, fordi pointloftet for dagen ville blive overskredet (eller udfordringen allerede er godkendt den dag). Afvis dem i stedet.`, true);
   // Nåede planten et nyt stadie? Så fejrer vi det.
   const stageAfter = getStage(totalApproved(data).points);
@@ -2149,14 +2745,41 @@ function approveItems(ids) {
 }
 function rejectItems(ids) {
   const data = classData();
+  const before = snapshotClass(data);
   const items = data.pending.filter(item => ids.includes(item.id));
   data.pending = data.pending.filter(item => !ids.includes(item.id));
   items.forEach(item => data.rejected.push({...item, rejectedAt: Date.now()}));
   data.rejected = data.rejected.slice(-200); // Gem kun de seneste 200 afviste
   saveState();
   render();
-  if (items.length === 1) showToast(`Forespørgslen "${items[0].title}" blev afvist.`);
-  else if (items.length > 1) showToast(`${items.length} indsendelser blev afvist.`);
+  if (items.length === 1) offerUndo(before, `Forespørgslen "${items[0].title}" blev afvist.`);
+  else if (items.length > 1) offerUndo(before, `${items.length} indsendelser blev afvist.`);
+}
+/* ---------- Fortryd (godkend og afvis) ----------
+   En godkendelse eller afvisning kan fortrydes i 8 sekunder – med knappen i beskeden eller Ctrl/Cmd + Z.
+   Kun den seneste handling kan fortrydes, så man aldrig kommer til at rulle flere handlinger tilbage på én gang. */
+let lastUndo = null; // {store, name, before, toast}
+function snapshotClass(data) { return {approved: data.approved.slice(), pending: data.pending.slice(), rejected: data.rejected.slice()}; }
+function offerUndo(before, message) {
+  if (lastUndo) hideToast(lastUndo.toast);
+  const undo = {store: demoState || state, name: activeClass, before};
+  undo.toast = showToast(message, false, {label: "Fortryd", title: "Fortryd (Ctrl+Z / Cmd+Z)", run: () => runUndo(undo)});
+  lastUndo = undo;
+  setTimeout(() => { if (lastUndo === undo) lastUndo = null; }, 8000);
+}
+function runUndo(undo = lastUndo) {
+  if (!undo || undo !== lastUndo) return false;
+  lastUndo = null;
+  hideToast(undo.toast);
+  const celebration = document.getElementById("celebration");
+  if (celebration.open) celebration.close();
+  // Er demoen nulstillet eller data ændret i en anden fane siden, rører vi ikke ved noget.
+  if ((demoState || state) !== undo.store) { showToast("Handlingen kan ikke fortrydes længere.", true); return true; }
+  Object.assign(undo.store.classes[undo.name], undo.before);
+  saveState();
+  render();
+  showToast(`Fortrudt – klasse ${undo.name} er tilbage, som den var.`);
+  return true;
 }
 // Efter godkend/afvis forsvinder rækken. Flyt fokus til næste knap, så tastaturbrugere ikke "falder ud".
 function refocusQueue(listId, index) {
@@ -2201,6 +2824,7 @@ function celebrate(stageIndex) {
     el.classList.remove("grow"); void el.offsetWidth; el.classList.add("grow");
   });
   if (!dialog.open) dialog.showModal();
+  toastRegion(); // Så "Fortryd" kan ses og klikkes oven på fejringen
   document.getElementById("celebrateClose").focus();
 }
 
@@ -2259,11 +2883,10 @@ function renderContest() {
   const {start, end} = contestPeriod();
   const today = todayKey();
   const periodText = `${formatDate(start)} til ${formatDate(end)}`;
-  const values = {name: CONTEST.name, prize: CONTEST.prize, sponsor: CONTEST.sponsor, period: periodText};
+  const values = {name: CONTEST.name, prize: CONTEST.prize, period: periodText};
   document.querySelectorAll("[data-contest]").forEach(el => {
     const value = values[el.dataset.contest] || "";
     el.textContent = value;
-    el.classList.toggle("ph", value.trim().startsWith("["));
   });
   document.querySelectorAll(".contest-example").forEach(el => { el.hidden = !CONTEST.isExample; });
   // Klassens status på klassens side
@@ -2336,6 +2959,8 @@ async function cancelContest() {
 // Pop-up'en vises kun én gang – og aldrig oven i introduktionen, demoen eller pitchen.
 function maybeShowContestPopup() {
   const params = new URLSearchParams(location.search);
+  // Så længe konkurrencen er et fiktivt eksempel, vises der ingen pop-up – den skal ikke tage fokus fra selve appen.
+  if (CONTEST.isExample) return;
   if (state.contestPopupSeen || params.has("demo") || params.has("pitch")) return;
   if (document.querySelector("dialog[open]")) return;
   document.getElementById("contestPopup").showModal();
@@ -2394,6 +3019,7 @@ function render() {
   renderChallenges();
   renderPending();
   renderGoal();
+  renderWeekChart("classChart", null, 170);
   renderLeague();
   renderDemoControls();
   renderContest();
@@ -2410,10 +3036,8 @@ function setActiveClass(name) {
 function setTheme(theme, remember) {
   if (remember) { state.theme = theme; saveState(); }
   document.documentElement.dataset.theme = theme;
-  // Knappen hedder altid "Mørk tilstand" og er "trykket ned", når mørk tilstand er slået til.
-  const button = document.getElementById("themeBtn");
-  button.textContent = "Mørk tilstand";
-  button.setAttribute("aria-pressed", String(theme === "dark"));
+  // Ikon-knappen hedder altid "Mørk tilstand" (for skærmlæsere) og er "trykket ned", når mørk tilstand er slået til.
+  document.getElementById("themeBtn").setAttribute("aria-pressed", String(theme === "dark"));
   document.querySelector('meta[name="theme-color"]').setAttribute("content", theme === "dark" ? "#101b16" : "#26734d");
 }
 
@@ -2423,7 +3047,11 @@ function setTheme(theme, remember) {
   select.innerHTML = CLASS_NAMES.map(name => `<option value="${name}">${name}</option>`).join("");
   select.addEventListener("change", event => setActiveClass(event.target.value));
 });
-document.getElementById("themeBtn").addEventListener("click", () => setTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark", true));
+document.getElementById("themeBtn").addEventListener("click", () => {
+  const change = () => setTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark", true);
+  if (document.startViewTransition && !prefersReducedMotion()) document.startViewTransition(change);
+  else change();
+});
 document.getElementById("pinForm").addEventListener("submit", event => {
   event.preventDefault();
   const input = document.getElementById("pinInput");
@@ -2450,6 +3078,18 @@ document.getElementById("lockBtn").addEventListener("click", () => {
   showToast("Lærerområdet er låst.");
 });
 document.getElementById("pendingTodayList").addEventListener("click", handleQueueClick);
+// Ctrl/Cmd + Z fortryder seneste godkendelse eller afvisning (ikke mens man skriver i et felt).
+document.addEventListener("keydown", event => {
+  if (!lastUndo || !(event.ctrlKey || event.metaKey) || event.shiftKey || event.altKey || event.key.toLowerCase() !== "z") return;
+  if (event.target.closest && event.target.closest("input, textarea, select, [contenteditable]")) return;
+  event.preventDefault();
+  runUndo();
+});
+// Beskedområdet flyttes tilbage til siden, når en dialog lukker.
+document.querySelectorAll("dialog").forEach(dialog => dialog.addEventListener("close", () => {
+  const region = document.getElementById("toastRegion");
+  if (dialog.contains(region)) document.body.appendChild(region);
+}));
 document.getElementById("pendingOlderList").addEventListener("click", handleQueueClick);
 document.getElementById("approveTodayBtn").addEventListener("click", () => {
   const ids = classData().pending.filter(item => item.date === todayKey()).map(item => item.id);
@@ -2471,7 +3111,7 @@ window.addEventListener("hashchange", () => routeFromHash(true));
 let resizeTimer = null;
 window.addEventListener("resize", () => {
   clearTimeout(resizeTimer);
-  resizeTimer = setTimeout(() => { renderCalc(); if (teacherUnlocked) renderWeekChart(); }, 150);
+  resizeTimer = setTimeout(() => { renderCalc(); renderWeekChart("classChart", null, 170); if (teacherUnlocked) renderWeekChart(); }, 150);
 });
 // Hvis appen er åben i to faner (fx elev og lærer), opdateres den ene, når den anden gemmer.
 window.addEventListener("storage", event => {
@@ -2488,7 +3128,6 @@ setInterval(() => {
   if (todayKey() !== renderedDay) { renderedDay = todayKey(); render(); }
 }, 30000);
 // Introduktion og fejring
-document.getElementById("helpBtn").addEventListener("click", openOnboarding);
 document.getElementById("heroHowBtn").addEventListener("click", openOnboarding);
 document.getElementById("obNext").addEventListener("click", () => onboardingStep === 2 ? finishOnboarding() : moveOnboarding(1));
 document.getElementById("obBack").addEventListener("click", () => moveOnboarding(-1));
@@ -2509,6 +3148,13 @@ document.getElementById("contestCancel").addEventListener("click", cancelContest
 document.getElementById("contestPopupGo").addEventListener("click", () => closeContestPopup(true));
 document.getElementById("contestPopupLater").addEventListener("click", () => closeContestPopup(false));
 document.getElementById("contestPopup").addEventListener("close", () => { if (!state.contestPopupSeen) { state.contestPopupSeen = true; saveState(); } });
+// Del
+document.getElementById("shareBtn").addEventListener("click", openShare);
+document.getElementById("shareClose").addEventListener("click", () => document.getElementById("shareDialog").close());
+document.getElementById("shareCopy").addEventListener("click", copyShareLink);
+document.getElementById("shareNative").addEventListener("click", () => {
+  navigator.share({title: "GroKlassen", text: "Prøv GroKlassen (demo med opdigtede eksempeldata)", url: demoUrl()}).catch(() => {});
+});
 // Præsentationstilstand
 document.getElementById("pitchBtn").addEventListener("click", openPitch);
 document.getElementById("pitchClose").addEventListener("click", closePitch);
@@ -2521,6 +3167,7 @@ document.getElementById("pitchDots").addEventListener("click", event => {
 document.getElementById("pitchFullscreen").addEventListener("click", toggleFullscreen);
 document.getElementById("pitchFullscreen").hidden = !document.fullscreenEnabled;
 document.getElementById("pitch").addEventListener("close", () => {
+  stopSwipeAnimation(true);
   if (document.fullscreenElement && document.exitFullscreen) document.exitFullscreen().catch(() => {});
 });
 // Piletaster: → og PageDown = næste, ← og PageUp = forrige, Home/End = første/sidste, F = fuld skærm. Esc lukker.
@@ -2532,19 +3179,17 @@ document.getElementById("pitch").addEventListener("keydown", event => {
   else if (event.key === "End") { event.preventDefault(); goPitch(PITCH_SLIDES.length - 1); }
   else if ((event.key === "f" || event.key === "F") && !event.ctrlKey && !event.metaKey && !event.altKey) toggleFullscreen();
 });
-// Swipe på mobil og tablet: stryg til venstre = næste, til højre = forrige.
-let swipeStart = null;
-const pitchStage = document.getElementById("pitchStage");
-pitchStage.addEventListener("pointerdown", event => { swipeStart = {x: event.clientX, y: event.clientY}; });
-pitchStage.addEventListener("pointercancel", () => { swipeStart = null; });
-pitchStage.addEventListener("pointerup", event => {
-  if (!swipeStart) return;
-  const dx = event.clientX - swipeStart.x, dy = event.clientY - swipeStart.y;
-  swipeStart = null;
-  if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) goPitch(pitchIndex + (dx < 0 ? 1 : -1));
-});
+// Swipe (finger eller mus): stryg til venstre = næste, til højre = forrige. Hændelserne er sat op længere oppe.
+pitchStage.addEventListener("pointerdown", startSwipe);
+pitchStage.addEventListener("pointermove", moveSwipe);
+pitchStage.addEventListener("pointerup", event => endSwipe(event, false));
+pitchStage.addEventListener("pointercancel", event => endSwipe(event, true));
 // Økonomiberegner
 Object.values(CALC_FIELDS).forEach(id => document.getElementById(id).addEventListener("input", renderCalc));
+document.querySelectorAll("[data-scenario]").forEach(btn => btn.addEventListener("click", () => {
+  setCalcValues(CALC_SCENARIOS[btn.dataset.scenario]);
+  showToast(`Beregneren viser scenariet "${CALC_SCENARIOS[btn.dataset.scenario].label}" (antagelser).`);
+}));
 document.getElementById("calcForm").addEventListener("submit", event => event.preventDefault());
 document.getElementById("calcReset").addEventListener("click", () => { setCalcValues(CALC_DEFAULTS); showToast("Beregneren viser igen vores antagelser."); });
 // Ugemål
@@ -2557,10 +3202,12 @@ document.getElementById("csvBtn").addEventListener("click", exportCsv);
 document.getElementById("reportBtn").addEventListener("click", openReport);
 document.getElementById("reportClose").addEventListener("click", () => document.getElementById("reportDialog").close());
 document.getElementById("reportPrint").addEventListener("click", () => {
+  document.body.classList.remove("printing-a4");
   document.body.classList.add("printing-report");
   window.print();
 });
-window.addEventListener("afterprint", () => document.body.classList.remove("printing-report"));
+document.getElementById("a4Btn").addEventListener("click", printA4);
+window.addEventListener("afterprint", () => document.body.classList.remove("printing-report", "printing-a4"));
 // Demo-data
 document.getElementById("heroDemoBtn").addEventListener("click", () => startDemo(false));
 document.getElementById("demoLoadBtn").addEventListener("click", () => startDemo(false));
@@ -2585,7 +3232,9 @@ const urlParams = new URLSearchParams(location.search);
 // Standard-PIN'en vises kun som hjælp, så længe den ikke er ændret (det er en demo-lås).
 document.getElementById("pinInput").placeholder = CONFIG.teacherPin === "1234" ? "Demo-PIN: 1234" : "Indtast PIN";
 setTheme(state.theme || (window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"), false);
+document.documentElement.classList.toggle("draft", DRAFT_MODE);
 applyTeamData();
+renderDraftBanner();
 renderMethods();
 // Pitch-tilstanden genbruger logoet fra toppen af siden.
 document.querySelectorAll("[data-logo]").forEach(img => { img.src = document.getElementById("brandLogo").src; });

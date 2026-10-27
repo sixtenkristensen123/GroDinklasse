@@ -4,6 +4,8 @@
 
 GroKlassen er en prototype lavet af et gymnasiehold til Business Mind Programme (BMP) 2026 hos Fonden for Entreprenørskab. Det er en første idé til en forretningsmodel – ikke en færdig virksomhed.
 
+**Før pitchen:** udfyld [`TEAM_DATA`](#9-holdets-egne-data-team_data--udfyld-før-pitchen) (afsnit 9), åbn `index.html?udkast=1` for at se, hvad der mangler, og øv med [`PITCH.md`](PITCH.md).
+
 ## 1. Hvad er GroKlassen?
 
 En bæredygtigheds-app til skoleklasser. Klassen samler point til en fælles plante, der vokser fra frø til stort træ, når læreren godkender klassens grønne handlinger.
@@ -24,26 +26,27 @@ En senere version med lærerlogin vil behandle lærernes e-mail. Det kræver en 
 
 **Klassen (elevernes side – `#klassen`)**
 - Ni grønne udfordringer med point og vejledende CO₂- og vandtal.
-- "Sådan har vi regnet": antagelse, udregning, kilder og faktatjek for hver udfordring.
+- "Sådan har vi regnet": antagelse, udregning, kilder og usikkerheder for hver udfordring.
 - Klassens plante i fem stadier – med fejring og animation, når den vokser (respekterer "reduceret bevægelse").
-- Klassens ugemål, som klassen selv sætter (5–75 point).
+- Klassens ugemål, som klassen selv sætter (5–75 point), og en graf over klassens point de seneste 8 uger.
 - Klasseliga mellem klasser – aldrig elever. Starter forfra hver mandag.
+- Konkurrencekortet (et fiktivt eksempel) står nederst under udfordringer og plante, så kerneproduktet kommer først.
 - Introduktion i 3 trin første gang (kan springes over og åbnes igen via "Sådan virker det").
 
 **For skoler (`#skoler`)** – mini-salgsside og pitch-støtte
-- Problem, løsning og det nye · tre roller · prisskitse (hypoteser) · økonomiberegner med break-even og graf · Business Model Canvas farvekodet efter BMP's fire perspektiver · mulige partnere og kanaler · ærlig sammenligning med alternativer · bæredygtighed på tre niveauer · næste skridt.
+- Problem, løsning og det nye · tre roller · prisskitse (hypoteser) · økonomiberegner med kommuneaftaler, tre scenarier, løn og break-even-graf · Business Model Canvas farvekodet efter BMP's fire perspektiver · mulige partnere og kanaler · ærlig sammenligning med alternativer · bæredygtighed på tre niveauer · næste skridt.
+- **Print A4-oversigt:** én side til dommerne (se afsnit 10).
 
 **Lærer (`#laerer`, demo-PIN `1234`)**
 - Ventende indsendelser med alder, Godkend/Afvis pr. række, "Godkend alle fra i dag" og samlet behandling af ældre.
 - Graf over godkendte point pr. uge (med tabelvisning).
 - Eksport som CSV (åbner i Excel) og print-venlig ugerapport med spørgsmål til en klassesamtale.
+- **Fortryd:** Godkend og Afvis (også samlet) kan fortrydes i 8 sekunder med knappen i beskeden eller Ctrl/Cmd + Z.
 - Indlæs/nulstil demo-data og nulstil klassens egne data.
 
-**Til pitchen**
-- **Demo-tilstand:** knappen "Prøv med demo-data" eller `index.html?demo=1`. Indlæser 6 ugers opdigtede eksempeldata, tydeligt mærket "DEMO". Demo-data gemmes for sig, så klassens rigtige data aldrig røres. "Nulstil demo" gendanner udgangspunktet med det samme.
-- **Præsentationstilstand:** knappen "▶ Pitch" eller `index.html?pitch=1`. Seks trin (Problem → Løsning/demo → Kunder → Forretningsmodel → Bæredygtighed → Næste skridt). Styres med piletaster, swipe, trinknapper og `F` for fuld skærm. `Esc` lukker.
-- Kombinér dem: `index.html?demo=1&pitch=1`.
-- Demo-klassen 7.A står på 178 point – 2 point fra "Stort træ". Den første godkendelse i demoen får planten til at vokse.
+**Konkurrence (`#konkurrence`)** – tilmelding af klassen til en (fiktiv) klassekonkurrence, regler og præmie-idéer. Der vises ingen pop-up, så længe `CONTEST.isExample` er `true`.
+
+**Til pitchen** – se afsnit 10 og [`PITCH.md`](PITCH.md): demo (`?demo=1`), præsentation (`?pitch=1`), udkast (`?udkast=1`), QR-kode, Del-knap og A4-oversigt.
 
 Appen virker på mobil, tablet og computer, i lys og mørk tilstand, helt offline og ved dobbeltklik på filen.
 
@@ -78,7 +81,7 @@ Alle tal er **forsigtige, vejledende skøn for én handling – ikke målinger**
 
 Dansk strøm og fjernvarme er så grønne, at lys, skærme og bad kun sparer få gram. De største gevinster kommer fra transport, mad og forbrug. Kun vand fra vandhanen tælles med. Prototypens gamle tal var for høje (fx lys 0,4 kg) og er rettet for at undgå greenwashing.
 
-**Holdet skal faktatjekke tallene før pitchen** – se den gule "Til faktatjek"-note ved hver udfordring.
+**Holdet skal faktatjekke tallene før pitchen.** På den offentlige side står usikkerhederne som "Usikkert – tjek selv". Med `?udkast=1` vises de i stedet som gule "Til faktatjek"-noter.
 
 ## 6. Fusk-beskyttelse
 
@@ -97,7 +100,19 @@ Dansk strøm og fjernvarme er så grønne, at lys, skærme og bad kun sparer få
 | Skolelicens | ca. 1.500 kr. pr. skole pr. år | Alle klasser, liga, dashboard, rapporter, support |
 | Kommuneaftale | fra ca. 12.000 kr. pr. år for op til 10 skoler | Samlet rapport til kommunens klimaenhed (kun klasseniveau) |
 
-Økonomiberegnerens antagelser (kan ændres i appen og i `CALC_DEFAULTS` i koden): 25 skoler, 1.500 kr. pr. licens, 150 kr. variable omkostninger pr. skole, hosting 4.000 kr., support 6.000 kr. og udvikling 20.000 kr. pr. år. Faste omkostninger 30.000 kr. → **break-even ved ca. 23 skoler**.
+### Økonomiberegneren
+
+Beregneren regner med **skolelicenser og kommuneaftaler** og viser den samlede indtægt. Break-even er det mindste antal skoler med licens, hvor indtægten dækker omkostningerne (med det valgte antal kommuneaftaler). Tekst, KPI, tabel og graf bruger de samme formler, så de altid stemmer overens.
+
+Alle tal er **antagelser** og står i `CALC_SCENARIOS` øverst i scriptet:
+
+| Scenarie | Skolelicenser | Pris | Kommuneaftaler | Variable pr. skole | Faste omkostninger | Break-even |
+|---|---:|---:|---:|---:|---:|---|
+| Forsigtig | 10 | 1.000 kr. | 0 | 200 kr. | 30.000 kr. | **38 skoler** |
+| **Forventet** (standard) | 25 | 1.500 kr. | 1 (10 skoler) | 150 kr. | 30.000 kr. | **15 skoler + 1 kommuneaftale** |
+| Optimistisk | 40 | 1.500 kr. | 3 (10 skoler hver) | 150 kr. | 36.000 kr. | **4 skoler + 3 kommuneaftaler** |
+
+Faste omkostninger = hosting og database + support + udvikling + **løn til drift og udvikling**. Lønnen er 0 kr. i alle scenarier, fordi holdet arbejder frivilligt i prototypefasen. Hvis en dommer spørger "Hvem betaler for jeres tid?", kan I skrive fx 150.000 kr. i feltet. Så stiger break-even i det forventede scenarie til 126 skoler, og I kan forklare, hvorfor kommuneaftaler er vigtige.
 
 Referencepriser (set 25.10.2026 – faktatjek): Grøn Skole/Grønt Flag 3.600 kr./år for en grundskole, Klimakampen 500 kr. pr. klasse pr. 4-ugers kampagne, Gyldendals fagportaler ca. 1.300 kr. pr. klasse pr. år.
 
@@ -109,13 +124,65 @@ Referencepriser (set 25.10.2026 – faktatjek): Grøn Skole/Grønt Flag 3.600 kr
 - **Socialt:** klassen arbejder mod ét fælles mål. Ingen elev bliver målt, rangeret eller udstillet. Mange forskellige udfordringer, så alle kan bidrage.
 - **Økonomisk:** en lille, billig app, hvor en skolelicens skal betale drift og udvikling.
 - **Verdensmål:** 4.7, 12 og 13.
-- **Appen selv er let:** én fil, ingen tracking, ingen server i prototypen, virker offline.
+- **Appen selv er let:** én fil på ca. 220 kB (siden viser selv den aktuelle størrelse), ingen biblioteker, ingen tracking, ingen server i prototypen, virker offline. Logoet ligger inde i filen én gang.
 
-## 9. Holdets egne data – udfyld før pitchen
+## 9. Holdets egne data (`TEAM_DATA`) – udfyld før pitchen
 
-Øverst i `<script>` i `index.html` ligger `TEAM_DATA`. Alt, der står i `[INDSÆT: …]`, `[VALIDÉR: …]` eller `[FAKTATJEK: …]`, vises med gult i appen og i pitch-tilstanden. Ret teksten ét sted, så opdateres alle steder. **Skriv kun det, I faktisk har undersøgt.** Se også tjeklisten i `PITCH.md`.
+Øverst i `<script>` i `index.html` ligger objektet **`TEAM_DATA`**. Det er det **eneste sted**, I skal rette jeres egne data. Alle tekster i appen, pitchen og A4-oversigten læses derfra. Hvert felt har en kommentar, der fortæller, hvad der skal stå, og hvor det vises.
 
-## 10. Sådan kører du appen lokalt
+```js
+const TEAM_DATA = {
+  interviewsTeachers: "6",   // Antal lærere, I har interviewet – kun tallet
+  interviewFinding:   "",    // Tomt felt = ærlig reservetekst
+  ...
+};
+```
+
+- **Tomt felt (`""`)** → appen viser en **ærlig reservetekst**, fx "Vi er i gang med at interviewe lærere" eller "4 uger med rigtige klasser er planlagt". Siden ser derfor aldrig ufærdig ud for dommerne. Reserveteksterne står i `TEAM_FALLBACK` lige under `TEAM_DATA`.
+- **Udfyldt felt** → jeres tekst vises, fx "Hvad lærerne selv siger: …".
+- **`index.html?udkast=1`** → alle tomme felter vises som gule pladsholdere (`[INDSÆT: …]`, `[VALIDÉR: …]`, `[FAKTATJEK: …]`), og et banner øverst fortæller, hvor mange felter der mangler. Noter til holdet (fx "faktatjek før pitchen") vises også kun her.
+- **Skriv kun det, I faktisk har undersøgt.** Opfind aldrig interviews, citater, brugertal, pilotresultater, sponsorer eller partneraftaler.
+- **Ingen persondata:** brug fx en fælles hold-mail – ikke private navne, telefonnumre eller e-mails.
+
+### Tjekliste over alle felter
+
+- [ ] `ideaOrigin` – hvordan I fik idéen (1 sætning). *Vises:* For skoler → Problemet og løsningen.
+- [ ] `interviewsTeachers` – antal interviewede lærere (kun tallet). *Vises:* For skoler → Kunder og Næste skridt, pitch trin 3.
+- [ ] `interviewFinding` – vigtigste fund fra interviewene (1 kort sætning). *Vises:* For skoler → Problemet, pitch trin 1.
+- [ ] `targetGrades` – validerede klassetrin, fx "4.–9. klasse". *Vises:* Kunder, Business Model Canvas og A4.
+- [ ] `willingnessToPay` – hvad skoleledere/lærere sagde om pris. *Vises:* Prisskitse, Canvas, pitch trin 4 og A4.
+- [ ] `feedbackUsed` – hvem I har talt med, og hvad I ændrede bagefter. *Vises:* For skoler → Partnere.
+- [ ] `pilotClasses` – antal pilotklasser (kun tallet). *Vises:* Næste skridt og pitch trin 6.
+- [ ] `pilotResult` – hvad pilotforsøget viste (1 sætning). *Vises:* Næste skridt.
+- [ ] `factChecker` – hvem der faktatjekker CO₂-tallene. *Vises:* Næste skridt og pitch trin 6.
+- [ ] `nameCheck` – resultat af tjek af navn/varemærke og domæne. *Vises:* For skoler → Alternativer.
+- [ ] `sponsor` – en sponsor, der **har sagt ja**. Sæt også `CONTEST.isExample` til `false`. *Vises:* Konkurrence.
+- [ ] `pitchAsk` – jeres opfordring, fx "Vi søger 3 pilotskoler – vil I være med?". *Vises:* pitch trin 6 og A4.
+- [ ] `teamName` – holdets navn og evt. skole. *Vises:* A4.
+- [ ] `contact` – fælles kontakt (fx hold-mail, ingen private oplysninger). *Vises:* A4.
+- [ ] `publicUrl` – den udgivne adresse (er udfyldt). QR-koden peger herhen med `?demo=1`. Ret den, hvis I flytter siden.
+
+Kontrollér til sidst med `index.html?udkast=1`, at banneret skriver, at alle felter er udfyldt (eller at de resterende reservetekster er i orden).
+
+## 10. Demo, udkast, QR-kode og A4 – til pitchen
+
+| Adresse | Hvad sker der? |
+|---|---|
+| `index.html?demo=1` | Starter straks en frisk demo med 6 ugers **opdigtede** eksempeldata, tydeligt mærket "DEMO": en voksen plante (Ungt træ), en graf over ugerne og en klasseliga. Demo-data gemmes for sig, så klassens rigtige data aldrig røres. "Nulstil demo" gendanner udgangspunktet, og "Afslut demo" viser klassens egne data igen (for en ny besøgende: den tomme tilstand) og fjerner `?demo=1` fra adressen. |
+| `index.html?pitch=1` | Åbner præsentationstilstanden i 6 trin. Styres med piletaster, trinknapper og `F` for fuld skærm. På mobil og tablet (og med musen) kan trinnene trækkes: de følger fingeren, og et kast skifter trin. `Esc` lukker. |
+| `index.html?demo=1&pitch=1` | Begge dele – den bedste adresse til selve pitchen. |
+| `index.html?udkast=1` | Viser de gule pladsholdere og et banner med de felter i `TEAM_DATA`, der mangler. Kan kombineres med de andre, fx `?udkast=1&pitch=1`. |
+
+Demo-klassen 7.A står på 178 point – 2 point fra "Stort træ". Den første godkendelse i lærerområdet får planten til at vokse med en fejring.
+
+**QR-koden** laves i selve filen uden biblioteker (standard-QR, fejlkorrektion M). Den peger på `TEAM_DATA.publicUrl` + `?demo=1`, så dommerne lander i en levende demo og ikke i en tom app. Den vises:
+- på **sidste pitch-trin** sammen med holdets opfordring (`pitchAsk`),
+- bag knappen **"Del"** i toppen (med "Kopiér link" og – på mobil – "Del …"),
+- på **A4-oversigten**.
+
+**Print A4-oversigt** (knap under For skoler) giver én ren A4-side med værditilbud, kunder, prisskitse, break-even (fra beregnerens aktuelle scenarie), bæredygtighed, QR-kode og holdets kontakt fra `TEAM_DATA`. Vælg "Gem som PDF" i printvinduet, hvis I vil sende den. Test den på jeres egen printer før pitchdagen.
+
+## 11. Sådan kører du appen lokalt
 
 1. Download eller kopiér filen `index.html` til en mappe på din computer.
 2. Dobbeltklik på `index.html`.
@@ -123,7 +190,7 @@ Referencepriser (set 25.10.2026 – faktatjek): Grøn Skole/Grønt Flag 3.600 kr
 
 Hvis browseren blokerer enkelte funktioner ved åbning af en lokal fil, kan du prøve en anden browser eller køre filen via en lokal webserver. GitHub Pages kører den som en almindelig webside.
 
-## 11. Sådan lægger du appen på GitHub og udgiver med GitHub Pages
+## 12. Sådan lægger du appen på GitHub og udgiver med GitHub Pages
 
 ### A. Opret et repository
 
@@ -136,13 +203,13 @@ Hvis browseren blokerer enkelte funktioner ved åbning af en lokal fil, kan du p
 
 ### B. Upload filerne
 
-1. Åbn dit nye repository.
+1. Åbn dit repository.
 2. Klik på **Add file** og vælg **Upload files**.
-3. Træk `index.html`, `README.md`, `PITCH.md` og `CHANGELOG.md` ind i uploadfeltet.
-4. Skriv fx `Tilføj GroKlassen prototype` i feltet **Commit changes**.
+3. Træk `index.html`, `README.md`, `PITCH.md`, `CHANGELOG.md`, `DESIGN-AUDIT.md` og `e2e.cjs` ind i uploadfeltet.
+4. Skriv fx `Opdatér GroKlassen` i feltet **Commit changes**.
 5. Klik på **Commit changes**.
 
-Filerne skal ligge direkte i roden af repository'et – ikke i en ekstra undermappe. Filen skal hedde præcis `index.html`. Mappen `.historik` og mappen `tests` behøver du ikke uploade.
+Filerne skal ligge direkte i roden af repository'et – ikke i en ekstra undermappe. Filen skal hedde præcis `index.html`.
 
 ### C. Aktivér GitHub Pages
 
@@ -154,15 +221,37 @@ Filerne skal ligge direkte i roden af repository'et – ikke i en ekstra underma
 6. Klik på **Save**.
 7. Vent et par minutter, og genindlæs siden **Settings → Pages**. GitHub viser adressen til din udgivne side dér.
 
-Adressen vil normalt ligne `https://DIT-GITHUB-NAVN.github.io/groklassen/`. Til pitchen kan du bruge `…/groklassen/?demo=1&pitch=1`. Hvis du ændrer filerne senere, uploader du de nye versioner og laver et nyt commit; GitHub Pages udgiver ændringerne automatisk.
+Adressen vil normalt ligne `https://DIT-GITHUB-NAVN.github.io/groklassen/`. Skriv den i `TEAM_DATA.publicUrl`, så QR-koden peger rigtigt. Til pitchen kan du bruge `…/groklassen/?demo=1&pitch=1`. Hvis du ændrer filerne senere, uploader du de nye versioner og laver et nyt commit; GitHub Pages udgiver ændringerne automatisk.
 
 **Bemærk:** GitHub Pages må ikke bruges til at drive en kommerciel tjeneste. Det er fint til prototypen, men en betalt version skal flyttes til en anden hosting.
 
-## 12. Test (valgfrit)
+## 13. Test (valgfrit)
 
-Mappen `tests` indeholder en automatisk browsertest (`tests/e2e.cjs`), der tjekker hele flowet, fusk-reglerne, migrering, offline-brug, tastatur og layout ved 375, 768 og 1280 px i lys og mørk tilstand. Den kræver Node.js og Playwright – se kommentaren øverst i filen. Appen virker fint uden.
+`e2e.cjs` er en automatisk browsertest (ca. 135 tjek), der gennemgår:
+- hele flowet (indsend → lærer-PIN → godkend → planten vokser → CSV → ugerapport),
+- fusk-reglerne (dobbelt indsendelse, loft og cooldown efter genindlæsning) og migrering,
+- `TEAM_DATA`, `?udkast=1` og `?demo=1` (også at ingen pladsholdere er synlige uden udkast),
+- QR-koden, Del-knappen og A4-oversigten (præcis én side),
+- økonomiens scenarier og break-even, konkurrencetilmelding og -afmelding samt pitchens 6 trin,
+- swipe i pitchen (1:1-sporing, elastisk kant, kast, afbrydelse, rigtig touch og reduceret bevægelse) og Fortryd (knap, Ctrl/Cmd + Z, kun seneste handling, oven på fejringen),
+- tilgængelighed (tastatur, fokus, labels, `aria-live` og kontrast i begge temaer),
+- layout ved 375, 768 og 1280 px i lys og mørk tilstand (ingen vandret scroll, indhold over folden på mobil).
 
-## 13. Videreudvikling
+Den kræver Node.js 18+ og Playwright:
+
+```bash
+npm install playwright jsqr pngjs
+npx playwright install chromium
+node e2e.cjs
+```
+
+Kør den mod en lokal server med `BASE_URL=http://localhost:8000/ node e2e.cjs` (start serveren med `python3 -m http.server 8000`). `jsqr` og `pngjs` er valgfrie – med dem afkoder testen også QR-koderne. Appen virker fint uden testen.
+
+## 14. Design
+
+`DESIGN-AUDIT.md` er en gennemgang af appens design efter Apples designprincipper (respons, rumlig sammenhæng, reduceret bevægelse, typografi m.m.) med det, der er rettet, og prioriterede forslag til næste runde.
+
+## 15. Videreudvikling
 
 - Supabase eller lignende (i en EU-region) til lærerlogin og fælles klassedata på tværs af enheder.
 - Servervalidering af pointloft, cooldown og godkendelse.
@@ -170,8 +259,8 @@ Mappen `tests` indeholder en automatisk browsertest (`tests/e2e.cjs`), der tjekk
 - Faktatjek af CO₂-tal med en fagperson og mulighed for lokale tal (fx egen varmeforsyning).
 - Databehandleraftale og privatlivsvurdering, før appen bruges med rigtige skoler.
 
-## 14. Licens og kontakt
+## 16. Licens og kontakt
 
 **Licens:** Ingen open source-licens er valgt endnu. Vil I tillade andre at genbruge koden, kan I vælge fx MIT og tilføje en `LICENSE`-fil.
 
-**Kontakt:** [INDSÆT: projektets kontaktoplysninger – fx en fælles hold-mail, ikke private oplysninger]
+**Kontakt:** se `TEAM_DATA.contact` i `index.html` (en fælles hold-mail – ikke private oplysninger).
