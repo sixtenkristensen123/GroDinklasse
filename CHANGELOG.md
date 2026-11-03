@@ -1,5 +1,27 @@
 # Ændringslog
 
+## Version 3.4 – 3. november 2026 (Apple-design-lag)
+
+Nyt udseende og ny bevægelse efter skillen *apple-design*. **Alt indhold og al logik er uændret** – laget ligger i `<style id="apple-design">` og `<script id="apple-motion">` og kan fjernes igen uden at noget går i stykker. Alle 134 browsertests i `e2e.cjs` består.
+
+### Udseende
+- Rolige systemgrå flader med GroKlassens grønne som accent i både lys og mørk tilstand.
+- Kort uden hårde kanter: dybde fra blød skygge, større hjørneradius og grupperede flader for rækker (udfordringer, liga, prisniveauer, BMC-felter).
+- Knapper som kapsler med tonet flade; den primære handling er fyldt grøn.
+- Typografi efter størrelse: tæt linjeafstand og negativ tracking på store overskrifter, balancerede linjeskift, tabeltal i nøgletal.
+
+### Bevægelse og materialer
+- Fanerne er en segmenteret kontrol med en markør, der glider til den valgte fane som en kritisk dæmpet fjeder. Den kan afbrydes og vendes midt i bevægelsen.
+- Fanerne bliver hængende øverst, når man ruller. Bag dem toner et gennemsigtigt materiale (blur) frem, kun når indhold ruller ind under dem.
+- Skift mellem faner: det nye indhold kommer en smule fra den side, fanen ligger.
+- Fremdriftsbjælker animeres med `transform` (fjeder) i stedet for `width`.
+- Dialoger vokser frem fra knappen, der åbnede dem, og går samme vej tilbage.
+- På mobil (≤ 600 px) er dialogerne ark nedefra med et håndtag. Arket følger fingeren 1:1, giver elastisk modstand opad og lukker ved et kast eller et langt træk (Apples momentum-projektion). Ellers fjedrer det tilbage.
+- Beskeder (toasts) er en mørk kapsel af materiale.
+
+### Tilgængelighed
+- Reduceret bevægelse: kun korte krydstoninger. Reduceret gennemsigtighed: solide flader. Højere kontrast: kanter vises igen.
+
 ## Version 3.3 – 27. oktober 2026 (finpudsning før pitchen)
 
 ### Troværdighed og første indtryk

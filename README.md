@@ -4,6 +4,7 @@
 
 GroKlassen er en prototype lavet af et gymnasiehold til Business Mind Programme (BMP) 2026 hos Fonden for Entreprenørskab. Det er en første idé til en forretningsmodel – ikke en færdig virksomhed.
 
+**Før pitchen:** udfyld [`TEAM_DATA`](#9-holdets-egne-data-team_data--udfyld-før-pitchen) (afsnit 9), åbn `index.html?udkast=1` for at se, hvad der mangler, og øv med [`PITCH.md`](PITCH.md).
 
 ## 1. Hvad er GroKlassen?
 
@@ -249,6 +250,8 @@ Kør den mod en lokal server med `BASE_URL=http://localhost:8000/ node e2e.cjs` 
 ## 14. Design
 
 `DESIGN-AUDIT.md` er en gennemgang af appens design efter Apples designprincipper (respons, rumlig sammenhæng, reduceret bevægelse, typografi m.m.) med det, der er rettet, og prioriterede forslag til næste runde.
+
+Udseendet og bevægelsen følger skillen *apple-design* (se `DESIGN-AUDIT.md`, runde 3). Det ligger samlet i `<style id="apple-design">` i `<head>` og `<script id="apple-motion">` nederst i filen. Fjernes de to blokke, ser appen ud som i version 3.3 – indholdet er det samme.
 
 ## 15. Videreudvikling
 
