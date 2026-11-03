@@ -4,7 +4,6 @@
 
 GroKlassen er en prototype lavet af et gymnasiehold til Business Mind Programme (BMP) 2026 hos Fonden for Entreprenørskab. Det er en første idé til en forretningsmodel – ikke en færdig virksomhed.
 
-**Før pitchen:** udfyld [`TEAM_DATA`](#9-holdets-egne-data-team_data--udfyld-før-pitchen) (afsnit 9), åbn `index.html?udkast=1` for at se, hvad der mangler, og øv med [`PITCH.md`](PITCH.md).
 
 ## 1. Hvad er GroKlassen?
 
