@@ -5,8 +5,6 @@
    Bemærk: localStorage og en PIN i browserkode er ikke sikker
    adgangskontrol. Brug en server/backend til en rigtig løsning.
    ========================================================= */
-// Filens størrelse måles allerede her, før appen tegner noget – så tallet svarer til selve filen.
-const APP_SIZE_BYTES = new Blob([document.documentElement.outerHTML]).size;
 const CONFIG = {
   teacherPin: "1234",        // Skift denne PIN-kode, hvis du vil
   dailyPointCap: 15,         // Maks. point pr. klasse pr. dag (godkendte + ventende)
@@ -19,61 +17,77 @@ const CONFIG = {
 const CLASS_NAMES = ["7.A", "7.B", "8.A"];
 
 /* ---------- HOLDETS EGNE DATA – udfyld før pitchen (det ENESTE sted, I skal rette) ----------
-   Skriv jeres rigtige data mellem anførselstegnene. Et tomt felt ("") viser en ærlig reservetekst
-   (se TEAM_FALLBACK nedenfor), så siden aldrig ser ufærdig ud for dommerne.
-   Åbn index.html?udkast=1 for at se, hvilke felter der stadig mangler (de vises med gult).
+   Skriv jeres rigtige data mellem anførselstegnene. Et tomt felt ("") skjuler linjen, hvor feltet bruges –
+   undtagen ideaOrigin, teamName, contact, pitchAsk og publicUrl, der viser en standardtekst (TEAM_FALLBACK nedenfor).
    Skriv KUN det, I faktisk har undersøgt – opfind aldrig tal, citater, brugere, skoler eller sponsorer.
    Ingen persondata: brug fx en fælles hold-mail, ikke private navne, telefonnumre eller mails. */
 const TEAM_DATA = {
-  ideaOrigin:         "", // Hvordan I fik idéen – 1 sætning. Vises: For skoler → Problemet og løsningen.
-  interviewsTeachers: "", // Antal lærere, I har interviewet – kun tallet, fx "6". Vises: For skoler → Kunder + Næste skridt, pitch trin 3.
-  interviewFinding:   "", // Vigtigste fund fra interviewene med lærere – 1 kort sætning. Vises: For skoler → Problemet, pitch trin 1.
-  targetGrades:       "", // Klassetrin, I har valideret, fx "4.–9. klasse". Vises: For skoler → Kunder og Business Model Canvas.
-  willingnessToPay:   "", // Hvad skoleledere/lærere sagde om pris og betalingsvilje. Vises: Prisskitse, Canvas, pitch trin 4.
-  feedbackUsed:       "", // Hvem I har talt med (fx "3 lærere og 1 skoleleder"), og hvad I ændrede bagefter. Vises: For skoler → Partnere.
-  pilotClasses:       "", // Antal pilotklasser – kun tallet, fx "3". Vises: For skoler → Næste skridt, pitch trin 6.
+  ideaOrigin:         "", // Hvordan I fik idéen – 1 sætning. Vises: For skoler → toppen af siden.
+  interviewsTeachers: "", // Antal lærere, I har interviewet – kun tallet, fx "6". Vises: For skoler → Næste skridt, pitch trin 3.
+  interviewFinding:   "", // Vigtigste fund fra interviewene med lærere – 1 kort sætning. Vises: pitch trin 1.
+  targetGrades:       "", // Klassetrin, I har valideret, fx "4.–9. klasse". Vises: Business Model Canvas og A4.
+  willingnessToPay:   "", // Hvad skoleledere/lærere sagde om pris og betalingsvilje. Vises: Prisskitse, Canvas, pitch trin 4 og A4.
+  feedbackUsed:       "", // Hvem I har talt med (fx "3 lærere og 1 skoleleder"), og hvad I ændrede bagefter. Vises: For skoler → Næste skridt.
+  pilotClasses:       "", // Antal pilotklasser – kun tallet, fx "3". Vises: For skoler → Næste skridt.
   pilotResult:        "", // Hvad pilotforsøget viste – 1 sætning. Vises: For skoler → Næste skridt.
   factChecker:        "", // Hvem der faktatjekker CO₂-tallene, fx "en biologilærer på vores skole". Vises: Næste skridt, pitch trin 6.
-  nameCheck:          "", // Resultat af jeres tjek af navn/varemærke og domæne. Vises: For skoler → Alternativer.
-  sponsor:            "", // Navnet på en sponsor, der HAR sagt ja til konkurrencen. Vises: Konkurrence. (Sæt også CONTEST.isExample til false.)
+  nameCheck:          "", // Resultat af jeres tjek af navn/varemærke og domæne. Vises: For skoler → Næste skridt.
+  sponsor:            "", // Navnet på en sponsor, der HAR sagt ja. Vises: Konkurrence og nyhedsbrevet (se NEWSLETTER). Tomt = "[Jeres sponsor]" + "Eksempel · fiktiv sponsor".
   pitchAsk:           "", // Jeres opfordring på sidste slide, fx "Vi søger 3 pilotskoler – vil I være med?". Vises: pitch trin 6 og A4-oversigten.
   teamName:           "", // Holdets navn og evt. skole, fx "Hold 3, X Gymnasium". Vises: A4-oversigten.
   contact:            "", // Fælles kontakt til holdet, fx en hold-mail (ingen private oplysninger). Vises: A4-oversigten.
   publicUrl: "https://sixtenkristensen123.github.io/GroDinklasse/" // Den udgivne adresse. QR-koden peger herhen med ?demo=1.
 };
 
-/* Ærlige reservetekster, der vises, når et felt i TEAM_DATA er tomt.
-   todo = det, der vises med gult i ?udkast=1, så holdet kan se, hvad der mangler.
-   text = det, alle andre ser. Teksten passer ind i sætningen, hvor feltet bruges. */
+/* Standardtekster til de felter, der altid vises. Alle andre tomme felter skjuler deres linje. */
 const TEAM_FALLBACK = {
-  ideaOrigin:         {todo:"INDSÆT: hvordan I fik idéen – 1 sætning", text:"GroKlassen er udviklet af et gymnasiehold til Business Mind Programme 2026."},
-  interviewsTeachers: {todo:"INDSÆT: antal interviewede lærere", text:"vi er i gang med at interviewe lærere"},
-  interviewFinding:   {todo:"INDSÆT: vigtigste fund fra jeres interviews med lærere", text:"Vi er i gang med at interviewe lærere om problemet."},
-  targetGrades:       {todo:"VALIDÉR: klassetrin, fx 4.–9. klasse", text:"grundskolens klasser – de præcise klassetrin testes i pilotforsøget"},
-  willingnessToPay:   {todo:"INDSÆT: hvad skoleledere/lærere sagde om pris og betalingsvilje", text:"Betalingsviljen er ikke undersøgt endnu – den tester vi i interviews og pilotforsøg."},
-  feedbackUsed:       {todo:"INDSÆT: hvem I har talt med, og hvad I ændrede bagefter", text:"Vi er i gang med at samle feedback fra lærere."},
-  pilotClasses:       {todo:"INDSÆT: antal pilotklasser", text:"4 uger med rigtige klasser er planlagt."},
-  pilotResult:        {todo:"INDSÆT: hvad pilotforsøget viste", text:"Pilotforsøget er ikke gennemført endnu."},
-  factChecker:        {todo:"INDSÆT: hvem der faktatjekker CO₂-tallene, fx en biologilærer", text:"en fagperson, før appen bruges i skoler"},
-  nameCheck:          {todo:"FAKTATJEK: er navnet GroKlassen og et domæne ledigt?", text:"det har vi ikke undersøgt endnu."},
-  sponsor:            {todo:"INDSÆT: sponsor – ingen aftale endnu", text:"ingen sponsor endnu – præmien er kun et eksempel"},
-  pitchAsk:           {todo:"INDSÆT: jeres opfordring, fx \"Vi søger 3 pilotskoler\"", text:"Vi søger pilotklasser, der vil teste GroKlassen i 4 uger."},
-  teamName:           {todo:"INDSÆT: holdets navn og evt. skole", text:"Et gymnasiehold i Business Mind Programme 2026"},
-  contact:            {todo:"INDSÆT: fælles kontakt, fx en hold-mail", text:"Spørg holdet – vi står klar efter pitchen."},
-  publicUrl:          {todo:"INDSÆT: den udgivne adresse", text:"https://sixtenkristensen123.github.io/GroDinklasse/"}
+  ideaOrigin: "GroKlassen er udviklet af et gymnasiehold til Business Mind Programme 2026.",
+  pitchAsk:   "Vi søger pilotklasser, der vil teste GroKlassen i 4 uger.",
+  teamName:   "Et gymnasiehold i Business Mind Programme 2026",
+  contact:    "Spørg holdet – vi står klar efter pitchen.",
+  publicUrl:  "https://sixtenkristensen123.github.io/GroDinklasse/"
 };
-// ?udkast=1 i adressen viser de gule pladsholdere i stedet for reserveteksterne.
-const DRAFT_MODE = new URLSearchParams(location.search).get("udkast") === "1";
 
 /* ---------- Økonomiberegnerens scenarier (kr. pr. år, ekskl. moms) ----------
    Alle tal er ANTAGELSER til pitchen – ikke rigtige kunder, aftaler eller tilbud. Se README for begrundelser.
    schools = skoler med egen skolelicens · munis = kommuneaftaler · muniSchools = skoler pr. kommuneaftale
+   sponsors = sponsoraftaler · sponsorPrice = pris pr. sponsoraftale · sponsorCost = omkostning pr. sponsoraftale (nyhedsbrev og rapportering)
    variable = variable omkostninger pr. skole (både licens- og kommuneskoler) · salary = løn til holdets tid
-   (0 kr., fordi holdet arbejder frivilligt i prototypefasen). "expected" er standard. */
+   (0 kr., fordi holdet arbejder frivilligt i prototypefasen). "expected" er standard.
+   Ingen sponsor har sagt ja – sponsoraftalerne er et regneeksempel, ikke en aftale. */
 const CALC_SCENARIOS = {
-  careful:    {label:"Forsigtig",   schools:10, price:1000, munis:0, muniPrice:12000, muniSchools:10, variable:200, hosting:4000, support:6000,  dev:20000, salary:0},
-  expected:   {label:"Forventet",   schools:25, price:1500, munis:1, muniPrice:12000, muniSchools:10, variable:150, hosting:4000, support:6000,  dev:20000, salary:0},
-  optimistic: {label:"Optimistisk", schools:40, price:1500, munis:3, muniPrice:12000, muniSchools:10, variable:150, hosting:6000, support:10000, dev:20000, salary:0}
+  careful:    {label:"Forsigtig",   schools:10, price:1000, munis:0, muniPrice:12000, muniSchools:10, sponsors:0, sponsorPrice:15000, sponsorCost:1000, variable:200, hosting:4000, support:6000,  dev:20000, salary:0},
+  expected:   {label:"Forventet",   schools:25, price:1500, munis:1, muniPrice:12000, muniSchools:10, sponsors:1, sponsorPrice:15000, sponsorCost:1000, variable:150, hosting:4000, support:6000,  dev:20000, salary:0},
+  optimistic: {label:"Optimistisk", schools:40, price:1500, munis:3, muniPrice:12000, muniSchools:10, sponsors:3, sponsorPrice:15000, sponsorCost:1000, variable:150, hosting:6000, support:10000, dev:20000, salary:0}
+};
+
+/* ---------- SPONSORNIVEAUER OG NYHEDSBREV – ret her ----------
+   Alle priser er HYPOTESER. Sponsorens navn står i TEAM_DATA.sponsor. Er feltet tomt, viser nyhedsbrevet
+   "[Jeres sponsor]" og mærkatet "Eksempel · fiktiv sponsor". Skriv aldrig en virksomhed, før den har sagt ja –
+   og brug aldrig en af virksomhederne fra "Sponsorer vi vil kontakte" bare fordi den står på listen.
+   Regler: nyhedsbrevet er til voksne (lærere, ledelse og forældre), ingen tilbud, rabatkoder eller produktreklame,
+   læreren kan slå sponsorafsnittet fra, og sponsoren kan ikke ændre indhold eller tal. */
+const SPONSOR_LEVELS = {
+  main:      {label:"Hovedsponsor", price:40000, exposure:"“Støttet af” øverst i nyhedsbrevet og afsnittet “Månedens grønne tip”"},
+  partner:   {label:"Partner",      price:15000, exposure:"Afsnittet “Månedens grønne tip” og navnet nederst i nyhedsbrevet"},
+  supporter: {label:"Støtter",      price:5000,  exposure:"Navnet i en “Tak til”-linje nederst i nyhedsbrevet"}
+};
+const NEWSLETTER = {
+  sponsorLevel: "main", // Sponsorens niveau: "main" (hovedsponsor), "partner" eller "supporter" (støtter)
+  sponsorTip:   ""      // Sponsorens eget grønne tip – sagligt og om en af appens udfordringer, aldrig produktreklame.
+                        // Holdet godkender teksten. Tomt = appens eget tip for måneden.
+};
+// Saglige tips til nyhedsbrevet – ét pr. udfordring. Månedens tip handler om en udfordring, klassen kan gøre mere af.
+const GREEN_TIPS = {
+  cycle:      "Aftal en fast cykel- eller gåmakker til skole. Det er lettere at holde fast i vanen sammen – også når det regner.",
+  sort:       "Hæng en lille seddel ved affaldsspandene med, hvad der hører til hvor. Så bliver det nemmere for alle at sortere rigtigt.",
+  shower:     "Sæt en sang på under badet, og stop, når den slutter. 2 minutter kortere sparer ca. 15 liter vand.",
+  lunch:      "Brug en madkasse og en drikkedunk, der kan genbruges. Så undgår madpakken engangsplast.",
+  lights:     "Gør det til en fast opgave i klassen at slukke lyset, når I går til frikvarter.",
+  repair:     "Prøv at reparere noget, før det bliver smidt ud – fx sy en knap i eller lap en cykelslange.",
+  plantlunch: "Prøv en plantebaseret frokost én dag om ugen, fx med bønnepostej, hummus eller falafel.",
+  swap:       "Hold en byttedag i klassen med tøj, bøger eller spil, som ingen bruger længere.",
+  screens:    "Sluk skærme og projektor helt, når skoledagen er slut. Standby bruger også strøm."
 };
 const CALC_DEFAULTS = CALC_SCENARIOS.expected;
 
@@ -109,7 +123,7 @@ const CHALLENGES = [
             {label:"Energistyrelsen: standardfaktorer for brændsler", url:"https://ens.dk/media/1031/download"}]},
   {id:"sort", title:"Sortér affald korrekt", description:"Sortér papir, plast, metal eller madaffald i klassen.", points:2, co2:0.05, water:0, icon:"♻️", confidence:"lav",
    method:"Antagelse: klassen sorterer ca. 50 g plast fra restaffaldet. Genanvendelse sparer ca. 1,8 kg CO₂ pr. kg plast, men ca. 30 % af den sorterede plast bliver alligevel brændt: 0,05 kg × 1,8 × 0,7 ≈ 0,06 – rundet ned til ca. 0,05 kg.",
-   waterMethod:"0 L – eventuel vandbesparelse i industrien er ikke dokumenteret.",
+   waterMethod:"0 L (kun vand fra vandhanen tælles med).",
    check:"Vej den plast, klassen sorterer på en dag. Find en kilde med metode for de 1,8 kg pr. kg (AffaldPlus oplyser ikke metoden). Papir, pap og madaffald er ikke regnet med.",
    sources:[{label:"AffaldPlus: CO₂-reduktion ved genanvendelse", url:"https://affaldplus.dk/co2-reduktion"},
             {label:"Samvirke: andel af sorteret plast, der ikke genanvendes (rundspørge)", url:"https://samvirke.dk/artikler/mere-end-30-procent-af-den-sorterede-plastik-bliver-ikke-genanvendt"}]},
@@ -563,7 +577,7 @@ function renderMethods() {
       <h3 id="method-title-${c.id}"><span aria-hidden="true">${c.icon}</span> ${safeText(c.title)} <span class="tag">ca. ${formatCo2(c.co2)} CO₂</span><span class="tag">${c.water} L vand</span><span class="conf">${levels[c.confidence] || ""}</span></h3>
       <p><strong>Antagelse og udregning:</strong> ${safeText(c.method)}</p>
       <p><strong>Vand:</strong> ${safeText(c.waterMethod)}</p>
-      <p class="check">${DRAFT_MODE ? '<span class="ph">Til faktatjek</span>' : "<strong>Usikkert – tjek selv:</strong>"} ${safeText(c.check)}</p>
+      <p class="check"><strong>Usikkerhed:</strong> ${safeText(c.check)}</p>
       <p class="small">Kilder (set 25.10.2026): ${c.sources.map(s => `<a href="${safeText(s.url)}" target="_blank" rel="noopener">${safeText(s.label)}</a>`).join(" · ")}</p>
     </article>`).join("");
 }
@@ -922,35 +936,24 @@ function qrSvg(text, label) {
 
 /* ---------- Holdets data (TEAM_DATA) ---------- */
 function teamFilled(key) { return String(TEAM_DATA[key] || "").trim() !== ""; }
-// Holdets tekst som HTML: det udfyldte felt (med tekst før/efter), ellers den ærlige reservetekst.
-// I ?udkast=1 vises i stedet en gul pladsholder, så holdet kan se, hvad der mangler.
+// Holdets tekst som HTML: det udfyldte felt (med tekst før/efter), ellers standardteksten – eller "" (skjul linjen).
 function teamHtml(key, before = "", after = "") {
   if (teamFilled(key)) return safeText(before + String(TEAM_DATA[key]).trim() + after);
-  const fallback = TEAM_FALLBACK[key] || {todo: key, text: ""};
-  if (DRAFT_MODE) return `${safeText(before)}<span class="ph">[${safeText(fallback.todo)}]</span>${safeText(after)}`;
-  return safeText(fallback.text);
+  return safeText(TEAM_FALLBACK[key] || "");
 }
 // Indsætter holdets data i alle elementer med data-team="..." (og evt. data-before/data-after).
+// Er feltet tomt, skjules linjen: det nærmeste element med data-team-line (ellers selve elementet).
 function applyTeamData(root = document) {
   root.querySelectorAll("[data-team]").forEach(el => {
-    el.innerHTML = teamHtml(el.dataset.team, el.dataset.before || "", el.dataset.after || "");
+    const html = teamHtml(el.dataset.team, el.dataset.before || "", el.dataset.after || "");
+    el.innerHTML = html;
+    (el.closest("[data-team-line]") || el).hidden = !html;
   });
-}
-// Udkast-banneret viser, hvor mange felter i TEAM_DATA holdet mangler at udfylde.
-function renderDraftBanner() {
-  const banner = document.getElementById("draftBanner");
-  banner.hidden = !DRAFT_MODE;
-  if (!DRAFT_MODE) return;
-  const keys = Object.keys(TEAM_FALLBACK);
-  const missing = keys.filter(key => !teamFilled(key));
-  document.getElementById("draftText").textContent = missing.length
-    ? `${missing.length} af ${keys.length} felter i TEAM_DATA mangler: ${missing.join(", ")}. Gule felter er pladsholdere.`
-    : `Alle ${keys.length} felter i TEAM_DATA er udfyldt.`;
 }
 // Adressen, som QR-koden og "Del" peger på.
 function publicUrl() {
   if (teamFilled("publicUrl")) return String(TEAM_DATA.publicUrl).trim();
-  return /^https?:$/.test(location.protocol) ? location.origin + location.pathname : TEAM_FALLBACK.publicUrl.text;
+  return /^https?:$/.test(location.protocol) ? location.origin + location.pathname : TEAM_FALLBACK.publicUrl;
 }
 function demoUrl() {
   const url = new URL(publicUrl());
@@ -960,6 +963,7 @@ function demoUrl() {
 
 /* ---------- Økonomiberegner ---------- */
 const CALC_FIELDS = {schools:"calcSchools", price:"calcPrice", munis:"calcMunis", muniPrice:"calcMuniPrice", muniSchools:"calcMuniSchools",
+  sponsors:"calcSponsors", sponsorPrice:"calcSponsorPrice", sponsorCost:"calcSponsorCost",
   variable:"calcVariable", hosting:"calcHosting", support:"calcSupport", dev:"calcDev", salary:"calcSalary"};
 function formatKr(value) { return `${value < 0 ? "−" : ""}${formatNumber(Math.abs(Math.round(value)))} kr.`; }
 function readCalc() {
@@ -970,28 +974,45 @@ function readCalc() {
   });
   return values;
 }
-// Selve regnestykket – holdt for sig selv, så det er let at forklare (og så tekst, tabel og graf bruger samme tal):
-//   indtægt(s)      = kommuneaftaler × pris pr. aftale + s × pris pr. skolelicens
-//   omkostninger(s) = faste omkostninger (hosting + support + udvikling + løn)
+// Selve regnestykket – holdt for sig selv, så det er let at forklare (og så tekst, tabel, graf, pitch og A4 bruger samme tal):
+//   indtægt(s)      = kommuneaftaler × pris pr. aftale + sponsoraftaler × pris pr. sponsoraftale + s × pris pr. skolelicens
+//   omkostninger(s) = faste omkostninger (hosting + support + udvikling + løn) + sponsoraftaler × omkostning pr. sponsoraftale
 //                     + (s + kommuneaftaler × skoler pr. aftale) × variable omkostninger
 //   break-even      = det mindste antal skoler med licens, hvor indtægt ≥ omkostninger
+// Kommune- og sponsoraftaler er faste indtægter – de afhænger ikke af antallet af skoler med licens.
 function calcEconomy(v) {
   const fixed = v.hosting + v.support + v.dev + v.salary;
   const margin = v.price - v.variable;                                 // dækningsbidrag pr. skolelicens
   const muniRevenue = v.munis * v.muniPrice;
   const muniContribution = muniRevenue - v.munis * v.muniSchools * v.variable; // kommuneaftalernes bidrag efter variable omkostninger
-  const revenueAt = s => muniRevenue + s * v.price;
-  const costsAt = s => fixed + (s + v.munis * v.muniSchools) * v.variable;
-  const remaining = fixed - muniContribution;                          // det, skolelicenserne skal dække
-  const breakEven = remaining <= 0 ? 0 : margin > 0 ? Math.ceil(remaining / margin) : null;
+  const sponsorRevenue = v.sponsors * v.sponsorPrice;
+  const sponsorCosts = v.sponsors * v.sponsorCost;
+  const sponsorContribution = sponsorRevenue - sponsorCosts;          // sponsoraftalernes bidrag efter nyhedsbrev og rapportering
+  const dealRevenue = muniRevenue + sponsorRevenue;                    // den faste indtægt fra aftaler
+  const revenueAt = s => dealRevenue + s * v.price;
+  const costsAt = s => fixed + sponsorCosts + (s + v.munis * v.muniSchools) * v.variable;
+  const solve = rest => rest <= 0 ? 0 : margin > 0 ? Math.ceil(rest / margin) : null;
+  const remaining = fixed - muniContribution - sponsorContribution;    // det, skolelicenserne skal dække
+  const breakEven = solve(remaining);
+  const breakEvenNoSponsors = solve(fixed - muniContribution);         // til sammenligning: uden sponsoraftaler
   const revenue = revenueAt(v.schools), costs = costsAt(v.schools);
-  return {fixed, margin, muniRevenue, muniContribution, remaining, revenueAt, costsAt, revenue, costs, result: revenue - costs, breakEven};
+  return {fixed, margin, muniRevenue, muniContribution, sponsorRevenue, sponsorCosts, sponsorContribution, dealRevenue,
+    remaining, revenueAt, costsAt, revenue, costs, result: revenue - costs, breakEven, breakEvenNoSponsors};
 }
 function plural(n, one, many) { return `${formatNumber(n)} ${n === 1 ? one : many}`; }
-// Kort tekst til KPI, pitch og A4: fx "15 skoler + 1 kommuneaftale"
+// Aftalerne, der regnes med, fx "1 kommuneaftale + 1 sponsoraftale"
+function dealsText(v) {
+  return [v.munis ? plural(v.munis, "kommuneaftale", "kommuneaftaler") : "", v.sponsors ? plural(v.sponsors, "sponsoraftale", "sponsoraftaler") : ""].filter(Boolean).join(" + ");
+}
+// Kort tekst til KPI, pitch og A4: fx "5 skoler + 1 kommuneaftale + 1 sponsoraftale"
 function breakEvenText(v, e) {
   if (e.breakEven === null) return "–";
-  return plural(e.breakEven, "skole", "skoler") + (v.munis ? ` + ${plural(v.munis, "kommuneaftale", "kommuneaftaler")}` : "");
+  const deals = dealsText(v);
+  return plural(e.breakEven, "skole", "skoler") + (deals ? ` + ${deals}` : "");
+}
+// Break-even uden sponsorer – vises ved siden af, fordi sponsorindtægter er usikre.
+function noSponsorText(e) {
+  return e.breakEvenNoSponsors === null ? "ingen break-even" : plural(e.breakEvenNoSponsors, "skole", "skoler");
 }
 function renderCalc() {
   const v = readCalc();
@@ -1002,19 +1023,24 @@ function renderCalc() {
   result.textContent = (e.result >= 0 ? "+" : "") + formatKr(e.result);
   result.classList.toggle("negative", e.result < 0);
   document.getElementById("calcBreakEven").textContent = e.breakEven === null ? "–" : plural(e.breakEven, "skole", "skoler");
-  document.getElementById("calcBreakEvenLabel").textContent = v.munis
-    ? `Break-even: skoler med licens (+ ${plural(v.munis, "kommuneaftale", "kommuneaftaler")})`
+  const deals = dealsText(v);
+  document.getElementById("calcBreakEvenLabel").textContent = deals
+    ? `Break-even: skoler med licens (+ ${deals})`
     : "Break-even (skoler med licens)";
   document.getElementById("calcRevenueSplit").textContent =
     `Indtægt: ${plural(v.schools, "skolelicens", "skolelicenser")} × ${formatKr(v.price)} = ${formatKr(v.schools * v.price)}` +
     ` + ${plural(v.munis, "kommuneaftale", "kommuneaftaler")} × ${formatKr(v.muniPrice)} = ${formatKr(e.muniRevenue)}` +
+    ` + ${plural(v.sponsors, "sponsoraftale", "sponsoraftaler")} × ${formatKr(v.sponsorPrice)} = ${formatKr(e.sponsorRevenue)}` +
     ` → samlet ${formatKr(e.revenue)} om året.`;
   const salaryText = v.salary ? ` (heraf ${formatKr(v.salary)} i løn)` : " (ingen løn – holdet arbejder frivilligt i prototypefasen)";
   const muniText = v.munis ? ` ${plural(v.munis, "kommuneaftale", "kommuneaftaler")} bidrager med ${formatKr(e.muniContribution)} efter variable omkostninger.` : "";
+  const sponsorText = v.sponsors ? ` ${plural(v.sponsors, "sponsoraftale", "sponsoraftaler")} bidrager med ${formatKr(e.sponsorContribution)} efter ${formatKr(e.sponsorCosts)} til nyhedsbrev og rapportering.` : "";
+  const start = `Faste omkostninger: ${formatKr(e.fixed)} om året${salaryText}.${muniText}${sponsorText}`;
   let explain;
-  if (e.breakEven === null) explain = `Faste omkostninger: ${formatKr(e.fixed)} om året${salaryText}.${muniText} Prisen pr. skolelicens skal være højere end de variable omkostninger pr. skole – ellers kan skolelicenserne aldrig betale resten.`;
-  else if (e.breakEven === 0) explain = `Faste omkostninger: ${formatKr(e.fixed)} om året${salaryText}.${muniText} Det dækker allerede de faste omkostninger, så break-even nås uden skolelicenser.`;
-  else explain = `Faste omkostninger: ${formatKr(e.fixed)} om året${salaryText}.${muniText} Hver skolelicens bidrager med ${formatKr(e.margin)} efter variable omkostninger (dækningsbidrag), så der skal ${plural(e.breakEven, "skole", "skoler")} med licens til at dække ${v.munis ? "resten" : "de faste omkostninger"}.`;
+  if (e.breakEven === null) explain = `${start} Prisen pr. skolelicens skal være højere end de variable omkostninger pr. skole – ellers kan skolelicenserne aldrig betale resten.`;
+  else if (e.breakEven === 0) explain = `${start} Aftalerne dækker allerede de faste omkostninger, så break-even nås med 0 skolelicenser.`;
+  else explain = `${start} Hver skolelicens bidrager med ${formatKr(e.margin)} efter variable omkostninger (dækningsbidrag), så der skal ${plural(e.breakEven, "skole", "skoler")} med licens til at dække ${deals ? "resten" : "de faste omkostninger"}.`;
+  if (v.sponsors) explain += ` Uden sponsoraftaler: ${noSponsorText(e)}.`;
   document.getElementById("calcExplain").textContent = explain;
   renderScenarioButtons(v);
   renderBreakEvenChart(v, e);
@@ -1052,7 +1078,8 @@ function renderBreakEvenChart(v, e) {
   const x = s => left + (s / maxSchools) * plotW;
   const y = val => top + plotH - (val / yMax) * plotH;
   const line = key => points.map((p, i) => `${i ? "L" : "M"}${x(p.s).toFixed(1)},${y(p[key]).toFixed(1)}`).join(" ");
-  const beLabel = e.breakEven === null ? "Ingen break-even med disse tal" : `Break-even: ${breakEvenText(v, e)}`;
+  const beLabel = (e.breakEven === null ? "Ingen break-even med disse tal" : `Break-even: ${breakEvenText(v, e)}`) +
+    (e.dealRevenue > 0 ? `. Faste aftaler (kommuner og sponsorer): ${formatKr(e.dealRevenue)} om året` : "");
   let svg = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Indtægt og omkostninger ved 0 til ${maxSchools} skoler med licens. ${beLabel}.">`;
   for (let val = 0; val <= yMax + 1; val += nice) {
     svg += `<line x1="${left}" x2="${W - right}" y1="${y(val)}" y2="${y(val)}" stroke="var(--viz-grid)" stroke-width="1"/>`;
@@ -1061,6 +1088,14 @@ function renderBreakEvenChart(v, e) {
   for (let s = 0; s <= maxSchools; s += xStep) svg += `<text x="${x(s)}" y="${H - 14}" text-anchor="middle">${s}</text>`;
   svg += `<text x="${left + plotW / 2}" y="${H}" text-anchor="middle">Antal skoler med licens</text>`;
   svg += `<line x1="${left}" x2="${W - right}" y1="${y(0)}" y2="${y(0)}" stroke="var(--viz-axis)" stroke-width="1"/>`;
+  // Faste aftaler (kommuner + sponsorer) som stiplet linje: den del af indtægten, der ikke afhænger af antal skoler.
+  if (e.dealRevenue > 0) {
+    svg += `<line class="deal-line" x1="${left}" x2="${W - right}" y1="${y(e.dealRevenue)}" y2="${y(e.dealRevenue)}" stroke="var(--series-a)" stroke-width="1.5" stroke-dasharray="5 4" opacity=".7"/>`;
+    const lastS = maxSchools, taken = [y(e.revenueAt(lastS)), y(e.costsAt(lastS))];
+    let dy = y(e.dealRevenue) + 4;
+    while (taken.some(t => Math.abs(t + 4 - dy) < 14)) dy += 14; // undgå at lægge teksten oven i de andre etiketter
+    svg += `<text class="deal-label" x="${W - right + 8}" y="${Math.min(dy, top + plotH + 4)}">Faste aftaler</text>`;
+  }
   svg += `<path d="${line("costs")}" fill="none" stroke="var(--series-b)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`;
   svg += `<path d="${line("revenue")}" fill="none" stroke="var(--series-a)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`;
   const last = points[points.length - 1];
@@ -1091,8 +1126,9 @@ function renderBreakEvenChart(v, e) {
   rowsAt.add(Math.min(v.schools, 100000));
   if (e.breakEven !== null) { rowsAt.add(e.breakEven); if (e.breakEven > 0) rowsAt.add(e.breakEven - 1); }
   const rows = [...rowsAt].sort((a, b) => a - b);
-  document.getElementById("breakEvenTable").innerHTML = `<table class="data-table"><thead><tr><th class="num">Skoler med licens</th><th class="num">Indtægt</th><th class="num">Omkostninger</th><th class="num">Resultat</th></tr></thead><tbody>${
-    rows.map(s => `<tr${s === e.breakEven ? ' class="be-row"' : ""}><td class="num">${formatNumber(s)}${s === e.breakEven ? " (break-even)" : ""}${s === v.schools ? " (valgt)" : ""}</td><td class="num">${formatKr(e.revenueAt(s))}</td><td class="num">${formatKr(e.costsAt(s))}</td><td class="num">${formatKr(e.revenueAt(s) - e.costsAt(s))}</td></tr>`).join("")
+  // Kolonnen "Heraf sponsorer" viser, at sponsorindtægten er den samme, uanset antal skoler.
+  document.getElementById("breakEvenTable").innerHTML = `<table class="data-table"><thead><tr><th class="num">Skoler med licens</th><th class="num">Indtægt</th><th class="num">Heraf sponsorer</th><th class="num">Omkostninger</th><th class="num">Resultat</th></tr></thead><tbody>${
+    rows.map(s => `<tr${s === e.breakEven ? ' class="be-row"' : ""}><td class="num">${formatNumber(s)}${s === e.breakEven ? " (break-even)" : ""}${s === v.schools ? " (valgt)" : ""}</td><td class="num">${formatKr(e.revenueAt(s))}</td><td class="num">${formatKr(e.sponsorRevenue)}</td><td class="num">${formatKr(e.costsAt(s))}</td><td class="num">${formatKr(e.revenueAt(s) - e.costsAt(s))}</td></tr>`).join("")
   }</tbody></table>`;
 }
 // Hvis pitch-tilstanden er åben, opdateres tallene fra beregneren med det samme.
@@ -1116,48 +1152,40 @@ function kicker(n, title, persp) {
 // Højst 3 korte punkter pr. trin, så 4 minutter kan holdes. Talepapiret kan åbnes på hvert pitchtrin.
 const pitchSpeech = text => `<details class="pitch-speaker"><summary>Talepapir til dette trin</summary><p>${text}</p></details>`;
 const PITCH_SLIDES = [
-  () => `${kicker(1, "Idéen", "vp")}
-    <h2 id="pitchSlideTitle" tabindex="-1">Hvad nu, hvis en hel klasse kunne få gode vaner til at gro?</h2>
-    <ul class="pitch-points"><li>Små grønne handlinger. Ét fælles mål.</li><li>GroKlassen gør klassens indsats synlig.</li></ul>
-    ${pitchSpeech('Forestil jer en klasse, der har haft en temauge om klima. Mandag er alle motiverede. Men hvad sker der ugen efter? Det er det spørgsmål, vi arbejder med. Vi har udviklet GroKlassen: en prototype, hvor klassens grønne handlinger får en fælles plante til at vokse. Vores idé er at gøre bæredygtighed til noget, klassen følger op på sammen.')} `,
-  () => `${kicker(2, "Problemet", "vp")}
+  () => `${kicker(1, "Problemet", "vp")}
     <h2 id="pitchSlideTitle" tabindex="-1">En temauge kan starte en vane. Hvad holder den i live?</h2>
-    <ul class="pitch-points"><li>Vores hypotese: gode intentioner mangler fælles opfølgning.</li><li>Læreren skal kunne følge med uden endnu et tungt system.</li><li>${teamHtml("interviewFinding")}</li></ul>
-    ${pitchSpeech('Der findes allerede undervisning, plakater og aktiviteter om bæredygtighed. Vores hypotese er, at det svære er at fastholde opmærksomheden i hverdagen. Derfor fokuserer vi på en enkel rutine, hvor indsatsen bliver synlig. Vi har endnu ikke dokumenteret problemets omfang eller en effekt på elevernes adfærd. Det skal interviews og pilotforsøg hjælpe os med at afklare.')} `,
-  () => {const total=totalApproved(classData()).points;return `${kicker(3, "Produktet", "vp")}
+    <ul class="pitch-points"><li>Bæredygtige vaner forsvinder, når ingen kan se dem.</li><li>Gode intentioner mangler fælles opfølgning i hverdagen.</li>${teamFilled("interviewFinding") ? `<li>${teamHtml("interviewFinding")}</li>` : ""}</ul>
+    ${pitchSpeech('Forestil jer en klasse, der har haft en temauge om klima. Mandag er alle motiverede. Ugen efter er meget af det glemt. Bæredygtige vaner forsvinder, når ingen kan se dem. Læreren har brug for et let værktøj, der holder opfølgningen i gang – ikke endnu et tungt system. Det er det, GroKlassen gør.')} `,
+  () => {const total=totalApproved(classData()).points;return `${kicker(2, "Løsningen", "vp")}
     <h2 id="pitchSlideTitle" tabindex="-1">En handling. En godkendelse. Et fælles fremskridt.</h2>
     <div class="pitch-split"><div>${flow(["Eleven registrerer", "Læreren godkender", "Planten vokser"])}
-    <ul class="pitch-points"><li>Ingen individuelle ranglister.</li><li>Synlig status og fælles ugemål.</li></ul>
+    <ul class="pitch-points"><li>Ét fælles klassemål – ingen elevranglister.</li><li>Lærergodkendelse og åbne CO₂-beregninger.</li><li>Ingen persondata – kun klassen.</li></ul>
     <button class="btn primary" type="button" id="pitchDemoBtn">Prøv live-demoen</button></div>
-    <div class="pitch-plant"><h3>${safeText(treeName())}</h3>${plantSvg(total)}<p class="pitch-note">${safeText(activeClass)} · ${total} godkendte point${demoState ? ' · opdigtede eksempeldata' : ' · lokale klassedata'}</p></div></div>
-    ${pitchSpeech('Lad os vise produktet. Eleven vælger en handling, for eksempel at cykle i stedet for at blive kørt. Registreringen står som afventende, indtil læreren godkender. Først derefter får klassen point, og planten vokser. Vi viser eksempeldata i demoen, så tallene er ikke resultater fra en rigtig skole. Det centrale er fællesskabet: eleverne bidrager til samme mål.')} `;},
-  () => `${kicker(4, "Kunden", "cs")}
-    <h2 id="pitchSlideTitle" tabindex="-1">Eleven bruger den. Læreren driver den. Skolen skal se værdien.</h2>
-    <div class="pitch-cols"><div class="pitch-col"><div class="big">Eleven</div><p>En enkel handling og et synligt bidrag.</p></div><div class="pitch-col"><div class="big">Læreren</div><p>Godkendelser, overblik og ugerapport.</p></div><div class="pitch-col"><div class="big">Skolen</div><p>Mulig køber af en årlig licens.</p></div></div>
-    <p class="pitch-note">Første salgshypotese: kontakt en lærer → afprøv i en klasse → drøft licens med skoleledelsen.</p>
-    ${pitchSpeech('Vi skelner mellem brugeren og kunden. Eleven skal have lyst til at bidrage. Læreren skal kunne bruge det i en travl hverdag. Og skoleledelsen skal kunne se en værdi, før den vil betale. Derfor vil vi starte med lærere og enkelte klasser. Hvis forsøget fungerer, vil vi undersøge en skolelicens. Kommuner er en mulig senere salgskanal, ikke en eksisterende kundegruppe.')} `,
-  () => {const v=readCalc(),e=calcEconomy(v);return `${kicker(5, "Forretningen", "ec")}
-    <h2 id="pitchSlideTitle" tabindex="-1">En enkel licensmodel. Betalingsviljen skal bevises.</h2>
-    ${flow(["Prøveperiode: gratis",`Skolelicens: ${formatKr(v.price)}/år`],"compact")}
-    <div class="pitch-cols"><div class="pitch-col"><div class="big">${formatKr(e.revenue)}</div><p>Modellens årsomsætning – ikke faktisk salg.</p></div><div class="pitch-col"><div class="big">${formatKr(e.fixed)}</div><p>Forudsatte faste årlige omkostninger${v.salary ? ', inkl. løn' : ', uden løn'}.</p></div><div class="pitch-col"><div class="big">${breakEvenText(v,e)}</div><p>Beregningsmodellens break-even.</p></div></div>
-    <p class="pitch-note"><span class="hyp">ANTAGELSER · EKSKL. MOMS</span> Tallene følger økonomiberegneren, inklusive eventuelle kommuneaftaler. ${teamHtml("willingnessToPay")}</p>
-    ${pitchSpeech('Vi undersøger en model med en gratis prøveperiode og derefter en årlig skolelicens. Tallene på skærmen kommer fra vores økonomiberegner. De er et scenarie, ikke omsætning eller indgåede aftaler. Modellen viser, hvilke salg og omkostninger forretningen forudsætter. Uden løn er den ikke et fuldt billede af en færdig virksomhed. Den afgørende næste test er, om skoleledelsen faktisk vil betale.')} `;},
-  () => `${kicker(6, "Hvorfor os?", "sus")}
-    <h2 id="pitchSlideTitle" tabindex="-1">Vi vil vinde på enkelhed og fællesskab.</h2>
-    <ul class="pitch-points"><li>Et fælles klassemål frem for elevranglister.</li><li>Lærergodkendelse og åbne beregningsforudsætninger.</li><li>Alternativerne er også papirskemaer, temauger og andre læringsapps.</li></ul>
-    <p class="pitch-note">CO₂- og vandtal er vejledende skøn. En målbar klimaeffekt er ikke dokumenteret.</p>
-    ${pitchSpeech('Vi konkurrerer også med det, læreren allerede gør: et papirskema, en temauge eller en anden app. Vores foreslåede forskel er en kort vej fra handling til fælles fremskridt, kombineret med lærergodkendelse. Det er vores positionering, ikke dokumentation for, at vi er de eneste. Point belønner indsats og vaner. De er ikke det samme som målte CO₂-besparelser.')} `,
-  () => `${kicker(7, "Beviset mangler endnu", "ka")}
-    <h2 id="pitchSlideTitle" tabindex="-1">En fungerende prototype. Nu skal hverdagen afgøre resten.</h2>
-    <ul class="pitch-points"><li>Forslag: tre pilotklasser i fire uger.</li><li>Mål: gentagen brug, lærerens tidsforbrug og elevernes oplevelse.</li><li>Efter forsøget: test betalingsvilje og beslut næste version.</li></ul>
-    <p class="pitch-note">Før rigtig skoledrift: sikker læreradgang, fælles datalagring og vurdering af databeskyttelse. Den nuværende PIN er en demo-lås.</p>
-    ${pitchSpeech('Vi har en prototype, men vi har ikke bevist efterspørgsel eller varige vaneændringer. Derfor foreslår vi en afgrænset pilot med tre klasser i fire uger. Vi vil undersøge, om de bliver ved med at bruge løsningen, om godkendelserne passer ind i lærerens hverdag, og hvordan eleverne oplever fællesskabet. Før testen aftaler vi succeskriterier med lærerne. En løsning til rigtig skoledrift kræver også sikker adgang og en vurdering af databeskyttelse.')} `,
-  () => `${kicker(8, "Vores invitation", "ka")}
-    <h2 id="pitchSlideTitle" tabindex="-1">Hjælp os fra god idé til dokumenteret værdi.</h2>
-    <div class="pitch-split pitch-end"><div><ul class="pitch-points"><li>Vi søger adgang til tre pilotklasser.</li><li>Vi søger sparring om skolesalg og produktudvikling.</li></ul>
-    <p class="pitch-ask">Vil I hjælpe os med at åbne døren til de første skoler?</p><p class="pitch-note">GroKlassen. Små handlinger. Stor forskel.</p></div>
+    <div class="pitch-plant"><h3>${safeText(treeName())}</h3>${plantSvg(total)}<p class="pitch-note">${safeText(activeClass)} · ${total} godkendte point${demoState ? ' · demo med eksempeldata' : ' · lokale klassedata'}</p></div></div>
+    ${pitchSpeech('Eleven vælger en grøn handling, for eksempel at cykle i stedet for at blive kørt. Læreren godkender, og først derefter får klassen point, og planten vokser. Det, der gør os anderledes, er fællesskabet: hele klassen arbejder mod ét mål, og ingen elev bliver rangeret. Læreren godkender alt, beregningerne er åbne, og vi gemmer ingen persondata. Lad os vise det i demoen med eksempeldata.')} `;},
+  () => `${kicker(3, "Kunden og vejen til kunden", "cs")}
+    <h2 id="pitchSlideTitle" tabindex="-1">Eleven bruger den. Læreren driver den. Skolen køber den.</h2>
+    <div class="pitch-cols"><div class="pitch-col"><div class="big">Eleven</div><p>En enkel handling og et synligt bidrag.</p></div><div class="pitch-col"><div class="big">Læreren</div><p>Godkendelser, overblik og ugerapport.</p></div><div class="pitch-col"><div class="big">Skolen</div><p>En årlig licens – eller en kommuneaftale.</p></div></div>
+    ${flow(["Lærer", "Pilotklasse", "Skoleledelse", "Kommune"], "compact")}
+    <p class="pitch-note">Kommunerne er vores vej til mange skoler på én gang.${teamFilled("interviewsTeachers") ? ` Interviews indtil nu: ${teamHtml("interviewsTeachers", "", " lærere")}.` : ""}</p>
+    ${pitchSpeech('Vi skelner mellem brugeren og kunden. Eleven skal have lyst til at bidrage, læreren skal kunne bruge det i en travl hverdag, og skoleledelsen køber en årlig licens. Vejen ind går gennem lærerne: vi starter i enkelte klasser, går videre til skoleledelsen og derefter til kommunen. Kommunerne er vores vej til mange skoler på én gang.')} `,
+  () => {const v=readCalc(),e=calcEconomy(v);return `${kicker(4, "Forretningen", "ec")}
+    <h2 id="pitchSlideTitle" tabindex="-1">En enkel licensmodel med plads til kommuner og sponsorer.</h2>
+    ${flow(["Prøveperiode: gratis",`Skolelicens: ${formatKr(v.price)}/år`].concat(v.sponsors ? [`${plural(v.sponsors, "sponsoraftale", "sponsoraftaler")} à ${formatKr(v.sponsorPrice)}`] : []),"compact")}
+    <div class="pitch-cols"><div class="pitch-col"><div class="big">${formatKr(e.revenue)}</div><p>Årsomsætning i scenariet.</p></div><div class="pitch-col"><div class="big">${formatKr(e.fixed)}</div><p>Forudsatte faste årlige omkostninger${v.salary ? ', inkl. løn' : ', uden løn'}.</p></div><div class="pitch-col"><div class="big">${breakEvenText(v,e)}</div><p>Beregningsmodellens break-even.</p></div></div>
+    <p class="pitch-note"><span class="hyp">SCENARIE · EKSKL. MOMS</span> Tallene følger økonomiberegneren, inklusive eventuelle kommune- og sponsoraftaler.${v.sponsors ? ` Uden sponsorer: break-even ved ${noSponsorText(e)}. Ingen sponsor har sagt ja.` : ""} ${teamHtml("willingnessToPay")}</p>
+    ${pitchSpeech('Modellen er enkel: en gratis prøveperiode og derefter en årlig skolelicens. Kommuneaftaler giver os mange skoler på én gang, og sponsoraftaler kan supplere med synlighed i et nyhedsbrev til forældrene. Tallene på skærmen kommer direkte fra vores økonomiberegner. Vi viser også break-even uden sponsorer, så modellen ikke afhænger af dem. Næste test er prisen hos skoleledelserne.')} `;},
+  () => `${kicker(5, "Bæredygtighed", "sus")}
+    <h2 id="pitchSlideTitle" tabindex="-1">Grønne vaner, et stærkt fællesskab og en model, der kan bære sig selv.</h2>
+    <div class="pitch-cols"><div class="pitch-col"><div class="big">Miljø</div><p>Vaner inden for transport, mad, affald og energi.</p></div><div class="pitch-col"><div class="big">Socialt</div><p>Ét fælles mål – ingen elev bliver udstillet.</p></div><div class="pitch-col"><div class="big">Økonomi</div><p>Licensen finansierer drift og udvikling.</p></div></div>
+    <p class="pitch-note">Verdensmål 4.7 · 12.5 · 12.8 · 13.3: grøn dannelse · mindre affald · viden om bæredygtig livsstil · klimabevidsthed. Tallene er forsigtige skøn med åben beregning.</p>
+    ${pitchSpeech('Bæredygtighed handler hos os om tre ting. Miljø: klassen bygger vaner inden for transport, mad, affald og energi – at cykle i skole sparer for eksempel omkring 400 gram CO₂. Socialt: hele klassen arbejder sammen, og ingen elev bliver målt eller udstillet. Økonomi: en lille, let app, hvor licensen betaler driften. Tallene er forsigtige skøn med åben beregning, så alle kan regne efter. Vi bidrager til verdensmålene 4.7, 12.5, 12.8 og 13.3.')} `,
+  () => `${kicker(6, "Næste skridt", "ka")}
+    <h2 id="pitchSlideTitle" tabindex="-1">Fra prototype til tre pilotklasser.</h2>
+    <div class="pitch-split pitch-end"><div><ul class="pitch-points"><li>Pilot: 3 klasser i 4 uger.</li><li>Vi måler gentagen brug, lærerens tidsforbrug og elevernes oplevelse.</li><li>Derefter: test af prisen og version 2 med lærerlogin og database i EU.</li></ul>
+    <p class="pitch-ask">${teamHtml("pitchAsk")}</p><p class="pitch-note">GroKlassen. Små handlinger. Stor forskel.</p></div>
     <figure class="pitch-qr"><div class="qr-box">${qrSvg(demoUrl(),"QR-kode til GroKlassens demo")}</div><figcaption>Scan og prøv produktet</figcaption></figure></div>
-    ${pitchSpeech('Vi søger ikke en opdigtet investering eller en værdiansættelse, vi ikke kan forsvare. På dette stadie er vores vigtigste næste skridt adgang til tre pilotklasser og sparring om at sælge til skoler. Vi bidrager med prototypen og arbejdet med at udvikle og teste den. Vil I hjælpe os med at åbne døren til de første skoler? Sammen kan vi undersøge, om små handlinger kan blive til vaner, der holder.')} `
+    ${pitchSpeech(`Vores næste skridt er en pilot med tre klasser i fire uger. Vi måler, om klasserne bliver ved, hvor lang tid godkendelserne tager for læreren, og hvordan eleverne oplever fællesskabet. Derefter tester vi prisen med skoleledelser og bygger version 2 med lærerlogin og en database i EU. ${teamHtml("pitchAsk")} Scan QR-koden, og prøv demoen selv.`)} `
 ];
 function renderPitch(moveFocus, animate = true) {
   const slide = document.getElementById("pitchSlide");
@@ -1295,7 +1323,12 @@ function endSwipe(event, cancelled) {
   const s = swipe;
   swipe = null;
   pitchStage.classList.remove("dragging");
-  if (!s.axis) return; // Et tryk – ikke et træk
+  if (!s.axis) {
+    // Et lynhurtigt stryg kan nå frem uden bevægelser imellem (browseren slår dem sammen) – kig på selve slippet.
+    const dx = event.clientX - s.startX, dy = event.clientY - s.startY;
+    if (cancelled || Math.hypot(dx, dy) < 10 || Math.abs(dy) >= Math.abs(dx)) return; // Et tryk – ikke et træk
+    s.axis = "x";
+  }
   if (prefersReducedMotion()) {
     const dx = event.clientX - s.startX;
     if (!cancelled && Math.abs(dx) > 40) goPitch(pitchIndex + (dx < 0 ? 1 : -1));
@@ -1354,16 +1387,15 @@ function buildA4() {
         <p><strong>Det nye:</strong> Fællesskab frem for individuelle ranglister, lærergodkendelse, åbne CO₂-beregninger og ingen persondata.</p></section>
       <section class="a4-box a4-cs"><h2>Kunder</h2>
         <ul><li><strong>Elever</strong> – brugere, ét fælles mål</li><li><strong>Lærere</strong> – godkender og får ugerapport</li><li><strong>Skoler og kommuner</strong> – betaler en licens</li></ul>
-        <p class="a4-small">Målgruppe: ${teamHtml("targetGrades")}</p></section>
+        ${teamFilled("targetGrades") ? `<p class="a4-small">Målgruppe: ${teamHtml("targetGrades")}</p>` : ""}</section>
       <section class="a4-box a4-ec"><h2>Prisskitse <span class="a4-hyp">hypotese</span></h2>
-        <ul><li>Prøve: 0 kr. – 1 klasse i 3 måneder</li><li>Skolelicens: ca. ${formatKr(v.price)} pr. skole pr. år</li><li>Kommuneaftale: fra ca. ${formatKr(v.muniPrice)} pr. år (op til 10 skoler)</li></ul>
-        <p class="a4-small">Ekskl. moms. ${teamHtml("willingnessToPay", "Betalingsvilje: ")}</p></section>
+        <ul><li>Prøve: 0 kr. – 1 klasse i 3 måneder</li><li>Skolelicens: ca. ${formatKr(v.price)} pr. skole pr. år</li><li>Kommuneaftale: fra ca. ${formatKr(v.muniPrice)} pr. år (op til 10 skoler)</li><li>Sponsorer: ${Object.values(SPONSOR_LEVELS).reverse().map(l => `${l.label.toLowerCase()} ca. ${formatKr(l.price)}`).join(" · ")} pr. år – synlighed i nyhedsbrevet til voksne</li></ul>
+        <p class="a4-small">Ekskl. moms. Ingen sponsor har sagt ja. ${teamHtml("willingnessToPay", "Betalingsvilje: ")}</p></section>
       <section class="a4-box a4-ec"><h2>Break-even <span class="a4-hyp">antagelser</span></h2>
         <p class="a4-big">${breakEvenText(v, e)}</p>
-        <p class="a4-small">Scenarie: ${scenario ? safeText(CALC_SCENARIOS[scenario].label.toLowerCase()) : "egne tal"}. Faste omkostninger ${formatKr(e.fixed)} pr. år${v.salary ? ` (heraf ${formatKr(v.salary)} i løn)` : " (ingen løn – frivilligt arbejde i prototypefasen)"}. Ved ${plural(v.schools, "skolelicens", "skolelicenser")}${v.munis ? ` og ${plural(v.munis, "kommuneaftale", "kommuneaftaler")}` : ""}: indtægt ${formatKr(e.revenue)}, resultat ${e.result >= 0 ? "+" : ""}${formatKr(e.result)}</p></section>
-      <section class="a4-box a4-sus"><h2>Bæredygtighed</h2>
-        <ul><li><strong>Miljø:</strong> vaner inden for transport, mad, affald og forbrug – med ærlige, vejledende CO₂-tal</li><li><strong>Socialt:</strong> ét fælles mål – ingen elev bliver rangeret eller udstillet</li><li><strong>Økonomi:</strong> lille, let app – licensen betaler driften</li></ul>
-        <p class="a4-small">Verdensmål 4.7, 12 og 13.</p></section>
+        <p class="a4-small">Scenarie: ${scenario ? safeText(CALC_SCENARIOS[scenario].label.toLowerCase()) : "egne tal"}. Faste omkostninger ${formatKr(e.fixed)} pr. år${v.salary ? ` (heraf ${formatKr(v.salary)} i løn)` : " (ingen løn – frivilligt arbejde i prototypefasen)"}. Ved ${plural(v.schools, "skolelicens", "skolelicenser")}${dealsText(v) ? ` og ${dealsText(v)}` : ""}: indtægt ${formatKr(e.revenue)} (heraf sponsorer ${formatKr(e.sponsorRevenue)}), resultat ${e.result >= 0 ? "+" : ""}${formatKr(e.result)}${v.sponsors ? ` Uden sponsorer: ${noSponsorText(e)}.` : ""}</p></section>
+      <section class="a4-box a4-sus"><h2>FN's verdensmål</h2>
+        <ul><li><strong>4.7</strong> Uddannelse for bæredygtig udvikling: grøn dannelse i hverdagen</li><li><strong>12.5</strong> Mindre affald: sortering, genbrug, madpakke uden engangsplast</li><li><strong>12.8</strong> Viden om bæredygtig livsstil: åbne beregninger</li><li><strong>13.3</strong> Klimabevidsthed: klassen ser effekten af sine handlinger</li></ul></section>
       <section class="a4-box a4-qr"><div class="a4-qrcode">${qrSvg(url, "QR-kode til demoen")}</div><p><strong>Scan og prøv demoen</strong></p><p class="a4-small a4-url">${safeText(url)}</p></section>
     </div>
     <footer class="a4-foot">
@@ -1374,7 +1406,7 @@ function buildA4() {
 }
 function printA4() {
   document.getElementById("a4Sheet").innerHTML = buildA4();
-  document.body.classList.remove("printing-report");
+  document.body.classList.remove("printing-report", "printing-newsletter");
   document.body.classList.add("printing-a4");
   window.print();
 }
@@ -1425,6 +1457,150 @@ function openReport() {
   document.getElementById("reportContent").innerHTML = buildReport();
   document.getElementById("reportDialog").showModal();
   document.getElementById("reportPrint").focus();
+}
+
+/* ---------- Månedens nyhedsbrev (med plads til en sponsor) ----------
+   Bygges ud fra klassens egne data – kun tal for hele klassen, ingen elevnavne og ingen e-mails.
+   Kan printes, gemmes som PDF eller kopieres som tekst til fx Aula. Sponsorens synlighed følger SPONSOR_LEVELS. */
+function monthKey(dateKey) { return dateKey.slice(0, 7); }                 // "2026-11-05" → "2026-11"
+function monthLabel(key) { const [y, m] = key.split("-").map(Number); return new Date(y, m - 1, 1).toLocaleDateString("da-DK", {month:"long", year:"numeric"}); }
+function monthEnd(key) { const [y, m] = key.split("-").map(Number); return dateKey(new Date(y, m, 0)); }
+function recentMonths(count = 6) {
+  const [y, m] = todayKey().split("-").map(Number);
+  return Array.from({length: count}, (_, i) => dateKey(new Date(y, m - 1 - i, 1)).slice(0, 7));
+}
+function sponsorInfo() {
+  const example = !teamFilled("sponsor");
+  return {example, name: example ? "[Jeres sponsor]" : String(TEAM_DATA.sponsor).trim()};
+}
+// Selve indholdet som data – så HTML-udgaven og tekstudgaven altid siger det samme.
+function newsletterModel(data, className, month, opts = {}) {
+  const level = SPONSOR_LEVELS[opts.level] ? opts.level : (SPONSOR_LEVELS[NEWSLETTER.sponsorLevel] ? NEWSLETTER.sponsorLevel : "main");
+  const showSponsor = opts.sponsor !== false;
+  const today = todayKey(), end = monthEnd(month);
+  const items = data.approved.filter(item => monthKey(item.date) === month);
+  const points = items.reduce((sum, item) => sum + item.points, 0);
+  const co2 = items.reduce((sum, item) => sum + estimateFor(item).co2, 0);
+  const upToEnd = data.approved.filter(item => item.date <= end).reduce((sum, item) => sum + item.points, 0);
+  // Uger, hvis mandag ligger i måneden (og ikke i fremtiden). Ugemålet er klassens nuværende mål.
+  const mondays = [];
+  for (let d = mondayOf(`${month}-01`); d <= end && d <= today; d = addDays(d, 7)) if (monthKey(d) === month) mondays.push(d);
+  const goalWeeks = mondays.filter(d => weekPoints(data, d) >= data.weeklyGoal).length;
+  const counts = CHALLENGES.map(c => ({c, count: items.filter(item => item.challengeId === c.id).length})).filter(r => r.count > 0).sort((a, b) => b.count - a.count);
+  // Månedens tip: en udfordring, klassen kan gøre mere af (den mindst brugte – ved lighed den første i listen).
+  const tipChallenge = CHALLENGES.slice().sort((a, b) => items.filter(i => i.challengeId === a.id).length - items.filter(i => i.challengeId === b.id).length)[0];
+  const sponsor = sponsorInfo();
+  const ownTip = String(NEWSLETTER.sponsorTip || "").trim();
+  const tipFromSponsor = showSponsor && level !== "supporter";
+  return {
+    className, month, monthText: monthLabel(month), demo: !!opts.demo, level, showSponsor, sponsor,
+    kpis: [
+      {value: formatNumber(points), label: `point i ${monthLabel(month).split(" ")[0]}`},
+      {value: PLANT_STAGES[getStage(upToEnd)].name, label: `plantestadie (${formatNumber(upToEnd)} point i alt)`},
+      {value: mondays.length ? `${goalWeeks} af ${mondays.length}` : "–", label: `uger med ugemålet nået (${data.weeklyGoal} point)`},
+      {value: `ca. ${formatCo2(co2)}`, label: "CO₂ sparet – vejledende skøn"}
+    ],
+    top: counts.slice(0, 3).map(r => ({icon: r.c.icon, title: r.c.title, count: r.count})),
+    actions: items.length,
+    tip: {
+      title: tipFromSponsor ? `Månedens grønne tip fra ${sponsor.name}` : "Månedens grønne tip",
+      icon: tipChallenge.icon, challenge: tipChallenge.title,
+      text: tipFromSponsor && ownTip ? ownTip : GREEN_TIPS[tipChallenge.id]
+    },
+    topLine: showSponsor && level === "main",
+    footLine: !showSponsor ? "" : level === "partner" ? `Partner: ${sponsor.name}` : level === "supporter" ? `Tak til ${sponsor.name} for at støtte GroKlassen.` : ""
+  };
+}
+function exampleTag(m) { return m.sponsor.example ? ' <span class="hyp nl-example">Eksempel · fiktiv sponsor</span>' : ""; }
+function newsletterHtml(m) {
+  const logo = document.getElementById("brandLogo").src;
+  return `<article class="newsletter" aria-label="Nyhedsbrev for klasse ${safeText(m.className)}, ${safeText(m.monthText)}">
+    <div class="nl-head">
+      <img class="nl-logo" src="${logo}" alt="GroKlassen">
+      <div><p class="nl-kicker">Nyhedsbrev · ${safeText(m.monthText)}</p><h3 class="nl-title">${safeText(m.className)}'s grønne måned</h3></div>
+    </div>
+    ${m.topLine ? `<p class="nl-sponsor">Støttet af <strong>${safeText(m.sponsor.name)}</strong>${exampleTag(m)}</p>` : ""}
+    ${m.demo ? '<p class="small"><span class="demo-chip">DEMO</span> Opdigtede eksempeldata – ikke rigtige resultater.</p>' : ""}
+    <div class="nl-kpis">${m.kpis.map(k => `<div class="nl-kpi"><div class="nl-num">${safeText(k.value)}</div><div class="nl-label">${safeText(k.label)}</div></div>`).join("")}</div>
+    <h4>Det gjorde klassen mest</h4>
+    ${m.top.length ? `<ol class="nl-top">${m.top.map(t => `<li>${t.icon} ${safeText(t.title)} <span class="small">(${t.count} ${t.count === 1 ? "gang" : "gange"})</span></li>`).join("")}</ol>` : '<p class="small">Ingen godkendte handlinger i denne måned endnu.</p>'}
+    <div class="nl-tip"><h4>${safeText(m.tip.title)}${m.tip.title.includes(m.sponsor.name) ? exampleTag(m) : ""}</h4><p>${m.tip.icon} <strong>${safeText(m.tip.challenge)}:</strong> ${safeText(m.tip.text)}</p></div>
+    <div class="nl-foot">
+      ${m.footLine ? `<p class="nl-footsponsor">${safeText(m.footLine)}${exampleTag(m)}</p>` : ""}
+      <p>Kun tal for hele klassen – ingen elevnavne. CO₂ er vejledende skøn, ikke målinger.${m.showSponsor ? " Sponsorer har ingen indflydelse på indhold eller tal." : ""} Lavet med GroKlassen (prototype).</p>
+    </div>
+  </article>`;
+}
+function newsletterText(m) {
+  const lines = [`GroKlassen · Nyhedsbrev for klasse ${m.className} · ${m.monthText}`];
+  if (m.topLine) lines.push(`Støttet af ${m.sponsor.name}${m.sponsor.example ? " (eksempel · fiktiv sponsor)" : ""}`);
+  if (m.demo) lines.push("DEMO – opdigtede eksempeldata, ikke rigtige resultater.");
+  lines.push("", "Klassens tal (hele klassen – ingen elevnavne):", ...m.kpis.map(k => `• ${k.value} – ${k.label}`));
+  lines.push("", "Det gjorde klassen mest:", ...(m.top.length ? m.top.map((t, i) => `${i + 1}. ${t.icon} ${t.title} (${t.count} ${t.count === 1 ? "gang" : "gange"})`) : ["Ingen godkendte handlinger i denne måned endnu."]));
+  lines.push("", `${m.tip.title}:`, `${m.tip.icon} ${m.tip.challenge}: ${m.tip.text}`);
+  if (m.footLine) lines.push("", m.footLine + (m.sponsor.example ? " (eksempel · fiktiv sponsor)" : ""));
+  lines.push("", `Kun tal for hele klassen – ingen elevnavne. CO₂ er vejledende skøn, ikke målinger.${m.showSponsor ? " Sponsorer har ingen indflydelse på indhold eller tal." : ""} Lavet med GroKlassen (prototype).`);
+  return lines.join("\n");
+}
+// Lærerens nyhedsbrev: den valgte klasse og måned
+function currentNewsletter() {
+  const month = document.getElementById("nlMonth").value || monthKey(todayKey());
+  return newsletterModel(classData(), activeClass, month, {sponsor: document.getElementById("nlSponsor").checked, demo: !!demoState});
+}
+function renderNewsletter() {
+  document.getElementById("newsletterContent").innerHTML = newsletterHtml(currentNewsletter());
+}
+function openNewsletter() {
+  const select = document.getElementById("nlMonth");
+  const keep = select.value;
+  select.innerHTML = recentMonths().map(k => `<option value="${k}">${safeText(monthLabel(k))}</option>`).join("");
+  if (keep && [...select.options].some(o => o.value === keep)) select.value = keep;
+  document.getElementById("nlClass").textContent = activeClass;
+  document.getElementById("nlStatus").textContent = "";
+  renderNewsletter();
+  const dialog = document.getElementById("newsletterDialog");
+  dialog.showModal();
+  dialog.scrollTop = 0;
+  document.getElementById("newsletterDialogTitle").focus({preventScroll: true});
+}
+async function copyNewsletter() {
+  const text = newsletterText(currentNewsletter());
+  const status = document.getElementById("nlStatus");
+  let ok = false;
+  try { await navigator.clipboard.writeText(text); ok = true; } catch (e) {
+    // Reserve, hvis browseren ikke giver adgang til udklipsholderen (fx når filen åbnes direkte)
+    const area = document.createElement("textarea");
+    area.value = text; area.setAttribute("readonly", ""); area.className = "sr-only";
+    document.getElementById("newsletterDialog").appendChild(area);
+    area.select();
+    try { ok = document.execCommand("copy"); } catch (err) { ok = false; }
+    area.remove();
+  }
+  status.textContent = "";
+  setTimeout(() => { status.textContent = ok ? "Teksten er kopieret. Sæt den ind i Aula eller på skolens intranet." : "Kunne ikke kopiere automatisk. Markér teksten i nyhedsbrevet, og kopiér den selv."; }, 30);
+}
+function printNewsletter() {
+  document.body.classList.remove("printing-a4", "printing-report");
+  document.body.classList.add("printing-newsletter");
+  window.print();
+}
+// Eksemplet under "For skoler": opdigtede demo-data for sidste måned, så der er en hel måned at vise.
+let newsletterDemo = null, newsletterPreviewLevel = NEWSLETTER.sponsorLevel;
+function renderNewsletterPreview() {
+  const box = document.getElementById("newsletterPreview");
+  if (!box) return;
+  if (!newsletterDemo) newsletterDemo = buildDemoState();
+  const month = recentMonths(2)[1];
+  box.innerHTML = newsletterHtml(newsletterModel(newsletterDemo.classes["7.A"], "7.A", month, {level: newsletterPreviewLevel, demo: true}));
+  document.querySelectorAll("[data-nl-level]").forEach(btn => btn.setAttribute("aria-pressed", String(btn.dataset.nlLevel === newsletterPreviewLevel)));
+}
+function renderSponsorTiers() {
+  const box = document.getElementById("sponsorTiers");
+  if (!box) return;
+  box.innerHTML = ["supporter", "partner", "main"].map(key => {
+    const l = SPONSOR_LEVELS[key];
+    return `<div class="tier${key === "partner" ? " featured" : ""}"><div class="tier-name">${key === "main" ? "🌳" : key === "partner" ? "🌿" : "🌱"} ${safeText(l.label)}</div><div class="tier-price">ca. ${formatKr(l.price)}</div><div class="small">pr. år</div><ul><li>${safeText(l.exposure)}</li><li>Ingen data om elever og ingen indflydelse på indhold</li></ul></div>`;
+  }).join("");
 }
 
 /* ---------- Demo-data ----------
@@ -2097,12 +2273,22 @@ document.getElementById("csvBtn").addEventListener("click", exportCsv);
 document.getElementById("reportBtn").addEventListener("click", openReport);
 document.getElementById("reportClose").addEventListener("click", () => document.getElementById("reportDialog").close());
 document.getElementById("reportPrint").addEventListener("click", () => {
-  document.body.classList.remove("printing-a4");
+  document.body.classList.remove("printing-a4", "printing-newsletter");
   document.body.classList.add("printing-report");
   window.print();
 });
 document.getElementById("a4Btn").addEventListener("click", printA4);
-window.addEventListener("afterprint", () => document.body.classList.remove("printing-report", "printing-a4"));
+window.addEventListener("afterprint", () => document.body.classList.remove("printing-report", "printing-a4", "printing-newsletter"));
+// Månedens nyhedsbrev (lærer) og eksemplet under "For skoler"
+document.getElementById("newsletterBtn").addEventListener("click", openNewsletter);
+document.getElementById("newsletterClose").addEventListener("click", () => document.getElementById("newsletterDialog").close());
+document.getElementById("newsletterCopy").addEventListener("click", copyNewsletter);
+document.getElementById("newsletterPrint").addEventListener("click", printNewsletter);
+["nlMonth", "nlSponsor"].forEach(id => document.getElementById(id).addEventListener("change", renderNewsletter));
+document.querySelectorAll("[data-nl-level]").forEach(btn => btn.addEventListener("click", () => {
+  newsletterPreviewLevel = btn.dataset.nlLevel;
+  renderNewsletterPreview();
+}));
 // Demo-data
 document.getElementById("heroDemoBtn").addEventListener("click", () => startDemo(false));
 document.getElementById("demoLoadBtn").addEventListener("click", () => startDemo(false));
@@ -2127,14 +2313,13 @@ const urlParams = new URLSearchParams(location.search);
 // Standard-PIN'en vises kun som hjælp, så længe den ikke er ændret (det er en demo-lås).
 document.getElementById("pinInput").placeholder = CONFIG.teacherPin === "1234" ? "Demo-PIN: 1234" : "Indtast PIN";
 setTheme(state.theme || (window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"), false);
-document.documentElement.classList.toggle("draft", DRAFT_MODE);
 applyTeamData();
-renderDraftBanner();
 renderMethods();
 // Pitch-tilstanden genbruger logoet fra toppen af siden.
 document.querySelectorAll("[data-logo]").forEach(img => { img.src = document.getElementById("brandLogo").src; });
-document.getElementById("appSize").textContent = `${formatNumber(Math.round(APP_SIZE_BYTES / 1024))} kB`;
+renderSponsorTiers();
 setCalcValues(CALC_DEFAULTS);
+renderNewsletterPreview();
 // ?demo=1 i adressen starter altid en frisk demo (praktisk til pitchen).
 if (urlParams.get("demo") === "1") startDemo(true);
 render();

@@ -174,6 +174,14 @@
     body.printing-a4 > *:not(#a4Sheet){display:none !important}
     body.printing-a4{background:#fff;color:#000}
     body.printing-a4 #a4Sheet{display:block}
+    /* Nyhedsbrevet: kun selve brevet udskrives, altid sort på hvidt */
+    body.printing-newsletter > *:not(#newsletterDialog){display:none !important}
+    body.printing-newsletter{background:#fff;color:#000}
+    #newsletterDialog{position:static;inset:auto;margin:0;border:0;box-shadow:none;width:auto;max-width:none;max-height:none;overflow:visible;padding:0;color:#000;background:#fff}
+    #newsletterDialog::backdrop{display:none}
+    body.printing-newsletter #newsletterDialogTitle{display:none}
+    body.printing-newsletter .newsletter{border:0;padding:0;background:#fff;color:#000;--text:#000;--muted:#333;--soft:#eef4ef;--border:#c9d6cc;--panel:#fff}
+    body.printing-newsletter .newsletter .hyp{background:#fff;color:#8b5b13;border-color:#8b5b13}
   }
   .a4-sheet{display:none;color:#000;background:#fff;font:10.5pt/1.42 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact}
   .a4-sheet h1{font-size:24pt;margin:0;letter-spacing:-.02em;line-height:1.1}
@@ -193,7 +201,6 @@
   .a4-hyp{font-size:7pt;font-weight:800;text-transform:uppercase;letter-spacing:.06em;border:1px solid #8b5b13;color:#8b5b13;border-radius:4px;padding:0 4px;vertical-align:2px}
   .a4-sheet footer.a4-foot{margin-top:14px;border-top:2px solid #26734d;padding:10px 0 0;color:#000;text-align:left;font-size:inherit}
   .a4-ask{font-size:15pt;font-weight:800;letter-spacing:-.01em}
-  .a4-sheet .ph{background:#fbefd5;color:#8b5b13;border:1px dashed #8b5b13}
   /* ---------- Klassekonkurrence ---------- */
   /* Konkurrencekortet på klassens side er bevidst afdæmpet – kerneproduktet (udfordringer og plante) skal fylde mest */
   .contest-card .contest-head h2{font-size:1.15rem}
@@ -278,7 +285,6 @@
   .conf{font-size:.74rem;border-radius:999px;padding:2px 8px;border:1px solid var(--input-border);font-weight:650}
   .linklike{background:none;border:0;padding:0;color:var(--primary);text-decoration:underline;font-size:.8rem;font-weight:650}
   .mini-card h4{margin:0 0 4px;font-size:.98rem}
-  .sustain p{font-size:.9rem;margin:0}
   .privacy{border-color:var(--primary)}
   /* ---------- For skoler ----------
      De fire BMP-perspektiver har hver sin farve (tjekket for farveblindhed) OG en tekstetiket,
@@ -296,12 +302,6 @@
   .jump a{background:var(--panel);border:1px solid var(--border);border-radius:999px;padding:6px 11px;font-size:.86rem;font-weight:650;text-decoration:none;color:var(--text)}
   .jump a:hover{background:var(--soft)}
   .hyp{display:inline-block;background:var(--warn-bg);color:var(--warning);border:1px solid var(--warning);border-radius:6px;padding:0 6px;font-size:.72rem;font-weight:800;letter-spacing:.05em;vertical-align:2px}
-  /* Pladsholdere, som holdet selv skal udfylde (gule) */
-  .ph{background:var(--warn-bg);color:var(--warning);border:1px dashed var(--warning);border-radius:6px;padding:0 5px;font-weight:700}
-  /* Noter til holdet vises kun i udkast-tilstand (?udkast=1) */
-  html:not(.draft) .draft-only{display:none !important}
-  .draft-banner{background:var(--warn-bg);color:var(--text);border-bottom:2px dashed var(--warning);padding:9px 16px;display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap;font-size:.88rem}
-  .draft-banner[hidden]{display:none}
   .card-grid{display:grid;gap:12px}
   .card-grid.three{grid-template-columns:repeat(3,minmax(0,1fr))}
   .card-grid.two{grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -424,3 +424,40 @@ html{scroll-padding-bottom:100px}body{padding-bottom:env(safe-area-inset-bottom)
 .hero-art{position:static;top:auto;right:auto;width:100%}.demo-banner .btn{min-height:44px}.header-actions #pitchBtn::after{content:none}
 
 .wrap{padding-left:max(12px,env(safe-area-inset-left));padding-right:max(12px,env(safe-area-inset-right))}.tabs{padding-left:max(12px,env(safe-area-inset-left));padding-right:max(12px,env(safe-area-inset-right))}.pitch-top{padding-top:max(12px,env(safe-area-inset-top))}dialog{max-height:calc(100dvh - 32px - env(safe-area-inset-top) - env(safe-area-inset-bottom))}
+
+/* ---------- Version 3.5: sponsorer, nyhedsbrev og verdensmål ---------- */
+.legend i.legend-dash{height:0;background:none;border-top:2px dashed var(--series-a);border-radius:0;opacity:.8}
+.viz .deal-label{font-size:11px;fill:var(--viz-ink)}
+.calc-note{border-left:3px solid var(--warning);padding-left:10px;margin-top:10px}
+.sponsor-list li{margin-bottom:8px}
+.sdg-list{list-style:none;padding:0;margin:8px 0 0;display:grid;gap:8px}
+.sdg-list li{display:flex;gap:12px;align-items:baseline;font-size:.95rem}
+.sdg-no{flex:none;min-width:3.2em;text-align:center;font-weight:800;font-variant-numeric:tabular-nums;background:var(--soft);border-radius:8px;padding:2px 6px}
+.nl-grid{align-items:start}
+.nl-preview{min-width:0}
+#newsletterDialog{width:min(96vw,720px)}
+.nl-controls{align-items:center;gap:10px;margin:6px 0 12px}
+.nl-controls select{min-width:11em;width:auto}
+.nl-check{display:inline-flex;align-items:center;gap:6px;min-height:44px}
+.nl-check input{width:18px;height:18px;accent-color:var(--primary)}
+.newsletter{border:1px solid var(--border);border-radius:16px;padding:18px;background:var(--panel);color:var(--text)}
+.nl-head{display:flex;gap:12px;align-items:center;border-bottom:2px solid var(--primary);padding-bottom:10px;margin-bottom:10px}
+.nl-logo{height:44px;width:auto;flex:none}
+.nl-kicker{margin:0;font-size:.8rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+.nl-title{margin:2px 0 0;font-size:1.25rem;letter-spacing:-.02em;line-height:1.2}
+.nl-sponsor{margin:0 0 10px;font-size:.92rem}
+.newsletter h4{margin:14px 0 6px;font-size:1rem}
+.nl-kpis{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.nl-kpi{background:var(--soft);border-radius:12px;padding:10px}
+.nl-num{font-size:1.15rem;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.nl-label{font-size:.8rem;color:var(--muted)}
+.nl-top{margin:0;padding-left:22px}
+.nl-top li{margin-bottom:4px;font-size:.93rem}
+.nl-tip{margin-top:14px;border-left:4px solid var(--primary);background:var(--soft);border-radius:0 12px 12px 0;padding:8px 12px}
+.nl-tip h4{margin:0 0 4px}
+.nl-tip p{margin:0;font-size:.93rem}
+.nl-foot{margin-top:14px;border-top:1px solid var(--border);padding-top:8px;font-size:.8rem;color:var(--muted)}
+.nl-foot p{margin:0 0 4px}
+.nl-footsponsor{color:var(--text);font-weight:650}
+.nl-example{white-space:nowrap}
+@media(min-width:900px){.nl-kpis{grid-template-columns:repeat(4,minmax(0,1fr))}.nl-grid .nl-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}

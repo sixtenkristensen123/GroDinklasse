@@ -1,5 +1,5 @@
 const CACHE_PREFIX='groklassen-'+encodeURIComponent(self.registration.scope)+'-';
-const CACHE=CACHE_PREFIX+'46b781fc67c5';
+const CACHE=CACHE_PREFIX+'v3-5b-971a60ecc201';
 const ASSETS=['./','./index.html','./app.css','./app.js','./manifest.json','./icons/icon-192.png','./icons/icon-512.png','./icons/maskable-512.png','./icons/apple-touch-icon.png'];
 const local=path=>new URL(path,self.registration.scope).href;
 self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS.map(local))))});

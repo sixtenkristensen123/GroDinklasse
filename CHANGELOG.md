@@ -1,5 +1,43 @@
 # Ændringslog
 
+## Version 3.5 – 5. november 2026 (sponsoraftaler, nyhedsbrev og en slankere "For skoler"-side)
+
+Bygger videre på den opdelte app fra den forrige upload (`index.html`, `app.js`, `app.css`, `manifest.json`, `sw.js` og `icons/`, der kan installeres som app).
+
+### Tekst og pitch
+- **Pitchen har 6 trin:** Problemet, Løsningen (med live-demo og det, der gør os anderledes), Kunden og vejen til kunden, Forretningen, Bæredygtighed og Næste skridt med invitation og QR-kode. Trinnene "Hvorfor os?" og "Beviset mangler endnu" er lagt ind i de andre.
+- **Ingen pladsholdere:** `?udkast=1`, udkast-banneret, de gule pladsholdere og noterne til holdet er fjernet. Et tomt felt i `TEAM_DATA` skjuler nu linjen, hvor feltet bruges. Undtagelser er `ideaOrigin`, `teamName`, `contact`, `pitchAsk` og `publicUrl`, der viser en standardtekst.
+- **Sikker tone:** undskyldende formuleringer er fjernet eller omskrevet. Eksempler: "Usikkerhed:" ved CO₂-tallene, "Priser og tal er beregnede scenarier." og "Partnere/Sponsorer vi vil kontakte". Mærkatet "Scenarie" står fortsat ved økonomitallene, og demoen er stadig mærket som eksempeldata.
+
+### Økonomi med sponsoraftaler
+- Ny indtægtskilde i økonomiberegneren: **sponsoraftaler** (antal 0–20 og pris pr. aftale, hypotese 15.000 kr./år) og en ny omkostning pr. sponsoraftale (hypotese 1.000 kr. til nyhedsbrev og rapportering). Skolelicenser og kommuneaftaler er uændrede.
+- Scenarierne: forsigtig 0 sponsorer (break-even 38 skoler), forventet 1 sponsor (5 skoler + 1 kommuneaftale + 1 sponsoraftale) og optimistisk 3 sponsorer (0 skoler + 3 kommuneaftaler + 3 sponsoraftaler). Alle mærket som antagelser.
+- Sponsorindtægten indgår i samlet indtægt, resultat, fordelingsteksten, tabellen (ny kolonne "Heraf sponsorer"), grafen (stiplet linje "Faste aftaler") og break-even. Beregneren, pitchtrinnet "Forretningen" og A4-oversigten viser også **break-even uden sponsorer** (15 skoler i det forventede scenarie).
+- Ny note: "Sponsorindtægter er usikre og kan ikke alene bære driften. Sponsorer har ingen indflydelse på udfordringer eller CO₂-tal."
+
+### Mulige sponsorer og sponsorniveauer
+- Ny sektion **Sponsorer vi vil kontakte** (`#skoler-sponsorer`), mærket IKKE KONTAKTET: Coop Danmark, Salling Group, Ørsted, Danfoss, Grundfos, DSB og VELUX – kun navn og én neutral linje, ingen logoer eller varemærker. Tjekket 5.11.2026. Note om virksomhedsfonde.
+- Sponsorniveauer i prisskitsen (hypoteser): Støtter ca. 5.000 kr., Partner ca. 15.000 kr. og Hovedsponsor ca. 40.000 kr. pr. år (`SPONSOR_LEVELS`).
+
+### Månedens nyhedsbrev
+- Lærerområdet har et nyt kort **📰 Månedens nyhedsbrev**: et nyhedsbrev for den valgte klasse og måned med point, plantestadie, mest brugte udfordringer, uger med ugemålet nået og vejledende CO₂ – kun klasseniveau.
+- Kan printes / gemmes som PDF (samme printmotor som ugerapporten, én side) eller kopieres som tekst til Aula. Ingen tilmelding og ingen e-mails.
+- Sponsoreksponering efter niveau: hovedsponsor ("Støttet af" + "Månedens grønne tip fra …"), partner (tippet + navnet nederst) og støtter ("Tak til"-linjen). Læreren kan slå sponsorafsnittet fra. Navnet kommer fra `TEAM_DATA.sponsor` – er feltet tomt, står der "[Jeres sponsor]" med mærkatet "Eksempel · fiktiv sponsor".
+- Ny sektion **Månedens nyhedsbrev** (`#skoler-nyhedsbrev`) med regler for sponsorer og et eksempel med demo-data, hvor man kan skifte mellem de tre niveauer.
+
+### En slankere "For skoler"-side
+- Fjernet: Problemet og løsningen, Tre roller, Mulige partnere og kanaler, Alternativer og Bæredygtighed på tre niveauer. Business Model Canvas, prisskitsen og Næste skridt er bevaret (Canvas har fået en linje om sponsorer og nyhedsbrev).
+- Ny kort sektion **FN's verdensmål, vi bidrager til** (`#skoler-verdensmaal`) med 4.7, 12.5, 12.8 og 13.3. På elevsiden er "Bæredygtighed på tre niveauer" erstattet af én linje om verdensmålene.
+- Hoppe-navigationen: Priser, Økonomi, Sponsorer, Nyhedsbrev, Forretningsmodel, Verdensmål, Næste skridt.
+- `TEAM_DATA`-felterne `ideaOrigin`, `feedbackUsed` og `nameCheck` er **bevaret og flyttet**: `ideaOrigin` vises nu øverst på "For skoler", `feedbackUsed` og `nameCheck` under Næste skridt. README-tjeklisten er uændret.
+- `#appSize` og målingen af filstørrelsen er fjernet sammen med sektionen.
+- A4-oversigten er stadig én side: verdensmål i stedet for bæredygtighed, sponsorniveauer i prisskitsen og sponsorer i break-even.
+
+### Rettelser og test
+- Swipe i pitchen: et lynhurtigt stryg, hvor browseren slår bevægelserne sammen, skifter nu også trin.
+- `e2e.cjs` har 175 tjek (alle består): sponsorfelter og scenarier, break-even med og uden sponsorer, nyhedsbrevet (print, kopiér, sponsorafsnit til/fra, eksempel-mærkat, niveauer), verdensmål og at de fjernede sektioner er væk. Pitchtjekkene forventer nu 6 trin, og mobiltjekket "over folden" følger det nye layout (overskrift, trin og "Registrér en handling").
+- `sw.js` har fået et nyt versionsnavn, så installerede enheder henter den nye version.
+
 ## Version 3.4 – 3. november 2026 (Apple-design-lag)
 
 Nyt udseende og ny bevægelse efter skillen *apple-design*. **Alt indhold og al logik er uændret** – laget ligger i `<style id="apple-design">` og `<script id="apple-motion">` og kan fjernes igen uden at noget går i stykker. Alle 134 browsertests i `e2e.cjs` består.

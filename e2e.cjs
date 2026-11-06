@@ -185,7 +185,7 @@ async function unlockTeacher(page) {
     await ctx.close();
   }
 
-  console.log('\n5. Holdets data (TEAM_DATA), ?udkast=1 og ?demo=1');
+  console.log('\n5. Holdets data (TEAM_DATA) og ?demo=1');
   {
     const { ctx, page, errors } = await freshPage(browser);
     await resetStorage(page, { onboardingDone: true });
@@ -196,16 +196,12 @@ async function unlockTeacher(page) {
     }
     await page.goto(FILE_URL + '?pitch=1');
     for (let i = 0; i < 6; i++) { if (PLACEHOLDER.test(await page.locator('#pitchSlide').innerText())) worst++; await page.keyboard.press('ArrowRight'); }
-    check('Ingen [INDSÆT/[VALIDÉR/[FAKTATJEK synlige uden ?udkast=1 (4 visninger + 6 trin)', worst === 0, `${worst} steder`);
-    await page.goto(FILE_URL + '?udkast=1#skoler');
-    check('?udkast=1 viser udkast-banneret', await page.locator('#draftBanner').isVisible());
-    check('?udkast=1 viser de gule pladsholdere', (await page.locator('#view-skoler .ph').count()) > 5);
-    check('?udkast=1 viser noter til holdet', await page.locator('#skoler-canvas .draft-only').isVisible());
+    check('Ingen [INDSÆT/[VALIDÉR/[FAKTATJEK synlige (4 visninger + 6 trin)', worst === 0, `${worst} steder`);
     await page.goto(FILE_URL + '#skoler');
-    check('Uden udkast er banneret og noterne skjult', !(await page.locator('#draftBanner').isVisible()) && !(await page.locator('#skoler-canvas .draft-only').isVisible()));
-    check('Tomme felter viser en ærlig reservetekst', (await page.locator('#skoler-vaerdi').innerText()).includes('Vi er i gang med at interviewe lærere'));
-    await page.evaluate(() => { TEAM_DATA.interviewFinding = 'Testfund fra holdet'; applyTeamData(); });
-    check('Et udfyldt felt vises med sin tekst før/efter', (await page.locator('#skoler-vaerdi').innerText()).includes('Hvad lærerne selv siger: Testfund fra holdet'));
+    check('Tomme felter skjuler linjen', await page.locator('[data-team="feedbackUsed"]').isHidden() && await page.locator('#skoler-naeste li[data-team-line]').isHidden() && (await page.locator('#skoler-naeste').innerText()).includes('Interviews'));
+    await page.evaluate(() => { TEAM_DATA.feedbackUsed = 'Testfund fra holdet'; applyTeamData(); });
+    check('Et udfyldt felt vises med sin tekst før/efter', (await page.locator('#skoler-naeste').innerText()).includes('Det har vi lært og ændret: Testfund fra holdet'));
+    check('ideaOrigin, feedbackUsed og nameCheck vises stadig på "For skoler"', await page.evaluate(() => ['ideaOrigin', 'feedbackUsed', 'nameCheck'].every(k => document.querySelector(`#view-skoler [data-team="${k}"]`))));
     check('Prisidéer nævner ingen firmanavne', !/BonBon/i.test(await page.content()));
     // ?demo=1: levende demo med plante, graf og liga – og "Afslut demo" gendanner den tomme tilstand
     await page.goto(FILE_URL + '?demo=1');
@@ -244,6 +240,9 @@ async function unlockTeacher(page) {
     await page.click('#a4Btn');
     check('Print A4-oversigt bygger arket og kalder print()', await page.evaluate(() => window.__printed === true && document.body.classList.contains('printing-a4') && !!document.querySelector('#a4Sheet svg.qr')));
     check('A4-arket har ingen pladsholdere og ingen persondata-felter', !PLACEHOLDER.test(await page.locator('#a4Sheet').evaluate(el => el.textContent)));
+    const a4 = await page.locator('#a4Sheet').evaluate(el => el.textContent);
+    check('A4-arket viser verdensmålene i stedet for "bæredygtighed på tre niveauer"', a4.includes("FN's verdensmål") && a4.includes('12.5') && a4.includes('13.3') && !a4.includes('Socialt:'));
+    check('A4-arket regner sponsorer med i break-even', a4.includes('5 skoler + 1 kommuneaftale + 1 sponsoraftale') && a4.includes('Uden sponsorer: 15 skoler') && a4.includes('hovedsponsor ca. 40.000 kr.'));
     await page.emulateMedia({ media: 'print' });
     const pdf = (await page.pdf({ format: 'A4', printBackground: true, preferCSSPageSize: true })).toString('latin1');
     const pages = (pdf.match(/\/Type\s*\/Page[^s]/g) || []).length;
@@ -257,16 +256,25 @@ async function unlockTeacher(page) {
     const { ctx, page, errors } = await freshPage(browser);
     await resetStorage(page, { onboardingDone: true });
     await page.goto(FILE_URL + '#skoler');
-    check('Break-even med standardantagelserne (forventet): 15 skoler', (await page.locator('#calcBreakEven').innerText()) === '15 skoler');
-    for (const [s, n] of [['careful', '38 skoler'], ['optimistic', '4 skoler'], ['expected', '15 skoler']]) {
+    check('Break-even med standardantagelserne (forventet): 5 skoler (+ 1 kommuneaftale + 1 sponsoraftale)', (await page.locator('#calcBreakEven').innerText()) === '5 skoler' && (await page.locator('#calcBreakEvenLabel').innerText()).includes('1 sponsoraftale'));
+    check('Sponsorfelterne har labels og hypoteser', await page.evaluate(() => ['calcSponsors', 'calcSponsorPrice', 'calcSponsorCost'].every(id => { const el = document.getElementById(id); return el && el.closest('label') && el.closest('label').textContent.length > 15; })) && (await page.getAttribute('#calcSponsors', 'max')) === '20');
+    for (const [s, n, sponsors, without] of [['careful', '38 skoler', '0', '38 skoler'], ['optimistic', '0 skoler', '3', '4 skoler'], ['expected', '5 skoler', '1', '15 skoler']]) {
       await page.click(`[data-scenario="${s}"]`);
-      check(`Scenarie ${s}: break-even ${n}`, (await page.locator('#calcBreakEven').innerText()) === n && (await page.locator(`[data-scenario="${s}"]`).getAttribute('aria-pressed')) === 'true');
+      const ok = (await page.locator('#calcBreakEven').innerText()) === n && (await page.locator(`[data-scenario="${s}"]`).getAttribute('aria-pressed')) === 'true'
+        && (await page.inputValue('#calcSponsors')) === sponsors && (await page.inputValue('#calcSponsorPrice')) === '15000' && (await page.inputValue('#calcSponsorCost')) === '1000';
+      const explain = await page.locator('#calcExplain').innerText();
+      check(`Scenarie ${s}: ${sponsors} sponsorer, break-even ${n}${sponsors !== '0' ? ` (uden sponsorer ${without})` : ''}`, ok && (sponsors === '0' ? !explain.includes('Uden sponsoraftaler') : explain.includes(`Uden sponsoraftaler: ${without}`)), explain);
     }
     await page.fill('#calcPrice', '3000');
-    check('Beregneren regner om (7 skoler ved 3.000 kr.)', (await page.locator('#calcBreakEven').innerText()) === '7 skoler');
+    check('Beregneren regner om (2 skoler ved 3.000 kr.)', (await page.locator('#calcBreakEven').innerText()) === '2 skoler');
+    await page.click('#calcReset');
+    await page.fill('#calcSponsors', '0');
+    check('Uden sponsorer giver det forventede scenarie igen 15 skoler', (await page.locator('#calcBreakEven').innerText()) === '15 skoler');
+    await page.fill('#calcSponsors', '2');
+    check('Flere sponsorer sænker break-even (2 sponsorer: 0 skoler)', (await page.locator('#calcBreakEven').innerText()) === '0 skoler' && (await page.locator('#calcRevenueSplit').innerText()).includes('2 sponsoraftaler × 15.000 kr. = 30.000 kr.'));
     await page.click('#calcReset');
     await page.fill('#calcSalary', '150000');
-    check('Løn til drift ændrer break-even (126 skoler ved 150.000 kr.)', (await page.locator('#calcBreakEven').innerText()) === '126 skoler');
+    check('Løn til drift ændrer break-even (116 skoler ved 150.000 kr.)', (await page.locator('#calcBreakEven').innerText()) === '116 skoler');
     const consistent = await page.evaluate(() => {
       const e = calcEconomy(readCalc()), f = formatNumber(e.breakEven);
       const row = [...document.querySelectorAll('#breakEvenTable tr')].find(tr => tr.textContent.includes('(break-even)'));
@@ -275,6 +283,12 @@ async function unlockTeacher(page) {
     });
     check('Break-even-tekst, KPI, tabel og graf stemmer overens', consistent);
     check('Samlet indtægt inkl. kommuneaftaler vises', (await page.locator('#calcRevenueSplit').innerText()).includes('kommuneaftale'));
+    check('Fordelingen viser licenser, kommuner og sponsorer', /skolelicenser.*kommuneaftale.*sponsoraftale × 15\.000 kr\. = 15\.000 kr\..*samlet 64\.500 kr\./.test(await page.locator('#calcRevenueSplit').innerText()));
+    const fixedRev = await page.evaluate(() => { const e = calcEconomy(readCalc()); return e.revenueAt(0) === e.muniRevenue + e.sponsorRevenue && e.revenueAt(10) - e.revenueAt(0) === 10 * readCalc().price; });
+    check('Sponsorindtægten er fast og afhænger ikke af antal skoler', fixedRev);
+    check('Grafen viser de faste aftaler som en stiplet linje', (await page.locator('#breakEvenChart .deal-line').count()) === 1);
+    check('Tabellen har en kolonne med sponsorindtægten', await page.evaluate(() => { const t = document.querySelector('#breakEvenTable table'); return t.tHead.textContent.includes('Heraf sponsorer') && [...t.tBodies[0].rows].every(r => r.cells[2].textContent === '15.000 kr.'); }));
+    check('Noten om usikre sponsorindtægter vises', (await page.locator('#calcSponsorNote').innerText()).includes('Sponsorindtægter er usikre og kan ikke alene bære driften. Sponsorer har ingen indflydelse på udfordringer eller CO₂-tal.'));
     check('Alle 9 BMC-felter vises', (await page.locator('.bmc-cell').count()) === 9);
     // Konkurrence: tilmelding og afmelding
     await page.goto(FILE_URL + '#konkurrence');
@@ -293,19 +307,104 @@ async function unlockTeacher(page) {
     // Pitch: 6 trin, højst 3 punkter, BMC-perspektiv på hvert trin
     await page.goto(FILE_URL + '?pitch=1');
     check('?pitch=1 åbner præsentationen', await page.locator('#pitch').evaluate(d => d.open));
-    let tooMany = 0, noPersp = 0;
+    let tooMany = 0, noPersp = 0, business = '';
     for (let i = 0; i < 6; i++) {
       if (await page.locator('#pitchSlide .pitch-points li').count() > 3) tooMany++;
       if (!(await page.locator('#pitchSlide .persp-chip').isVisible())) noPersp++;
+      if (i === 3) business = await page.locator('#pitchSlide').innerText();
       if (i < 5) await page.keyboard.press('ArrowRight');
     }
     check('Højst 3 punkter pr. trin', tooMany === 0, `${tooMany} trin har flere`);
     check('Hvert trin viser sit perspektiv', noPersp === 0, `${noPersp} mangler`);
+    check('Pitchtrinnet "Forretningen" bruger beregnerens tal med sponsorer', business.includes('64.500 kr.') && business.includes('5 skoler + 1 kommuneaftale + 1 sponsoraftale') && business.includes('Uden sponsorer: break-even ved 15 skoler'), business.slice(0, 300));
     check('Piletaster går til trin 6', (await page.locator('#pitchCount').innerText()) === '6 / 6');
     await page.keyboard.press('ArrowLeft');
     check('Tilbage glider ind fra venstre', await page.locator('#pitchSlide').evaluate(el => el.classList.contains('back')));
     await page.keyboard.press('Escape');
     check('Esc lukker præsentationen', !(await page.locator('#pitch').evaluate(d => d.open)));
+    check('Ingen fejl i konsollen', errors.length === 0, errors.join(' | '));
+    await ctx.close();
+  }
+
+  console.log('\n7b. Sponsorer, nyhedsbrev, verdensmål og fjernede sektioner');
+  {
+    const { ctx, page, errors } = await freshPage(browser);
+    await resetStorage(page, { onboardingDone: true });
+    await page.goto(FILE_URL + '#skoler'); await page.waitForTimeout(150);
+    const COMPANIES = ['Coop', 'Salling', 'Ørsted', 'Danfoss', 'Grundfos', 'DSB', 'VELUX'];
+    // Fjernede sektioner og oprydning
+    const removed = await page.evaluate(() => ['skoler-vaerdi', 'skoler-roller', 'skoler-partnere', 'skoler-alternativer', 'skoler-baeredygtighed', 'valueTitle', 'rolesTitle', 'partnersTitle', 'altTitle', 'sustainTitle', 'appSize'].filter(id => document.getElementById(id)));
+    check('De fjernede sektioner (og #appSize) er væk', removed.length === 0, removed.join(', '));
+    const jump = await page.evaluate(() => [...document.querySelectorAll('nav.jump a')].map(a => [a.textContent, !!document.querySelector(a.getAttribute('href'))]));
+    check('Hoppe-navigationen: Priser, Økonomi, Sponsorer, Nyhedsbrev, Forretningsmodel, Verdensmål, Næste skridt', jump.map(j => j[0]).join(',') === 'Priser,Økonomi,Sponsorer,Nyhedsbrev,Forretningsmodel,Verdensmål,Næste skridt' && jump.every(j => j[1]), JSON.stringify(jump));
+    const order = await page.evaluate(() => [...document.querySelectorAll('#view-skoler > section[id]')].map(s => s.id).join(','));
+    check('Sektionerne står i samme rækkefølge som navigationen', order === 'skoler-priser,skoler-oekonomi,skoler-sponsorer,skoler-nyhedsbrev,skoler-canvas,skoler-verdensmaal,skoler-naeste', order);
+    check('Business Model Canvas, prisskitsen og Næste skridt er bevaret', (await page.locator('.bmc-cell').count()) === 9 && await page.locator('#skoler-priser').isVisible() && await page.locator('#skoler-naeste').isVisible());
+    const links = await page.evaluate(() => [...document.querySelectorAll('a[href^="#"]')].map(a => a.getAttribute('href')).filter(h => h.length > 1 && !['#klassen', '#skoler', '#laerer', '#konkurrence', '#main'].includes(h) && !document.querySelector(h)));
+    check('Ingen links peger på sektioner, der ikke findes', links.length === 0, links.join(', '));
+    // Verdensmål
+    const sdg = await page.locator('#skoler-verdensmaal li').allInnerTexts();
+    check('Verdensmål-sektionen har 4.7, 12.5, 12.8 og 13.3 med én linje hver', sdg.length === 4 && ['4.7', '12.5', '12.8', '13.3'].every((n, i) => sdg[i].startsWith(n)), sdg.join(' | '));
+    await page.goto(FILE_URL + '#klassen'); await page.waitForTimeout(100);
+    const count = await page.locator('#countTitle').evaluate(h => h.parentElement.innerText);
+    check('Elevsiden: "Bæredygtighed på tre niveauer" er erstattet af én linje om verdensmålene', !count.includes('Bæredygtighed på tre niveauer') && count.includes('4.7 · 12.5 · 12.8 · 13.3'));
+    await page.goto(FILE_URL + '#skoler'); await page.waitForTimeout(100);
+    // Mulige sponsorer
+    const sp = await page.locator('#skoler-sponsorer').innerText();
+    check('Mulige sponsorer: 7 landsdækkende virksomheder, mærket IKKE KONTAKTET', (await page.locator('#skoler-sponsorer .sponsor-list li').count()) === 7 && COMPANIES.every(c => sp.includes(c)) && sp.includes('IKKE KONTAKTET') && sp.includes('ingen har sagt ja'));
+    check('Mulige sponsorer: ingen logoer eller billeder', (await page.locator('#skoler-sponsorer img, #skoler-sponsorer svg').count()) === 0);
+    check('Note om virksomhedsfonde', sp.includes('Salling Fondene') && sp.includes('VELUX FONDENE'));
+    const tiers = await page.locator('#sponsorTiers').innerText();
+    check('Sponsorniveauer i prisskitsen: Støtter 5.000, Partner 15.000, Hovedsponsor 40.000 kr. (hypoteser)', (await page.locator('#sponsorTiers .tier').count()) === 3 && /Støtter[\s\S]*5\.000 kr\.[\s\S]*Partner[\s\S]*15\.000 kr\.[\s\S]*Hovedsponsor[\s\S]*40\.000 kr\./.test(tiers) && (await page.locator('#skoler-priser').innerText()).includes('Sponsorniveauer'));
+    // Eksemplet på nyhedsbrevet under "For skoler"
+    const preview = () => page.locator('#newsletterPreview').innerText();
+    let pv = await preview();
+    check('Eksemplet: hovedsponsor med "Støttet af" og månedens tip', pv.includes('Støttet af [Jeres sponsor]') && pv.includes('Månedens grønne tip fra [Jeres sponsor]') && pv.includes('Eksempel · fiktiv sponsor') && pv.includes('DEMO'));
+    const namesCompany = text => COMPANIES.some(c => new RegExp(`(^|[^\\p{L}])${c}([^\\p{L}]|$)`, 'u').test(text)); // hele ord (fx ikke "DSB" i "NYHEDSBREV")
+    check('Eksemplet nævner ingen af de mulige sponsorer som sponsor', !namesCompany(pv));
+    await page.click('[data-nl-level="partner"]'); pv = await preview();
+    check('Eksemplet: partner har tippet og navnet i bunden, men ikke "Støttet af"', !pv.includes('Støttet af') && pv.includes('Månedens grønne tip fra [Jeres sponsor]') && pv.includes('Partner: [Jeres sponsor]') && (await page.getAttribute('[data-nl-level="partner"]', 'aria-pressed')) === 'true');
+    await page.click('[data-nl-level="supporter"]'); pv = await preview();
+    check('Eksemplet: støtter står kun i "Tak til"-linjen', !pv.includes('Støttet af') && !pv.includes('tip fra') && pv.includes('Tak til [Jeres sponsor]'));
+    check('Reglerne for sponsorer vises', await page.locator('#skoler-nyhedsbrev').evaluate(el => ['ikke reklame til børn', 'Ingen tilbud, rabatkoder eller produktreklame', 'slå sponsorafsnittet fra', 'kan ikke ændre indhold eller tal'].every(t => el.innerText.includes(t))));
+    // Lærerens nyhedsbrev
+    await page.goto(FILE_URL + '?demo=1#klassen'); await page.waitForTimeout(150);
+    await unlockTeacher(page);
+    check('Lærerområdet har kortet "Månedens nyhedsbrev" ved siden af ugerapport og CSV', await page.locator('.tool-grid').evaluate(g => { const t = [...g.querySelectorAll('.tool h3')].map(h => h.textContent); return t.some(x => x.includes('Ugerapport')) && t.some(x => x.includes('Månedens nyhedsbrev')) && t.some(x => x.includes('CSV')); }));
+    await page.click('#newsletterBtn');
+    const dialogOpen = await page.locator('#newsletterDialog').evaluate(d => d.open);
+    const nl = () => page.locator('#newsletterContent').innerText();
+    let text = await nl();
+    const monthName = await page.evaluate(() => monthLabel(monthKey(todayKey())));
+    check('Nyhedsbrevet åbner for den valgte klasse og denne måned', dialogOpen && (await page.locator('#nlClass').innerText()) === '7.A' && text.toLowerCase().includes(monthName) && (await page.locator('#nlMonth option').count()) === 6);
+    check('Nyhedsbrevet bygger på klassens data (point, plantestadie, ugemål, CO₂, mest brugte)', ['point i', 'plantestadie', 'ugemålet nået', 'CO₂ sparet', 'Det gjorde klassen mest'].every(t => text.includes(t)));
+    check('Nyhedsbrevet har kun klassedata og ingen pladsholdere', text.includes('ingen elevnavne') && !PLACEHOLDER.test(text));
+    check('Uden sponsor i TEAM_DATA: "[Jeres sponsor]" og "Eksempel · fiktiv sponsor"', text.includes('Støttet af [Jeres sponsor]') && text.includes('Eksempel · fiktiv sponsor'));
+    check('Lærerens nyhedsbrev nævner ingen af de mulige sponsorer', !namesCompany(text));
+    const months = await page.locator('#nlMonth option').evaluateAll(o => o.map(x => x.value));
+    await page.selectOption('#nlMonth', months[1]); text = await nl();
+    check('Skift måned bygger nyhedsbrevet for den måned', text.toLowerCase().includes(await page.evaluate(m => monthLabel(m), months[1])));
+    await page.uncheck('#nlSponsor'); text = await nl();
+    check('Læreren kan slå sponsorafsnittet fra', !text.includes('Jeres sponsor') && !text.includes('Støttet af') && text.includes('Månedens grønne tip'));
+    await page.check('#nlSponsor');
+    await page.evaluate(() => { window.__copied = null; Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText: t => { window.__copied = t; return Promise.resolve(); } } }); });
+    await page.click('#newsletterCopy'); await page.waitForTimeout(150);
+    const copied = await page.evaluate(() => window.__copied);
+    check('Kopiér tekst giver en tekstudgave til Aula', !!copied && copied.includes('Nyhedsbrev for klasse 7.A') && copied.includes('ingen elevnavne') && copied.includes('Det gjorde klassen mest') && !copied.includes('<'), String(copied).slice(0, 120));
+    check('Kopiér tekst giver besked (aria-live)', (await page.locator('#nlStatus').innerText()).includes('kopieret') && (await page.getAttribute('#nlStatus', 'aria-live')) === 'polite');
+    await page.evaluate(() => { TEAM_DATA.sponsor = 'Testsponsor'; renderNewsletter(); });
+    text = await nl();
+    check('Med en rigtig sponsor i TEAM_DATA: navnet vises uden "Eksempel"-mærkat', text.includes('Støttet af Testsponsor') && !text.includes('Eksempel · fiktiv sponsor') && !text.includes('[Jeres sponsor]'));
+    await page.evaluate(() => { TEAM_DATA.sponsor = ''; renderNewsletter(); window.print = () => { window.__printed = true; }; });
+    await page.click('#newsletterPrint');
+    check('Print / Gem som PDF udskriver kun nyhedsbrevet', await page.evaluate(() => window.__printed === true && document.body.classList.contains('printing-newsletter')));
+    await page.emulateMedia({ media: 'print' });
+    const pdf = (await page.pdf({ format: 'A4', printBackground: true })).toString('latin1');
+    const pages = (pdf.match(/\/Type\s*\/Page[^s]/g) || []).length;
+    check('Nyhedsbrevet fylder én side', pages === 1, `${pages} sider`);
+    await page.emulateMedia({ media: 'screen' });
+    await page.click('#newsletterClose');
+    check('Nyhedsbrevet indsamler ingen e-mails (ingen e-mail-felter i appen)', (await page.locator('input[type="email"], input[name*="mail" i]').count()) === 0);
     check('Ingen fejl i konsollen', errors.length === 0, errors.join(' | '));
     await ctx.close();
   }
@@ -373,10 +472,11 @@ async function unlockTeacher(page) {
     await page.waitForTimeout(150); await page.mouse.up();
     await page.waitForTimeout(900);
     check('Langsomt, kort træk fjedrer tilbage til samme trin', (await count()) === '1 / 6' && (await offset()) === 0);
-    // Kast: kort, hurtigt træk skifter trin
-    await page.mouse.move(x0, y0); await page.mouse.down();
-    await page.mouse.move(x0 - 40, y0); await page.mouse.move(x0 - 90, y0); await page.mouse.move(x0 - 140, y0);
-    await page.mouse.up();
+    // Kast: kort, hurtigt træk skifter trin. Hændelserne sendes samlet via DevTools-protokollen,
+    // så kastet er lige hurtigt på en langsom og en hurtig maskine.
+    const cdp = await ctx.newCDPSession(page);
+    const mouse = (type, x) => cdp.send('Input.dispatchMouseEvent', { type, x, y: y0, button: 'left', buttons: type === 'mouseReleased' ? 0 : 1, clickCount: 1 });
+    await Promise.all([mouse('mousePressed', x0), mouse('mouseMoved', x0 - 40), mouse('mouseMoved', x0 - 90), mouse('mouseMoved', x0 - 140), mouse('mouseReleased', x0 - 140)]);
     await page.waitForTimeout(900);
     check('Hurtigt kast skifter til næste trin', (await count()) === '2 / 6' && (await offset()) === 0);
     // Elastisk modstand ved første trin
@@ -491,8 +591,14 @@ async function unlockTeacher(page) {
       check(`${w}px ${scheme}: ingen vandret scroll og ingen fejl`, worst <= 0 && errors.length === 0, `overløb ${worst}px ${errors.join(' | ')}`);
       if (w === 375) {
         await page.goto('about:blank'); await page.goto(FILE_URL + '#klassen');
-        const fold = await page.evaluate(() => ({ stats: document.querySelector('.stats').getBoundingClientRect().bottom, challenges: document.getElementById('challengesTitle').getBoundingClientRect().top, header: document.querySelector('header').getBoundingClientRect().height }));
-        check(`375px ${scheme}: hero, de fire tal og udfordringerne står over folden`, fold.stats < h && fold.challenges < h, JSON.stringify(fold));
+        // Det nye mobillayout: overskrift, de tre trin og "Registrér en handling" skal kunne ses uden at rulle – over fanebjælken i bunden.
+        const fold = await page.evaluate(() => {
+          const tabs = document.querySelector('.tabs').getBoundingClientRect();
+          const visibleBottom = tabs.top > window.innerHeight / 2 ? tabs.top : window.innerHeight;
+          return { title: document.getElementById('heroTitle').getBoundingClientRect().bottom, steps: document.querySelector('.hero-points').getBoundingClientRect().bottom,
+            action: document.querySelector('#view-klassen .hero-actions .btn.primary').getBoundingClientRect().bottom, visibleBottom, header: document.querySelector('header').getBoundingClientRect().height };
+        });
+        check(`375px ${scheme}: overskrift, trin og "Registrér en handling" står over folden`, fold.title < fold.visibleBottom && fold.steps < fold.visibleBottom && fold.action < fold.visibleBottom, JSON.stringify(fold));
         check(`375px ${scheme}: headeren står på én linje`, fold.header < 70, `${fold.header}px`);
         const tabs = await page.evaluate(() => { const t = document.querySelector('.tabs'); return t.scrollWidth - t.clientWidth; });
         check(`375px ${scheme}: alle faner kan ses uden at scrolle`, tabs <= 0, `${tabs}px`);

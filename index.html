@@ -30,11 +30,6 @@
   <button class="btn small-btn" type="button" id="demoResetBtn">Nulstil demo</button>
   <button class="btn small-btn" type="button" id="demoExitBtn">Afslut demo</button>
 </div>
-<!-- Vises kun med ?udkast=1: hvilke felter i TEAM_DATA holdet mangler at udfylde -->
-<div class="draft-banner" id="draftBanner" role="region" aria-label="Udkast-tilstand" hidden>
-  <span class="demo-chip">UDKAST</span>
-  <span id="draftText"></span>
-</div>
 <div class="wrap">
   <header>
     <div class="brand">
@@ -107,13 +102,8 @@
           <section class="panel" aria-labelledby="countTitle">
             <h2 id="countTitle">Sådan tæller det</h2>
             <p class="muted">Pointene er en fælles klassescore. De belønner indsats og gode vaner – ikke kun CO₂ – derfor giver fx "Sluk lyset" point, selvom CO₂-effekten er lille. Læreren godkender hver indsendelse, før den tæller med.</p>
-            <h3 style="margin-top:14px">Bæredygtighed på tre niveauer</h3>
-            <div class="card-grid three sustain">
-              <div class="mini-card"><h4>🌍 Miljø</h4><p>Små grønne vaner i hverdagen – transport, mad, affald, forbrug og energi – med ærlige, vejledende tal.</p></div>
-              <div class="mini-card"><h4>🤝 Socialt</h4><p>Klassen arbejder sammen mod ét mål. Ingen elev bliver målt, rangeret eller udstillet.</p></div>
-              <div class="mini-card"><h4>💰 Økonomi</h4><p>En lille, let app, der er billig at drive. En skolelicens skal betale for drift og udvikling.</p></div>
-            </div>
-            <p class="small" style="margin-top:10px"><strong>Alle kan være med:</strong> der er mange slags udfordringer, så elever, der fx ikke kan cykle i skole, kan bidrage på andre måder. Point gives til klassen samlet. <a href="#skoler-baeredygtighed">Læs mere om bæredygtighed og tilgængelighed</a></p>
+            <p class="small" style="margin-top:10px"><span aria-hidden="true">🌐</span> <strong>Verdensmål 4.7 · 12.5 · 12.8 · 13.3:</strong> grøn dannelse · mindre affald · viden om bæredygtig livsstil · klimabevidsthed. <a href="#skoler-verdensmaal">Se hvordan</a></p>
+            <p class="small" style="margin-top:6px"><strong>Alle kan være med:</strong> der er mange slags udfordringer, så elever, der fx ikke kan cykle i skole, kan bidrage på andre måder. Point gives til klassen samlet.</p>
           </section>
         </div>
         <aside>
@@ -158,7 +148,7 @@
             <span class="hyp contest-example">EKSEMPEL · FIKTIV KONKURRENCE</span>
             <h2 id="contestTitle" data-contest="name">Klassekonkurrence</h2>
             <p>Den klasse, der samler flest godkendte point fra <strong data-contest="period"></strong>, vinder <strong data-contest="prize"></strong> til hele klassen.</p>
-            <p class="small">Sponsor: <span data-team="sponsor"></span></p>
+            <p class="small" data-team-line>Sponsor: <span data-team="sponsor"></span></p>
           </div>
         </div>
         <div class="contest-body">
@@ -182,7 +172,7 @@
           <span class="hyp contest-example">EKSEMPEL · FIKTIV KONKURRENCE</span>
           <h2 id="contestPageTitle" class="hero-title" tabindex="-1"><span aria-hidden="true">🏆</span> <span data-contest="name">Klassekonkurrence</span></h2>
           <p class="hero-lead">Saml flest godkendte point fra <strong data-contest="period"></strong> – og vind <strong data-contest="prize"></strong> til hele klassen.</p>
-          <p class="small" style="margin-top:8px">Sponsor: <span data-team="sponsor"></span></p>
+          <p class="small" style="margin-top:8px" data-team-line>Sponsor: <span data-team="sponsor"></span></p>
         </div>
         <div class="contest-trophy huge" aria-hidden="true">🏆</div>
       </section>
@@ -248,36 +238,13 @@
           <span class="tag">FOR SKOLER OG KOMMUNER</span>
           <h2 id="schoolsTitle" class="hero-title">Grønne vaner, der kan ses – for hele klassen.</h2>
           <p class="hero-lead">GroKlassen er et let værktøj, hvor klassen samler grønne handlinger, læreren godkender, og en fælles plante viser fremskridtet. Uden elevnavne og uden persondata.</p>
-          <p class="small" style="margin-top:10px"><span class="hyp">PROTOTYPE</span> Priser, tal og partnere på denne side er hypoteser fra et gymnasiehold. De skal testes i pilotforsøg, før de er rigtige.</p>
-          <div class="hero-actions"><button class="btn primary" type="button" id="a4Btn">Print A4-oversigt</button><span class="small">Én side til dommerne: værditilbud, kunder, priser, break-even, bæredygtighed og QR-kode.</span></div>
+          <p class="small" style="margin-top:10px"><span class="hyp">SCENARIE</span> Priser og tal er beregnede scenarier.</p>
+          <p class="small" style="margin-top:6px"><span data-team="ideaOrigin" data-before="Sådan fik vi idéen: "></span></p>
+          <div class="hero-actions"><button class="btn primary" type="button" id="a4Btn">Print A4-oversigt</button><span class="small">Én side til dommerne: værditilbud, kunder, priser og sponsorniveauer, break-even med sponsorer, verdensmål og QR-kode.</span></div>
         </div>
         <nav class="jump" aria-label="Indhold på siden">
-          <a href="#skoler-vaerdi">Værdi</a><a href="#skoler-roller">Kunder</a><a href="#skoler-priser">Priser</a><a href="#skoler-oekonomi">Økonomi</a><a href="#skoler-canvas">Forretningsmodel</a><a href="#skoler-partnere">Partnere</a><a href="#skoler-alternativer">Alternativer</a><a href="#skoler-baeredygtighed">Bæredygtighed</a><a href="#skoler-naeste">Næste skridt</a>
+          <a href="#skoler-priser">Priser</a><a href="#skoler-oekonomi">Økonomi</a><a href="#skoler-sponsorer">Sponsorer</a><a href="#skoler-nyhedsbrev">Nyhedsbrev</a><a href="#skoler-canvas">Forretningsmodel</a><a href="#skoler-verdensmaal">Verdensmål</a><a href="#skoler-naeste">Næste skridt</a>
         </nav>
-      </section>
-
-      <!-- Værditilbud -->
-      <section class="panel persp-vp" id="skoler-vaerdi" tabindex="-1" aria-labelledby="valueTitle">
-        <div class="persp-label"><i aria-hidden="true"></i>Værditilbud</div>
-        <h2 id="valueTitle">Problemet og løsningen</h2>
-        <div class="card-grid three">
-          <div class="mini-card"><h3>😕 Problemet</h3><p>Bæredygtige vaner forsvinder, når ingen kan se dem. Plakater og temauger er gode til at starte – men hvem holder fast, når ugen er slut?</p><p class="small">Vores hypotese. <span data-team="interviewFinding" data-before="Hvad lærerne selv siger: "></span></p></div>
-          <div class="mini-card"><h3>🌱 Løsningen</h3><p>Klassen registrerer små grønne handlinger. Læreren godkender. En fælles plante vokser – og et ugemål giver klassen noget at samles om hver uge.</p></div>
-          <div class="mini-card"><h3>✨ Det nye</h3><p>Fællesskab i stedet for individuelle ranglister. Lærergodkendelse i stedet for blind tillid. Åbne, ærlige beregninger. Og ingen persondata om eleverne – det gør det lettere for skolen at sige ja.</p></div>
-        </div>
-        <p class="small" style="margin-top:12px"><span data-team="ideaOrigin" data-before="Sådan fik vi idéen: "></span></p>
-      </section>
-
-      <!-- Kundeperspektiv: tre roller -->
-      <section class="panel persp-cs" id="skoler-roller" tabindex="-1" aria-labelledby="rolesTitle">
-        <div class="persp-label"><i aria-hidden="true"></i>Kundeperspektiv</div>
-        <h2 id="rolesTitle">Tre roller – tre slags værdi</h2>
-        <div class="card-grid three">
-          <div class="mini-card"><h3>🎒 Elever</h3><div class="role">Brugere</div><ul><li>Ser at deres handlinger tæller – planten vokser</li><li>Et fælles mål for klassen, ingen udstilling af enkeltpersoner</li><li>Ingen login, intet navn – bare klassen</li></ul></div>
-          <div class="mini-card"><h3>📋 Lærere</h3><div class="role">Daglige administratorer</div><ul><li>Godkend indsendelser enkeltvis eller samlet</li><li>Graf over klassens udvikling og print-venlig ugerapport</li><li>Spørgsmål til en kort klassesamtale hver uge</li></ul></div>
-          <div class="mini-card"><h3>🏫 Skoler og kommuner</h3><div class="role">Betalende kunder</div><ul><li>Et konkret værktøj til grøn dannelse i hverdagen</li><li>Rapporter og CSV på klasseniveau – ingen persondata</li><li>Kan understøtte skolens grønne handleplan eller kommunens klimaplan</li></ul></div>
-        </div>
-        <p class="small" style="margin-top:12px">Målgruppe: <span data-team="targetGrades"></span> · Interviews indtil nu: <span data-team="interviewsTeachers" data-after=" lærere"></span></p>
       </section>
 
       <!-- Økonomi: prisskitse -->
@@ -290,16 +257,19 @@
           <div class="tier featured"><div class="tier-name">🌳 Skolelicens</div><div class="tier-price">ca. 1.500 kr.</div><div class="small">pr. skole pr. år</div><ul><li>Alle skolens klasser og en klasseliga</li><li>Lærerdashboard, ugerapporter og CSV</li><li>Support på mail</li></ul></div>
           <div class="tier"><div class="tier-name">🏙️ Kommuneaftale</div><div class="tier-price">fra ca. 12.000 kr.</div><div class="small">pr. år for op til 10 skoler</div><ul><li>Alle deltagende skoler i kommunen</li><li>Samlet rapport til kommunens klimaenhed (kun klasseniveau)</li><li>Hjælp til opstart</li></ul></div>
         </div>
+        <h3 style="margin-top:16px">Sponsorniveauer <span class="hyp">HYPOTESE</span></h3>
+        <p class="small">Sponsorer får synlighed i nyhedsbrevet til de voksne – aldrig i elevernes udfordringer. Ingen sponsor har sagt ja.</p>
+        <div class="card-grid three" id="sponsorTiers"></div>
         <details style="margin-top:12px">
           <summary>Hvorfor netop disse priser? (referencer)</summary>
-          <p class="small">Vi har lagt prisen lavt, fordi GroKlassen er et nyt og ubevist værktøj. Til sammenligning (priser set på udbydernes egne hjemmesider 25.10.2026<span class="draft-only"> – <strong>faktatjek før pitchen</strong></span>):</p>
+          <p class="small">Vi har lagt prisen lavt, fordi GroKlassen er et nyt værktøj. Til sammenligning (priser set på udbydernes egne hjemmesider 25.10.2026):</p>
           <ul class="small">
             <li>Grøn Skole/Grønt Flag (Friluftsrådet): 3.600 kr. pr. skoleår for en grundskole – et helt program med netværk og certificering.</li>
             <li>Klimakampen: 500 kr. pr. klasse for en kampagne på 4 uger.</li>
             <li>Gyldendals digitale fagportaler: ca. 1.300 kr. pr. klasse pr. år.</li>
             <li>Matematik-Tjek: 645–2.045 kr. pr. skole pr. år afhængigt af antal klasser.</li>
           </ul>
-          <p class="small"><span data-team="willingnessToPay" data-before="Betalingsvilje ifølge vores egne samtaler: "></span></p>
+          <p class="small" data-team-line><span data-team="willingnessToPay" data-before="Betalingsvilje ifølge vores egne samtaler: "></span></p>
         </details>
       </section>
 
@@ -323,10 +293,13 @@
               <label>Kommuneaftaler<input class="input" type="number" id="calcMunis" min="0" max="98" step="1" inputmode="numeric"><span class="small">Antal aftaler med kommuner</span></label>
               <label>Pris pr. kommuneaftale (kr.)<input class="input" type="number" id="calcMuniPrice" min="0" max="1000000" step="500" inputmode="numeric"><span class="small">Hypotese: fra ca. 12.000 kr.</span></label>
               <label>Skoler pr. kommuneaftale<input class="input" type="number" id="calcMuniSchools" min="0" max="50" step="1" inputmode="numeric"><span class="small">Prisskitsen: op til 10 skoler</span></label>
+              <label>Sponsoraftaler<input class="input" type="number" id="calcSponsors" min="0" max="20" step="1" inputmode="numeric"><span class="small">Antal sponsorer (0–20) – ingen har sagt ja</span></label>
+              <label>Pris pr. sponsoraftale (kr.)<input class="input" type="number" id="calcSponsorPrice" min="0" max="1000000" step="1000" inputmode="numeric"><span class="small">Hypotese: ca. 15.000 kr./år (partner)</span></label>
             </fieldset>
             <fieldset class="calc-group">
               <legend>Omkostninger pr. år <span class="hyp">ANTAGELSER</span></legend>
               <label>Variable omkostninger pr. skole (kr.)<input class="input" type="number" id="calcVariable" min="0" max="100000" step="50" inputmode="numeric"><span class="small">Onboarding, fakturering, support – gælder alle skoler</span></label>
+              <label>Omkostning pr. sponsoraftale (kr.)<input class="input" type="number" id="calcSponsorCost" min="0" max="100000" step="100" inputmode="numeric"><span class="small">Hypotese: ca. 1.000 kr. til nyhedsbrev og rapportering</span></label>
               <label>Hosting og database (kr.)<input class="input" type="number" id="calcHosting" min="0" max="1000000" step="500" inputmode="numeric"><span class="small">Fx database i EU + webhosting + domæne</span></label>
               <label>Support (kr.)<input class="input" type="number" id="calcSupport" min="0" max="1000000" step="500" inputmode="numeric"><span class="small">Lærersupport og fejlrettelser</span></label>
               <label>Udvikling (kr.)<input class="input" type="number" id="calcDev" min="0" max="1000000" step="1000" inputmode="numeric"><span class="small">Fx sikkerhed, GDPR-rådgivning, nye funktioner</span></label>
@@ -342,19 +315,64 @@
             </div>
             <p class="small" id="calcRevenueSplit" style="margin-top:10px"></p>
             <p class="small" id="calcExplain"></p>
+            <p class="small calc-note" id="calcSponsorNote"><strong>Bemærk:</strong> Sponsorindtægter er usikre og kan ikke alene bære driften. Sponsorer har ingen indflydelse på udfordringer eller CO₂-tal.</p>
           </div>
         </form>
         <h3 class="chart-head">Indtægt og omkostninger ved flere skoler med licens</h3>
         <div class="viz" id="breakEvenChart"></div>
-        <div class="legend" aria-hidden="true"><span><i style="background:var(--series-a)"></i>Indtægt</span><span><i style="background:var(--series-b)"></i>Omkostninger</span></div>
+        <div class="legend" aria-hidden="true"><span><i style="background:var(--series-a)"></i>Indtægt</span><span><i style="background:var(--series-b)"></i>Omkostninger</span><span><i class="legend-dash"></i>Faste aftaler (kommuner + sponsorer)</span></div>
         <details style="margin-top:8px"><summary>Vis som tabel</summary><div class="table-scroll" id="breakEvenTable"></div></details>
         <div class="form-row"><button class="btn small-btn" type="button" id="calcReset">Gendan antagelser (forventet)</button></div>
+      </section>
+
+      <!-- Aktivitetsperspektiv: mulige sponsorer (ingen er kontaktet) -->
+      <section class="panel persp-ka" id="skoler-sponsorer" tabindex="-1" aria-labelledby="sponsorsTitle">
+        <div class="persp-label"><i aria-hidden="true"></i>Aktivitetsperspektiv · mulige nøglepartnere</div>
+        <h2 id="sponsorsTitle">Sponsorer vi vil kontakte <span class="hyp">IKKE KONTAKTET</span></h2>
+        <p class="muted">Landsdækkende virksomheder, hvis bæredygtighedsarbejde passer til vores udfordringer. Ingen af dem er kontaktet, og ingen har sagt ja.</p>
+        <ul class="plain-list sponsor-list">
+          <li><strong>Coop Danmark</strong> – landsdækkende dagligvarekæde ejet af medlemmerne, der arbejder med klima, økologi og madspild. Passer til "Plantebaseret frokost" og "Madpakke uden engangsplast".</li>
+          <li><strong>Salling Group</strong> (Netto, føtex, Bilka) – landsdækkende dagligvarehandel, der arbejder med madspild og emballage. Passer til "Sortér affald korrekt" og madpakken.</li>
+          <li><strong>Ørsted</strong> – dansk energiselskab inden for grøn energi. Passer til "Sluk lyset" og "Sluk skærme og opladere".</li>
+          <li><strong>Danfoss</strong> – dansk virksomhed inden for energieffektivitet. Passer til energi-udfordringerne.</li>
+          <li><strong>Grundfos</strong> – dansk virksomhed inden for vand og pumper. Passer til "Tag et kort bad" og vandtallene.</li>
+          <li><strong>DSB</strong> – landsdækkende kollektiv og grøn transport. Passer til "Cykel eller gå i skole".</li>
+          <li><strong>VELUX</strong> – dagslys og indeklima i bygninger, også skoler. Passer til energi og skolens hverdag.</li>
+        </ul>
+        <p class="small">Mange virksomheder støtter via deres fonde (fx Salling Fondene, Poul Due Jensens Fond/Grundfos Foundation og VELUX FONDENE). Det kan være en anden vej end en sponsoraftale.</p>
+        <p class="small">Vi viser kun navne og en kort begrundelse – ingen logoer, og intet om samarbejde, før en virksomhed har sagt ja.</p>
+      </section>
+
+      <!-- Kanaler: nyhedsbrev med sponsoreksponering -->
+      <section class="panel persp-cs" id="skoler-nyhedsbrev" tabindex="-1" aria-labelledby="newsletterTitle">
+        <div class="persp-label"><i aria-hidden="true"></i>Kunderelationer · sponsoreksponering</div>
+        <h2 id="newsletterTitle">Månedens nyhedsbrev <span class="hyp">EKSEMPEL</span></h2>
+        <p class="muted">Læreren laver med ét klik et nyhedsbrev om klassens grønne måned (Lærer → Månedens nyhedsbrev). Det kan printes, gemmes som PDF eller kopieres ind i Aula. Appen indsamler ingen e-mails, og alle tal er for hele klassen.</p>
+        <div class="card-grid two nl-grid">
+          <div>
+            <h3>Regler for sponsorer</h3>
+            <ul class="plain-list">
+              <li>Nyhedsbrevet er til lærere, skoleledelse og forældre – ikke reklame til børn.</li>
+              <li>Ingen tilbud, rabatkoder eller produktreklame.</li>
+              <li>Læreren kan slå sponsorafsnittet fra.</li>
+              <li>Sponsoren kan ikke ændre indhold eller tal.</li>
+            </ul>
+            <h3 style="margin-top:14px">Se eksponeringen pr. niveau</h3>
+            <div class="scenarios" role="group" aria-label="Vis nyhedsbrevet for et sponsorniveau">
+              <button class="btn small-btn" type="button" data-nl-level="main" aria-pressed="true">Hovedsponsor</button>
+              <button class="btn small-btn" type="button" data-nl-level="partner" aria-pressed="false">Partner</button>
+              <button class="btn small-btn" type="button" data-nl-level="supporter" aria-pressed="false">Støtter</button>
+            </div>
+            <p class="small">Eksemplet bruger opdigtede demo-data for sidste måned. Sponsorens navn kommer fra <code>TEAM_DATA.sponsor</code> – indtil en sponsor har sagt ja, står der "[Jeres sponsor]".</p>
+          </div>
+          <div class="nl-preview" id="newsletterPreview" aria-live="polite"></div>
+        </div>
       </section>
 
       <!-- Business Model Canvas -->
       <section class="panel" id="skoler-canvas" tabindex="-1" aria-labelledby="bmcTitle">
         <h2 id="bmcTitle">Business Model Canvas</h2>
-        <p class="muted">De 9 felter er farvekodet efter de fire perspektiver, som Business Mind Programme bedømmer.<span class="draft-only"> Gule felter skal holdet selv udfylde med rigtige data.</span></p>
+        <p class="muted">De 9 felter er farvekodet efter de fire perspektiver, som Business Mind Programme bedømmer.</p>
         <div class="legend persp-legend">
           <span class="persp-key vp"><i></i>Værditilbud</span>
           <span class="persp-key cs"><i></i>Kundeperspektiv</span>
@@ -362,102 +380,39 @@
           <span class="persp-key ec"><i></i>Økonomi</span>
         </div>
         <div class="bmc">
-          <article class="bmc-cell persp-ka" style="grid-area:kp"><div class="persp-label"><i aria-hidden="true"></i>Aktivitet</div><h3>Nøglepartnere</h3><ul><li>Pilotskoler og -lærere</li><li>Kommunernes klimaenheder</li><li>Organisationer med grønne skoleprogrammer</li><li>Fagpersoner, der faktatjekker CO₂-tal</li><li>Hosting i EU</li></ul><p class="small">Alle er <strong>mulige</strong> partnere – ingen aftaler endnu.</p></article>
+          <article class="bmc-cell persp-ka" style="grid-area:kp"><div class="persp-label"><i aria-hidden="true"></i>Aktivitet</div><h3>Nøglepartnere</h3><ul><li>Pilotskoler og -lærere</li><li>Kommunernes klimaenheder</li><li>Organisationer med grønne skoleprogrammer</li><li>Fagpersoner, der faktatjekker CO₂-tal</li><li>Sponsorer vi vil kontakte (se ovenfor)</li><li>Hosting i EU</li></ul><p class="small">Partnere vi vil kontakte.</p></article>
           <article class="bmc-cell persp-ka" style="grid-area:ka"><div class="persp-label"><i aria-hidden="true"></i>Aktivitet</div><h3>Nøgleaktiviteter</h3><ul><li>Udvikle og drive appen</li><li>Udvikle udfordringer og faktatjekke beregninger</li><li>Pilotforsøg og lærersupport</li><li>Salg til skoler og kommuner</li></ul></article>
           <article class="bmc-cell persp-ka" style="grid-area:kr"><div class="persp-label"><i aria-hidden="true"></i>Aktivitet</div><h3>Nøgleressourcer</h3><ul><li>Appen (én let webapp)</li><li>Beregningsmetoder og kilder</li><li>Holdets tid og kompetencer</li><li>Feedback fra pilotklasser</li></ul></article>
           <article class="bmc-cell persp-vp" style="grid-area:vp"><div class="persp-label"><i aria-hidden="true"></i>Værditilbud</div><h3>Værditilbud</h3><ul><li>Gør klassens grønne vaner synlige med en fælles plante</li><li>Fællesskab – kun klasser sammenlignes, aldrig elever</li><li>Lærergodkendelse, ugemål og ugerapport</li><li>Ingen persondata om elever</li><li>Ærlige, åbne CO₂-beregninger</li></ul></article>
-          <article class="bmc-cell persp-cs" style="grid-area:cr"><div class="persp-label"><i aria-hidden="true"></i>Kunde</div><h3>Kunderelationer</h3><ul><li>Gratis prøve → selvbetjening</li><li>Ugerapport og ugemål holder klassen i gang</li><li>Personlig hjælp i pilotperioden</li></ul></article>
+          <article class="bmc-cell persp-cs" style="grid-area:cr"><div class="persp-label"><i aria-hidden="true"></i>Kunde</div><h3>Kunderelationer</h3><ul><li>Gratis prøve → selvbetjening</li><li>Ugerapport og ugemål holder klassen i gang</li><li>Månedens nyhedsbrev til forældre og skole</li><li>Personlig hjælp i pilotperioden</li></ul></article>
           <article class="bmc-cell persp-cs" style="grid-area:ch"><div class="persp-label"><i aria-hidden="true"></i>Kunde</div><h3>Kanaler</h3><ul><li>Direkte kontakt via pilotlærere</li><li>Lærernetværk og faglige foreninger</li><li>Kommunernes klimaenheder</li><li>Fagmesser for lærere</li><li>Webapp – ingen installation</li></ul></article>
-          <article class="bmc-cell persp-cs" style="grid-area:cs"><div class="persp-label"><i aria-hidden="true"></i>Kunde</div><h3>Kundesegmenter</h3><ul><li><strong>Brugere:</strong> elever i skoleklasser</li><li><strong>Administratorer:</strong> lærere</li><li><strong>Betalende:</strong> skoleledelser og kommuner</li></ul><p class="small">Klassetrin: <span data-team="targetGrades"></span></p></article>
-          <article class="bmc-cell persp-ec" style="grid-area:co"><div class="persp-label"><i aria-hidden="true"></i>Økonomi</div><h3>Omkostningsstruktur</h3><ul><li>Udvikling og vedligehold</li><li>Hosting og database (ca. 4.000 kr./år – antagelse)</li><li>Support og onboarding</li><li>GDPR-rådgivning og databehandleraftale, når lærere får login</li><li>Markedsføring, fx messer</li><li>Holdets tid: 0 kr. i løn i prototypefasen (frivilligt arbejde)</li></ul></article>
-          <article class="bmc-cell persp-ec" style="grid-area:rs"><div class="persp-label"><i aria-hidden="true"></i>Økonomi</div><h3>Indtægtsstrømme</h3><ul><li>Årlig skolelicens (hypotese: ca. 1.500 kr.)</li><li>Kommuneaftaler for flere skoler (hypotese: fra ca. 12.000 kr. for op til 10 skoler)</li><li>Gratis prøve som indgang (freemium)</li></ul><p class="small"><span data-team="willingnessToPay" data-before="Betalingsvilje: "></span></p></article>
+          <article class="bmc-cell persp-cs" style="grid-area:cs"><div class="persp-label"><i aria-hidden="true"></i>Kunde</div><h3>Kundesegmenter</h3><ul><li><strong>Brugere:</strong> elever i skoleklasser</li><li><strong>Administratorer:</strong> lærere</li><li><strong>Betalende:</strong> skoleledelser og kommuner</li></ul><p class="small" data-team-line>Klassetrin: <span data-team="targetGrades"></span></p></article>
+          <article class="bmc-cell persp-ec" style="grid-area:co"><div class="persp-label"><i aria-hidden="true"></i>Økonomi</div><h3>Omkostningsstruktur</h3><ul><li>Udvikling og vedligehold</li><li>Hosting og database (ca. 4.000 kr./år – antagelse)</li><li>Support og onboarding</li><li>GDPR-rådgivning og databehandleraftale, når lærere får login</li><li>Markedsføring, fx messer</li><li>Nyhedsbrev og rapportering til sponsorer (ca. 1.000 kr. pr. aftale – antagelse)</li><li>Holdets tid: 0 kr. i løn i prototypefasen (frivilligt arbejde)</li></ul></article>
+          <article class="bmc-cell persp-ec" style="grid-area:rs"><div class="persp-label"><i aria-hidden="true"></i>Økonomi</div><h3>Indtægtsstrømme</h3><ul><li>Årlig skolelicens (hypotese: ca. 1.500 kr.)</li><li>Kommuneaftaler for flere skoler (hypotese: fra ca. 12.000 kr. for op til 10 skoler)</li><li>Sponsoraftaler med synlighed i nyhedsbrevet (hypotese: 5.000–40.000 kr./år – ingen aftaler)</li><li>Gratis prøve som indgang (freemium)</li></ul><p class="small" data-team-line><span data-team="willingnessToPay" data-before="Betalingsvilje: "></span></p></article>
         </div>
       </section>
 
-      <!-- Aktivitetsperspektiv: partnere og kanaler -->
-      <section class="panel persp-ka" id="skoler-partnere" tabindex="-1" aria-labelledby="partnersTitle">
-        <div class="persp-label"><i aria-hidden="true"></i>Aktivitetsperspektiv og kanaler</div>
-        <h2 id="partnersTitle">Mulige partnere og kanaler</h2>
-        <p class="muted">Ingen af dem er kontaktet eller har sagt ja. Det er mulige samarbejder, som vi vil undersøge.</p>
-        <div class="card-grid two">
-          <div>
-            <h3>Mulige nøglepartnere</h3>
-            <ul class="plain-list">
-              <li><strong>Kommunernes klimaenheder</strong> – alle kommuner har klimaplaner (DK2020), og nogle betaler allerede for skolernes grønne programmer.</li>
-              <li><strong>Grøn Skole/Grønt Flag (Friluftsrådet)</strong> – GroKlassen kunne være et dagligt værktøj til skolernes miljøhandleplaner.</li>
-              <li><strong>CONCITO</strong> – grøn tænketank med skoleprojekter om klimahandling.</li>
-              <li><strong>Faglige foreninger</strong> – fx Danmarks Naturfagslærerforening – til feedback på udfordringerne.</li>
-              <li><strong>Astra</strong> (nationalt naturfagscenter) – vej til kommunale naturfagskonsulenter.</li>
-              <li><strong>Kampagner som Alle Børn Cykler</strong> – GroKlassen kunne holde vanen i gang efter kampagneugerne.</li>
-            </ul>
-          </div>
-          <div>
-            <h3>Kanaler – sådan når vi skolerne</h3>
-            <ul class="plain-list">
-              <li><strong>Pilotlærere</strong> – de første klasser og mund-til-mund på lærerværelset.</li>
-              <li><strong>Lærernetværk og fagblade</strong> – fx naturfagslærernes blade og kurser.</li>
-              <li><strong>Kommunerne</strong> – én aftale kan nå mange skoler på én gang.</li>
-              <li><strong>Grønne netværk for skoler</strong> – skoler, der allerede arbejder med bæredygtighed.</li>
-              <li><strong>Fagmesser</strong> – fx Lærfest for grundskolen<span class="draft-only"> (dato faktatjekkes)</span>.</li>
-              <li><strong>Selve appen</strong> – virker i browseren uden installation, så det er let at prøve.</li>
-            </ul>
-          </div>
-        </div>
-        <p class="small"><span data-team="feedbackUsed" data-before="Hvem har vi talt med, og hvad ændrede vi bagefter? "></span></p>
-      </section>
-
-      <!-- Alternativer -->
-      <section class="panel persp-vp" id="skoler-alternativer" tabindex="-1" aria-labelledby="altTitle">
-        <div class="persp-label"><i aria-hidden="true"></i>Værditilbud · konkurrenter</div>
-        <h2 id="altTitle">Alternativer – en ærlig sammenligning</h2>
-        <div class="table-scroll">
-          <table class="data-table compare">
-            <caption class="sr-only">Sammenligning af GroKlassen med alternativer</caption>
-            <thead><tr><th scope="col">Alternativ</th><th scope="col">Styrker</th><th scope="col">Hvad GroKlassen gør anderledes</th></tr></thead>
-            <tbody>
-              <tr><th scope="row">Plakater og opslag i klassen</th><td>Gratis, altid synlige, ingen skærm og ingen data.</td><td>Historik, ugemål, lærergodkendelse og rapport. Men kræver en skærm.</td></tr>
-              <tr><th scope="row">Kampagner og temauger (fx Alle Børn Cykler, Affaldsindsamlingen)</th><td>Gratis, stor rækkevidde og stærke afsendere.</td><td>Kører hele året og dækker mange slags handlinger. Om det fastholder vaner bedre, skal testes.</td></tr>
-              <tr><th scope="row">Klimakonkurrence-apps (fx Klimakampen)</th><td>Findes allerede, har point og hold og en lav pris pr. klasse.</td><td>Et løbende værktøj hele skoleåret med lærergodkendelse, fælles plante og kun data på klasseniveau.</td></tr>
-              <tr><th scope="row">Generelle vane-apps (fx Habitica, JouleBug)</th><td>Moden gamification og mange funktioner.</td><td>Bygget til danske skoleklasser – ingen individuelle profiler, ingen elevlogin.</td></tr>
-              <tr><th scope="row">Grønne skoleprogrammer (fx Grønt Flag – Grøn Skole)</th><td>Etablerede, med netværk og certificering.</td><td>Et dagligt værktøj på klasseniveau – kan supplere et program, ikke erstatte det.</td></tr>
-            </tbody>
-          </table>
-        </div>
-        <div class="card-grid two" style="margin-top:14px">
-          <div class="mini-card"><h3>Vores svagheder – ærligt</h3><ul><li>Ingen rigtige brugere endnu – kun en prototype</li><li>Data ligger kun i én browser (ingen login eller fælles database endnu)</li><li>CO₂-tallene er skøn, ikke målinger</li><li>Der findes allerede konkurrenter med færdige apps</li></ul></div>
-          <div class="mini-card"><h3>Kan idéen beskyttes?</h3><p>En idé kan ikke beskyttes i sig selv. Vores forspring skal komme fra pilotskoler, et stærkt navn og åbne beregninger, der skaber tillid. Navnet kan måske registreres som varemærke: <span data-team="nameCheck"></span></p></div>
-        </div>
-        <p class="small" style="margin-top:10px">Oplysninger om andre løsninger er fra deres egne hjemmesider (set 25.10.2026)<span class="draft-only"> og skal faktatjekkes</span>. Vi påstår intet om deres svagheder.</p>
-      </section>
-
-      <!-- Bæredygtighed på tre niveauer -->
-      <section class="panel" id="skoler-baeredygtighed" tabindex="-1" aria-labelledby="sustainTitle">
-        <h2 id="sustainTitle">Bæredygtighed på tre niveauer</h2>
-        <div class="card-grid three">
-          <div class="mini-card"><h3>🌍 Miljømæssig</h3><ul><li>Gør grønne vaner synlige: transport, mad, affald, forbrug og energi</li><li>Ærlige, forsigtige CO₂-tal med åben beregning – se "Sådan har vi regnet" på klassens side</li><li>Den største effekt kommer fra transport, mad og forbrug. Lys og skærme sparer få gram, fordi dansk strøm er grøn – det siger vi højt</li></ul></div>
-          <div class="mini-card"><h3>🤝 Social</h3><ul><li>Klassen er holdet: ét fælles mål, én fælles plante</li><li>Ingen individuelle ranglister – ingen elev bliver udstillet</li><li>Ugerapporten giver spørgsmål til en klassesamtale om vaner</li><li>Ligaen starter forfra hver mandag, så alle klasser kan vinde</li></ul></div>
-          <div class="mini-card"><h3>💰 Økonomisk</h3><ul><li>En skolelicens skal finansiere drift og udvikling, så værktøjet kan leve videre</li><li>Lav pris, fordi appen er lille og billig at drive</li><li>Om skolerne får økonomisk værdi, skal pilotforsøg vise – det påstår vi ikke endnu</li></ul></div>
-        </div>
-        <div class="card-grid three" style="margin-top:12px">
-          <div class="mini-card"><h3>🌐 Verdensmål</h3><p><strong>4.7</strong> Uddannelse for bæredygtig udvikling · <strong>12</strong> Ansvarligt forbrug og produktion · <strong>13</strong> Klimaindsats.</p><p class="small draft-only">Forklar selv med jeres egne ord, hvordan GroKlassen bidrager – og hvor lidt eller meget.</p></div>
-          <div class="mini-card"><h3>🪶 Appen selv er let</h3><ul><li>Én fil på ca. <strong id="appSize">–</strong> – ingen biblioteker eller eksterne filer at hente (logoet ligger inde i filen)</li><li>Ingen tracking, ingen cookies, ingen reklamer</li><li>Ingen server i prototypen – virker offline</li><li>Mørk tilstand og reduceret animation</li></ul></div>
-          <div class="mini-card"><h3>♿ Tilgængelighed og inklusion</h3><ul><li>Alle elever kan bidrage – mange slags udfordringer, og ingen kræver at man køber noget</li><li>Bygget til tastatur og skærmlæser: labels, synligt fokus og beskeder, der læses op</li><li>Virker på mobil, tablet og computer</li><li>Ingen individuelle point eller ranglister</li></ul></div>
-        </div>
-        <div class="mini-card privacy" style="margin-top:12px">
-          <h3>🔒 Ingen persondata – også et salgsargument</h3>
-          <p>Prototypen indsamler ingen elevnavne, e-mails eller andet, der kan identificere en person. Alt er på klasseniveau, og data ligger kun i browseren på den enhed, der bruges. Det gør det lettere for skolen at sige ja (GDPR). En senere version med lærerlogin vil behandle lærernes e-mail – det kræver en databehandleraftale og en GDPR-vurdering, før den bruges i skoler.</p>
-        </div>
+      <!-- FN's verdensmål -->
+      <section class="panel" id="skoler-verdensmaal" tabindex="-1" aria-labelledby="sdgTitle">
+        <h2 id="sdgTitle">FN's verdensmål, vi bidrager til</h2>
+        <ul class="sdg-list">
+          <li><span class="sdg-no">4.7</span><span><strong>Uddannelse for bæredygtig udvikling:</strong> grøn dannelse i hverdagen.</span></li>
+          <li><span class="sdg-no">12.5</span><span><strong>Mindre affald:</strong> sortering, genbrug og madpakke uden engangsplast.</span></li>
+          <li><span class="sdg-no">12.8</span><span><strong>Viden om bæredygtig livsstil:</strong> åbne beregninger i "Sådan har vi regnet".</span></li>
+          <li><span class="sdg-no">13.3</span><span><strong>Uddannelse og bevidsthed om klima:</strong> klassen ser effekten af sine handlinger.</span></li>
+        </ul>
       </section>
 
       <!-- Næste skridt -->
       <section class="panel" id="skoler-naeste" tabindex="-1" aria-labelledby="nextTitle">
         <h2 id="nextTitle">Næste skridt: fra hypotese til viden</h2>
         <ol class="steps">
-          <li><strong>Interviews:</strong> tal med lærere og skoleledere om behov og pris. Indtil nu: <span data-team="interviewsTeachers" data-after=" lærere"></span>.</li>
-          <li><strong>Pilotforsøg:</strong> <span data-team="pilotClasses" data-after=" klasser bruger GroKlassen i 4 uger."></span> Vi måler, om klasserne bliver ved, og hvad lærerne siger. Resultat: <span data-team="pilotResult"></span></li>
-          <li><strong>Faktatjek:</strong> CO₂-tallene tjekkes af <span data-team="factChecker"></span>.</li>
+          <li><strong>Interviews:</strong> tal med lærere og skoleledere om behov og pris. <span data-team-line>Indtil nu: <span data-team="interviewsTeachers" data-after=" lærere"></span>.</span> <span data-team="feedbackUsed" data-before="Det har vi lært og ændret: "></span></li>
+          <li><strong>Pilotforsøg:</strong> 4 uger med rigtige klasser<span data-team-line> (<span data-team="pilotClasses" data-after=" klasser"></span>)</span>. Vi måler, om klasserne bliver ved, og hvad lærerne siger.<span data-team-line> Resultat: <span data-team="pilotResult"></span></span></li>
+          <li><strong>Kvalitetssikring:</strong> CO₂-tallene kvalitetssikres af en fagperson<span data-team-line> (<span data-team="factChecker"></span>)</span>.</li>
           <li><strong>Version 2:</strong> login for lærere, fælles database i EU, servervalidering af fusk-reglerne, GDPR-vurdering og databehandleraftale.</li>
           <li><strong>Test af pris:</strong> spørg skoleledelser, om de vil betale fx 1.000, 1.500 eller 3.000 kr. om året.</li>
+          <li data-team-line><strong>Navn og domæne:</strong> er navnet GroKlassen og et domæne ledigt? <span data-team="nameCheck" data-before="Resultat: "></span></li>
         </ol>
       </section>
     </div>
@@ -536,6 +491,11 @@
               <h3>📄 Ugerapport</h3>
               <p>En print-venlig rapport til undervisningen eller til ledelsen – med spørgsmål til en klassesamtale.</p>
               <button class="btn primary small-btn" type="button" id="reportBtn">Vis ugerapport</button>
+            </div>
+            <div class="tool">
+              <h3>📰 Månedens nyhedsbrev</h3>
+              <p>Et nyhedsbrev til forældre og skole om klassens grønne måned – kan printes, gemmes som PDF eller kopieres til Aula.</p>
+              <button class="btn small-btn" type="button" id="newsletterBtn">Lav nyhedsbrev</button>
             </div>
             <div class="tool">
               <h3>⬇️ Eksportér CSV</h3>
@@ -618,7 +578,24 @@
   </div>
 </dialog>
 
-<!-- Præsentationstilstand: 8 trin til en pitch på cirka 5 minutter. Styres med piletaster, swipe eller knapperne. -->
+<!-- Månedens nyhedsbrev. "Print / Gem som PDF" udskriver kun nyhedsbrevet (se @media print i CSS). -->
+<dialog id="newsletterDialog" aria-labelledby="newsletterDialogTitle">
+  <h2 id="newsletterDialogTitle" tabindex="-1">Månedens nyhedsbrev · <span id="nlClass"></span></h2>
+  <div class="form-row no-print nl-controls">
+    <label for="nlMonth" class="small">Måned</label>
+    <select id="nlMonth" class="class-select" autocomplete="off"></select>
+    <label class="nl-check small"><input type="checkbox" id="nlSponsor" checked> Vis sponsorafsnit</label>
+  </div>
+  <div id="newsletterContent"></div>
+  <div class="dialog-actions no-print">
+    <button class="btn" type="button" id="newsletterClose">Luk</button>
+    <button class="btn" type="button" id="newsletterCopy">Kopiér tekst</button>
+    <button class="btn primary" type="button" id="newsletterPrint">Print / Gem som PDF</button>
+  </div>
+  <p class="small no-print" id="nlStatus" aria-live="polite" style="margin:8px 0 0;text-align:right"></p>
+</dialog>
+
+<!-- Præsentationstilstand: 6 trin til en pitch på cirka 4 minutter. Styres med piletaster, swipe eller knapperne. -->
 <dialog id="pitch" aria-roledescription="præsentation" aria-labelledby="pitchSlideTitle">
   <div class="pitch-top">
     <div class="brand"><img class="pitch-logo" data-logo alt="GroKlassen"></div>
