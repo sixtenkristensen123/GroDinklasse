@@ -240,10 +240,10 @@
           <p class="hero-lead">GroKlassen er et let værktøj, hvor klassen samler grønne handlinger, læreren godkender, og en fælles plante viser fremskridtet. Uden elevnavne og uden persondata.</p>
           <p class="small" style="margin-top:10px"><span class="hyp">SCENARIE</span> Priser og tal er beregnede scenarier.</p>
           <p class="small" style="margin-top:6px"><span data-team="ideaOrigin" data-before="Sådan fik vi idéen: "></span></p>
-          <div class="hero-actions"><button class="btn primary" type="button" id="a4Btn">Print A4-oversigt</button><span class="small">Én side til dommerne: værditilbud, kunder, priser og sponsorniveauer, break-even med sponsorer, verdensmål og QR-kode.</span></div>
+          <div class="hero-actions"><button class="btn primary" type="button" id="a4Btn">Print A4-oversigt</button><span class="small">Én side til dommerne: værditilbud, kunder, priser, økonomi for licenser og sponsorater, verdensmål og QR-kode.</span></div>
         </div>
         <nav class="jump" aria-label="Indhold på siden">
-          <a href="#skoler-priser">Priser</a><a href="#skoler-oekonomi">Økonomi</a><a href="#skoler-sponsorer">Sponsorer</a><a href="#skoler-nyhedsbrev">Nyhedsbrev</a><a href="#skoler-canvas">Forretningsmodel</a><a href="#skoler-verdensmaal">Verdensmål</a><a href="#skoler-naeste">Næste skridt</a>
+          <a href="#skoler-priser">Priser</a><a href="#skoler-oekonomi">Økonomi</a><a href="#skoler-sponsorer">Sponsorer</a><a href="#skoler-nyhedsbrev">Nyhedsbrev</a><a href="#skoler-canvas">Forretningsmodel</a><a href="#skoler-verdensmaal">Verdensmål</a>
         </nav>
       </section>
 
@@ -251,9 +251,9 @@
       <section class="panel persp-ec" id="skoler-priser" tabindex="-1" aria-labelledby="pricesTitle">
         <div class="persp-label"><i aria-hidden="true"></i>Økonomi · indtægter</div>
         <h2 id="pricesTitle">Prisskitse <span class="hyp">HYPOTESE</span></h2>
-        <p class="muted">Priserne er hypoteser og skal valideres gennem interviews og pilotforsøg. Alle priser er ekskl. moms.</p>
+        <p class="muted">Priserne er forudsætninger, sat i forhold til lignende løsninger (se referencerne). Alle priser er ekskl. moms.</p>
         <div class="card-grid three">
-          <div class="tier"><div class="tier-name">🌱 Prøve</div><div class="tier-price">0 kr.</div><div class="small">1 klasse i 3 måneder</div><ul><li>Alle udfordringer og klassens plante</li><li>Lærergodkendelse og ugemål</li><li>Formål: at indsamle feedback fra pilotklasser</li></ul></div>
+          <div class="tier"><div class="tier-name">🌱 Prøve</div><div class="tier-price">0 kr.</div><div class="small">1 klasse i 3 måneder</div><ul><li>Alle udfordringer og klassens plante</li><li>Lærergodkendelse og ugemål</li><li>Formål: klassen kan prøve, før skolen køber</li></ul></div>
           <div class="tier featured"><div class="tier-name">🌳 Skolelicens</div><div class="tier-price">ca. 1.500 kr.</div><div class="small">pr. skole pr. år</div><ul><li>Alle skolens klasser og en klasseliga</li><li>Lærerdashboard, ugerapporter og CSV</li><li>Support på mail</li></ul></div>
           <div class="tier"><div class="tier-name">🏙️ Kommuneaftale</div><div class="tier-price">fra ca. 12.000 kr.</div><div class="small">pr. år for op til 10 skoler</div><ul><li>Alle deltagende skoler i kommunen</li><li>Samlet rapport til kommunens klimaenhed (kun klasseniveau)</li><li>Hjælp til opstart</li></ul></div>
         </div>
@@ -269,60 +269,84 @@
             <li>Gyldendals digitale fagportaler: ca. 1.300 kr. pr. klasse pr. år.</li>
             <li>Matematik-Tjek: 645–2.045 kr. pr. skole pr. år afhængigt af antal klasser.</li>
           </ul>
-          <p class="small" data-team-line><span data-team="willingnessToPay" data-before="Betalingsvilje ifølge vores egne samtaler: "></span></p>
         </details>
       </section>
 
-      <!-- Økonomi: beregner -->
+      <!-- Økonomi: to beregnere – kommuner (licenser) og sponsorater (nyhedsbrevet) -->
       <section class="panel persp-ec" id="skoler-oekonomi" tabindex="-1" aria-labelledby="calcTitle">
-        <div class="persp-label"><i aria-hidden="true"></i>Økonomi · indtægter, omkostninger og break-even</div>
-        <h2 id="calcTitle">Økonomiberegner</h2>
-        <p class="muted">Vælg et scenarie, eller skift tallene selv, og se, hvor mange skoler der skal til, før GroKlassen kan betale for sig selv. Alle tal er <span class="hyp">ANTAGELSER</span> – ikke rigtige kunder, aftaler eller tilbud.</p>
-        <div class="scenarios" role="group" aria-label="Vælg scenarie (antagelser)">
-          <button class="btn small-btn" type="button" data-scenario="careful" aria-pressed="false">Forsigtig</button>
-          <button class="btn small-btn" type="button" data-scenario="expected" aria-pressed="true">Forventet</button>
-          <button class="btn small-btn" type="button" data-scenario="optimistic" aria-pressed="false">Optimistisk</button>
-          <span class="small" id="scenarioNote"></span>
-        </div>
-        <form class="calc" id="calcForm" autocomplete="off">
-          <div class="calc-inputs">
-            <fieldset class="calc-group">
-              <legend>Indtægter pr. år <span class="hyp">ANTAGELSER</span></legend>
-              <label>Skoler med skolelicens<input class="input" type="number" id="calcSchools" min="0" max="500" step="1" inputmode="numeric"><span class="small">Antal betalende skoler</span></label>
-              <label>Pris pr. skolelicens (kr.)<input class="input" type="number" id="calcPrice" min="0" max="100000" step="100" inputmode="numeric"><span class="small">Hypotese</span></label>
-              <label>Kommuneaftaler<input class="input" type="number" id="calcMunis" min="0" max="98" step="1" inputmode="numeric"><span class="small">Antal aftaler med kommuner</span></label>
-              <label>Pris pr. kommuneaftale (kr.)<input class="input" type="number" id="calcMuniPrice" min="0" max="1000000" step="500" inputmode="numeric"><span class="small">Hypotese: fra ca. 12.000 kr.</span></label>
-              <label>Skoler pr. kommuneaftale<input class="input" type="number" id="calcMuniSchools" min="0" max="50" step="1" inputmode="numeric"><span class="small">Prisskitsen: op til 10 skoler</span></label>
-              <label>Sponsoraftaler<input class="input" type="number" id="calcSponsors" min="0" max="20" step="1" inputmode="numeric"><span class="small">Antal sponsorer (0–20) – ingen har sagt ja</span></label>
-              <label>Pris pr. sponsoraftale (kr.)<input class="input" type="number" id="calcSponsorPrice" min="0" max="1000000" step="1000" inputmode="numeric"><span class="small">Hypotese: ca. 15.000 kr./år (partner)</span></label>
-            </fieldset>
-            <fieldset class="calc-group">
-              <legend>Omkostninger pr. år <span class="hyp">ANTAGELSER</span></legend>
-              <label>Variable omkostninger pr. skole (kr.)<input class="input" type="number" id="calcVariable" min="0" max="100000" step="50" inputmode="numeric"><span class="small">Onboarding, fakturering, support – gælder alle skoler</span></label>
-              <label>Omkostning pr. sponsoraftale (kr.)<input class="input" type="number" id="calcSponsorCost" min="0" max="100000" step="100" inputmode="numeric"><span class="small">Hypotese: ca. 1.000 kr. til nyhedsbrev og rapportering</span></label>
-              <label>Hosting og database (kr.)<input class="input" type="number" id="calcHosting" min="0" max="1000000" step="500" inputmode="numeric"><span class="small">Fx database i EU + webhosting + domæne</span></label>
-              <label>Support (kr.)<input class="input" type="number" id="calcSupport" min="0" max="1000000" step="500" inputmode="numeric"><span class="small">Lærersupport og fejlrettelser</span></label>
-              <label>Udvikling (kr.)<input class="input" type="number" id="calcDev" min="0" max="1000000" step="1000" inputmode="numeric"><span class="small">Fx sikkerhed, GDPR-rådgivning, nye funktioner</span></label>
-              <label>Løn til drift og udvikling (kr.) <span class="small">(valgfri)</span><input class="input" type="number" id="calcSalary" min="0" max="5000000" step="5000" inputmode="numeric" aria-describedby="calcSalaryHelp"><span class="small" id="calcSalaryHelp">0 kr. = frivilligt arbejde i prototypefasen. Skriv fx en deltidsløn for at se, hvad det betyder.</span></label>
-            </fieldset>
-          </div>
-          <div class="calc-results" aria-live="polite">
-            <div class="kpis calc-kpis">
-              <div class="kpi"><div class="number" id="calcRevenue">0</div><div class="label">Samlet indtægt pr. år</div></div>
-              <div class="kpi"><div class="number" id="calcCosts">0</div><div class="label">Omkostninger pr. år</div></div>
-              <div class="kpi"><div class="number" id="calcResult">0</div><div class="label">Resultat pr. år</div></div>
-              <div class="kpi"><div class="number" id="calcBreakEven">0</div><div class="label" id="calcBreakEvenLabel">Break-even (skoler med licens)</div></div>
+        <div class="persp-label"><i aria-hidden="true"></i>Økonomi · to indtægtsben</div>
+        <h2 id="calcTitle">Økonomiberegnere</h2>
+        <p class="muted">GroKlassen har to indtægtsben, som regnes hver for sig: licenser til kommuner og skoler og sponsorater i nyhedsbrevet. Alle standardtal er <span class="hyp">FORUDSÆTNING</span> – skift dem, og se break-even.</p>
+      <div class="econ" id="econMuni">
+          <h3 class="econ-title">A · Kommuner og skoler (licenser)</h3>
+          <div class="scenarios" role="group" aria-label="Scenarie for kommuner (forudsætninger)"><button class="btn small-btn" type="button" data-muni-scenario="careful" aria-pressed="false">Forsigtig</button><button class="btn small-btn" type="button" data-muni-scenario="expected" aria-pressed="true">Forventet</button><button class="btn small-btn" type="button" data-muni-scenario="optimistic" aria-pressed="false">Optimistisk</button><span class="small" id="muniScenarioNote"></span></div>
+          <form class="calc" id="muniForm" autocomplete="off">
+            <div class="calc-inputs">
+              <fieldset class="calc-group">
+                <legend>Indtægter pr. år <span class="hyp">FORUDSÆTNING</span></legend>
+                <label>Kommuneaftaler<input class="input" type="number" id="muniDeals" min="0" max="98" step="1" inputmode="numeric"><span class="small">Antal aftaler med kommuner</span></label>
+                <label>Pris pr. kommuneaftale (kr.)<input class="input" type="number" id="muniPrice" min="0" max="1000000" step="500" inputmode="numeric"><span class="small">Forudsætning: ca. 12.000 kr.</span></label>
+                <label>Skoler pr. kommuneaftale<input class="input" type="number" id="muniSchoolsPer" min="0" max="50" step="1" inputmode="numeric"><span class="small">Prisskitsen: op til 10 skoler</span></label>
+                <label>Enkeltskoler med skolelicens<input class="input" type="number" id="muniSingles" min="0" max="500" step="1" inputmode="numeric"><span class="small">Skoler uden kommuneaftale</span></label>
+                <label>Pris pr. skolelicens (kr.)<input class="input" type="number" id="muniSinglePrice" min="0" max="100000" step="100" inputmode="numeric"><span class="small">Forudsætning: ca. 1.500 kr.</span></label>
+                <label>Elever pr. skole<input class="input" type="number" id="muniPupils" min="0" max="2000" step="10" inputmode="numeric"><span class="small">Forudsætning: ca. 300 elever</span></label>
+              </fieldset>
+              <fieldset class="calc-group">
+                <legend>Omkostninger pr. år <span class="hyp">FORUDSÆTNING</span></legend>
+                <label>Variable omkostninger pr. skole (kr.)<input class="input" type="number" id="muniVariable" min="0" max="100000" step="50" inputmode="numeric"><span class="small">Onboarding, fakturering og support</span></label>
+                <label>Hosting og database (kr.)<input class="input" type="number" id="muniHosting" min="0" max="1000000" step="500" inputmode="numeric"><span class="small">Database i EU, webhosting og domæne</span></label>
+                <label>Support (kr.)<input class="input" type="number" id="muniSupport" min="0" max="1000000" step="500" inputmode="numeric"><span class="small">Lærersupport og fejlrettelser</span></label>
+                <label>Udvikling (kr.)<input class="input" type="number" id="muniDev" min="0" max="1000000" step="1000" inputmode="numeric"><span class="small">Sikkerhed, GDPR-rådgivning og nye funktioner</span></label>
+                <label>Løn til drift og udvikling (kr.) <span class="small">(valgfri)</span><input class="input" type="number" id="muniSalary" min="0" max="5000000" step="5000" inputmode="numeric"><span class="small">0 kr. = frivilligt arbejde i prototypefasen</span></label>
+              </fieldset>
             </div>
-            <p class="small" id="calcRevenueSplit" style="margin-top:10px"></p>
-            <p class="small" id="calcExplain"></p>
-            <p class="small calc-note" id="calcSponsorNote"><strong>Bemærk:</strong> Sponsorindtægter er usikre og kan ikke alene bære driften. Sponsorer har ingen indflydelse på udfordringer eller CO₂-tal.</p>
-          </div>
-        </form>
-        <h3 class="chart-head">Indtægt og omkostninger ved flere skoler med licens</h3>
-        <div class="viz" id="breakEvenChart"></div>
-        <div class="legend" aria-hidden="true"><span><i style="background:var(--series-a)"></i>Indtægt</span><span><i style="background:var(--series-b)"></i>Omkostninger</span><span><i class="legend-dash"></i>Faste aftaler (kommuner + sponsorer)</span></div>
-        <details style="margin-top:8px"><summary>Vis som tabel</summary><div class="table-scroll" id="breakEvenTable"></div></details>
-        <div class="form-row"><button class="btn small-btn" type="button" id="calcReset">Gendan antagelser (forventet)</button></div>
+            <div class="calc-results" aria-live="polite">
+              <div class="kpis calc-kpis"><div class="kpi"><div class="number" id="muniRevenue">0</div><div class="label">Indtægt pr. år</div></div><div class="kpi"><div class="number" id="muniCosts">0</div><div class="label">Omkostninger pr. år</div></div><div class="kpi"><div class="number" id="muniResult">0</div><div class="label">Resultat pr. år</div></div><div class="kpi"><div class="number" id="muniBreakEven">0</div><div class="label" id="muniBreakEvenLabel">Break-even</div></div><div class="kpi"><div class="number" id="muniPerPupil">0</div><div class="label">Pris pr. elev pr. år</div></div></div>
+              <p class="small" id="muniExplain"></p>
+            </div>
+          </form>
+          <h4 class="chart-head">Indtægt og omkostninger ved flere kommuneaftaler</h4>
+          <div class="viz" id="muniChart"></div>
+          <div class="legend" aria-hidden="true"><span><i style="background:var(--series-a)"></i>Indtægt</span><span><i style="background:var(--series-b)"></i>Omkostninger</span></div>
+          <details style="margin-top:8px"><summary>Vis som tabel</summary><div class="table-scroll" id="muniTable"></div></details>
+          <div class="form-row"><button class="btn small-btn" type="button" id="muniReset">Gendan forudsætninger</button></div>
+        </div>
+        <div class="econ" id="econSponsor">
+          <h3 class="econ-title">B · Sponsorater (nyhedsbrevet)</h3>
+          <div class="scenarios" role="group" aria-label="Scenarie for sponsorater (forudsætninger)"><button class="btn small-btn" type="button" data-sp-scenario="careful" aria-pressed="false">Forsigtig</button><button class="btn small-btn" type="button" data-sp-scenario="expected" aria-pressed="true">Forventet</button><button class="btn small-btn" type="button" data-sp-scenario="optimistic" aria-pressed="false">Optimistisk</button><span class="small" id="spScenarioNote"></span></div>
+          <form class="calc" id="spForm" autocomplete="off">
+            <div class="calc-inputs">
+              <fieldset class="calc-group">
+                <legend>Indtægter pr. år <span class="hyp">FORUDSÆTNING</span></legend>
+                <label>Støttere<input class="input" type="number" id="spSupporter" min="0" max="50" step="1" inputmode="numeric"><span class="small">Antal sponsorer på niveauet Støtter</span></label>
+                <label>Pris pr. støtter (kr.)<input class="input" type="number" id="spSupporterPrice" min="0" max="1000000" step="500" inputmode="numeric"><span class="small">Forudsætning: ca. 5.000 kr.</span></label>
+                <label>Partnere<input class="input" type="number" id="spPartner" min="0" max="50" step="1" inputmode="numeric"><span class="small">Antal sponsorer på niveauet Partner</span></label>
+                <label>Pris pr. partner (kr.)<input class="input" type="number" id="spPartnerPrice" min="0" max="1000000" step="500" inputmode="numeric"><span class="small">Forudsætning: ca. 15.000 kr.</span></label>
+                <label>Hovedsponsorer<input class="input" type="number" id="spMain" min="0" max="10" step="1" inputmode="numeric"><span class="small">Antal hovedsponsorer</span></label>
+                <label>Pris pr. hovedsponsor (kr.)<input class="input" type="number" id="spMainPrice" min="0" max="1000000" step="1000" inputmode="numeric"><span class="small">Forudsætning: ca. 40.000 kr.</span></label>
+              </fieldset>
+              <fieldset class="calc-group">
+                <legend>Omkostninger og modtagere <span class="hyp">FORUDSÆTNING</span></legend>
+                <label>Nyhedsbreve pr. år<input class="input" type="number" id="spIssues" min="0" max="52" step="1" inputmode="numeric"><span class="small">Fx ét pr. måned i skoleåret</span></label>
+                <label>Produktion pr. nyhedsbrev (kr.)<input class="input" type="number" id="spProduction" min="0" max="100000" step="100" inputmode="numeric"><span class="small">Tekst, layout og tal</span></label>
+                <label>Udsendelse pr. år (kr.)<input class="input" type="number" id="spDistribution" min="0" max="100000" step="100" inputmode="numeric"><span class="small">Fx nyhedsbrevsværktøj</span></label>
+                <label>Salg og administration pr. sponsor (kr.)<input class="input" type="number" id="spSales" min="0" max="100000" step="100" inputmode="numeric"><span class="small">Kontakt, aftale og fakturering</span></label>
+                <label>Modtagere pr. nyhedsbrev<input class="input" type="number" id="spRecipients" min="0" max="1000000" step="100" inputmode="numeric"><span class="small">Lærere, skoleledelse og forældre</span></label>
+              </fieldset>
+            </div>
+            <div class="calc-results" aria-live="polite">
+              <div class="kpis calc-kpis"><div class="kpi"><div class="number" id="spRevenue">0</div><div class="label">Indtægt pr. år</div></div><div class="kpi"><div class="number" id="spCosts">0</div><div class="label">Omkostninger pr. år</div></div><div class="kpi"><div class="number" id="spResult">0</div><div class="label">Resultat pr. år</div></div><div class="kpi"><div class="number" id="spBreakEven">0</div><div class="label" id="spBreakEvenLabel">Break-even (antal sponsorer)</div></div><div class="kpi"><div class="number" id="spPerRecipient">0</div><div class="label">Pris pr. modtager pr. nyhedsbrev</div></div></div>
+              <p class="small" id="spExplain"></p>
+              <p class="small calc-note" id="spNote"><strong>Bemærk:</strong> Sponsorindtægter er usikre og må aldrig styre elevernes indhold. Sponsorer har ingen indflydelse på udfordringer eller CO₂-tal.</p>
+            </div>
+          </form>
+          <h4 class="chart-head">Indtægt og omkostninger ved flere sponsorer</h4>
+          <div class="viz" id="spChart"></div>
+          <div class="legend" aria-hidden="true"><span><i style="background:var(--series-a)"></i>Indtægt</span><span><i style="background:var(--series-b)"></i>Omkostninger</span></div>
+          <details style="margin-top:8px"><summary>Vis som tabel</summary><div class="table-scroll" id="spTable"></div></details>
+          <div class="form-row"><button class="btn small-btn" type="button" id="spReset">Gendan forudsætninger</button></div>
+        </div>
+        <p class="econ-total" id="econTotal" aria-live="polite"></p>
       </section>
 
       <!-- Aktivitetsperspektiv: mulige sponsorer (ingen er kontaktet) -->
@@ -343,29 +367,24 @@
         <p class="small">Vi viser kun navne og en kort begrundelse – ingen logoer, og intet om samarbejde, før en virksomhed har sagt ja.</p>
       </section>
 
-      <!-- Kanaler: nyhedsbrev med sponsoreksponering -->
+      <!-- Kanaler: GroKlassen-nyhedsbrevet i samarbejde med sponsorer -->
       <section class="panel persp-cs" id="skoler-nyhedsbrev" tabindex="-1" aria-labelledby="newsletterTitle">
-        <div class="persp-label"><i aria-hidden="true"></i>Kunderelationer · sponsoreksponering</div>
-        <h2 id="newsletterTitle">Månedens nyhedsbrev <span class="hyp">EKSEMPEL</span></h2>
-        <p class="muted">Læreren laver med ét klik et nyhedsbrev om klassens grønne måned (Lærer → Månedens nyhedsbrev). Det kan printes, gemmes som PDF eller kopieres ind i Aula. Appen indsamler ingen e-mails, og alle tal er for hele klassen.</p>
+        <div class="persp-label"><i aria-hidden="true"></i>Kanaler · sponsorater</div>
+        <h2 id="newsletterTitle">GroKlassen-nyhedsbrevet <span class="hyp">EKSEMPEL</span></h2>
+        <p class="muted">Hver måned sender GroKlassen et nyhedsbrev til lærere, skoleledelse og forældre – i samarbejde med sponsorer. Det samler klassernes tal, et grønt tip og en idé til en klasseaktivitet.</p>
         <div class="card-grid two nl-grid">
           <div>
             <h3>Regler for sponsorer</h3>
             <ul class="plain-list">
-              <li>Nyhedsbrevet er til lærere, skoleledelse og forældre – ikke reklame til børn.</li>
+              <li>Nyhedsbrevet er til voksne – ingen reklame rettet mod børn.</li>
+              <li>Sponsoren står i en tydeligt mærket annonceboks og vises aldrig i elevernes udfordringer.</li>
               <li>Ingen tilbud, rabatkoder eller produktreklame.</li>
-              <li>Læreren kan slå sponsorafsnittet fra.</li>
-              <li>Sponsoren kan ikke ændre indhold eller tal.</li>
+              <li>Sponsoren kan ikke ændre indhold eller tal og får ingen data.</li>
+              <li>Ingen tilmelding med e-mail i prototypen – ingen persondata.</li>
             </ul>
-            <h3 style="margin-top:14px">Se eksponeringen pr. niveau</h3>
-            <div class="scenarios" role="group" aria-label="Vis nyhedsbrevet for et sponsorniveau">
-              <button class="btn small-btn" type="button" data-nl-level="main" aria-pressed="true">Hovedsponsor</button>
-              <button class="btn small-btn" type="button" data-nl-level="partner" aria-pressed="false">Partner</button>
-              <button class="btn small-btn" type="button" data-nl-level="supporter" aria-pressed="false">Støtter</button>
-            </div>
-            <p class="small">Eksemplet bruger opdigtede demo-data for sidste måned. Sponsorens navn kommer fra <code>TEAM_DATA.sponsor</code> – indtil en sponsor har sagt ja, står der "[Jeres sponsor]".</p>
+            <p class="small">Eksemplet bygger på demo-data for sidste måned. Sponsorens navn kommer fra <code>TEAM_DATA.sponsor</code>.</p>
           </div>
-          <div class="nl-preview" id="newsletterPreview" aria-live="polite"></div>
+          <div class="nl-preview" id="newsletterPreview"></div>
         </div>
       </section>
 
@@ -380,40 +399,23 @@
           <span class="persp-key ec"><i></i>Økonomi</span>
         </div>
         <div class="bmc">
-          <article class="bmc-cell persp-ka" style="grid-area:kp"><div class="persp-label"><i aria-hidden="true"></i>Aktivitet</div><h3>Nøglepartnere</h3><ul><li>Pilotskoler og -lærere</li><li>Kommunernes klimaenheder</li><li>Organisationer med grønne skoleprogrammer</li><li>Fagpersoner, der faktatjekker CO₂-tal</li><li>Sponsorer vi vil kontakte (se ovenfor)</li><li>Hosting i EU</li></ul><p class="small">Partnere vi vil kontakte.</p></article>
-          <article class="bmc-cell persp-ka" style="grid-area:ka"><div class="persp-label"><i aria-hidden="true"></i>Aktivitet</div><h3>Nøgleaktiviteter</h3><ul><li>Udvikle og drive appen</li><li>Udvikle udfordringer og faktatjekke beregninger</li><li>Pilotforsøg og lærersupport</li><li>Salg til skoler og kommuner</li></ul></article>
-          <article class="bmc-cell persp-ka" style="grid-area:kr"><div class="persp-label"><i aria-hidden="true"></i>Aktivitet</div><h3>Nøgleressourcer</h3><ul><li>Appen (én let webapp)</li><li>Beregningsmetoder og kilder</li><li>Holdets tid og kompetencer</li><li>Feedback fra pilotklasser</li></ul></article>
+          <article class="bmc-cell persp-ka" style="grid-area:kp"><div class="persp-label"><i aria-hidden="true"></i>Aktivitet</div><h3>Nøglepartnere</h3><ul><li>Lærere og skoler</li><li>Kommunernes klimaenheder</li><li>Organisationer med grønne skoleprogrammer</li><li>Sponsorer til nyhedsbrevet (se ovenfor)</li><li>Hosting i EU</li></ul><p class="small">Partnere vi vil kontakte.</p></article>
+          <article class="bmc-cell persp-ka" style="grid-area:ka"><div class="persp-label"><i aria-hidden="true"></i>Aktivitet</div><h3>Nøgleaktiviteter</h3><ul><li>Udvikle og drive appen</li><li>Udvikle udfordringer og beregninger</li><li>Lærersupport og nyhedsbrevet hver måned</li><li>Salg til skoler og kommuner</li></ul></article>
+          <article class="bmc-cell persp-ka" style="grid-area:kr"><div class="persp-label"><i aria-hidden="true"></i>Aktivitet</div><h3>Nøgleressourcer</h3><ul><li>Appen (én let webapp)</li><li>Beregningsmetoder og kilder</li><li>Holdets tid og kompetencer</li><li>Nyhedsbrevet og sponsornetværket</li></ul></article>
           <article class="bmc-cell persp-vp" style="grid-area:vp"><div class="persp-label"><i aria-hidden="true"></i>Værditilbud</div><h3>Værditilbud</h3><ul><li>Gør klassens grønne vaner synlige med en fælles plante</li><li>Fællesskab – kun klasser sammenlignes, aldrig elever</li><li>Lærergodkendelse, ugemål og ugerapport</li><li>Ingen persondata om elever</li><li>Ærlige, åbne CO₂-beregninger</li></ul></article>
-          <article class="bmc-cell persp-cs" style="grid-area:cr"><div class="persp-label"><i aria-hidden="true"></i>Kunde</div><h3>Kunderelationer</h3><ul><li>Gratis prøve → selvbetjening</li><li>Ugerapport og ugemål holder klassen i gang</li><li>Månedens nyhedsbrev til forældre og skole</li><li>Personlig hjælp i pilotperioden</li></ul></article>
-          <article class="bmc-cell persp-cs" style="grid-area:ch"><div class="persp-label"><i aria-hidden="true"></i>Kunde</div><h3>Kanaler</h3><ul><li>Direkte kontakt via pilotlærere</li><li>Lærernetværk og faglige foreninger</li><li>Kommunernes klimaenheder</li><li>Fagmesser for lærere</li><li>Webapp – ingen installation</li></ul></article>
+          <article class="bmc-cell persp-cs" style="grid-area:cr"><div class="persp-label"><i aria-hidden="true"></i>Kunde</div><h3>Kunderelationer</h3><ul><li>Gratis prøve → selvbetjening</li><li>Ugerapport og ugemål holder klassen i gang</li><li>GroKlassen-nyhedsbrevet til lærere og forældre hver måned</li><li>Personlig hjælp ved opstart</li></ul></article>
+          <article class="bmc-cell persp-cs" style="grid-area:ch"><div class="persp-label"><i aria-hidden="true"></i>Kunde</div><h3>Kanaler</h3><ul><li>Direkte kontakt til lærere</li><li>GroKlassen-nyhedsbrevet (i samarbejde med sponsorer)</li><li>Lærernetværk og faglige foreninger</li><li>Kommunernes klimaenheder</li><li>Fagmesser for lærere</li><li>Webapp – ingen installation</li></ul></article>
           <article class="bmc-cell persp-cs" style="grid-area:cs"><div class="persp-label"><i aria-hidden="true"></i>Kunde</div><h3>Kundesegmenter</h3><ul><li><strong>Brugere:</strong> elever i skoleklasser</li><li><strong>Administratorer:</strong> lærere</li><li><strong>Betalende:</strong> skoleledelser og kommuner</li></ul><p class="small" data-team-line>Klassetrin: <span data-team="targetGrades"></span></p></article>
-          <article class="bmc-cell persp-ec" style="grid-area:co"><div class="persp-label"><i aria-hidden="true"></i>Økonomi</div><h3>Omkostningsstruktur</h3><ul><li>Udvikling og vedligehold</li><li>Hosting og database (ca. 4.000 kr./år – antagelse)</li><li>Support og onboarding</li><li>GDPR-rådgivning og databehandleraftale, når lærere får login</li><li>Markedsføring, fx messer</li><li>Nyhedsbrev og rapportering til sponsorer (ca. 1.000 kr. pr. aftale – antagelse)</li><li>Holdets tid: 0 kr. i løn i prototypefasen (frivilligt arbejde)</li></ul></article>
-          <article class="bmc-cell persp-ec" style="grid-area:rs"><div class="persp-label"><i aria-hidden="true"></i>Økonomi</div><h3>Indtægtsstrømme</h3><ul><li>Årlig skolelicens (hypotese: ca. 1.500 kr.)</li><li>Kommuneaftaler for flere skoler (hypotese: fra ca. 12.000 kr. for op til 10 skoler)</li><li>Sponsoraftaler med synlighed i nyhedsbrevet (hypotese: 5.000–40.000 kr./år – ingen aftaler)</li><li>Gratis prøve som indgang (freemium)</li></ul><p class="small" data-team-line><span data-team="willingnessToPay" data-before="Betalingsvilje: "></span></p></article>
+          <article class="bmc-cell persp-ec" style="grid-area:co"><div class="persp-label"><i aria-hidden="true"></i>Økonomi</div><h3>Omkostningsstruktur</h3><ul><li>Udvikling og vedligehold</li><li>Hosting og database (ca. 4.000 kr./år – forudsætning)</li><li>Support og onboarding</li><li>GDPR-rådgivning og databehandleraftale, når lærere får login</li><li>Markedsføring, fx messer</li><li>Nyhedsbrevet: produktion, udsendelse og sponsorsalg (forudsætning)</li><li>Holdets tid: 0 kr. i løn i prototypefasen (frivilligt arbejde)</li></ul></article>
+          <article class="bmc-cell persp-ec" style="grid-area:rs"><div class="persp-label"><i aria-hidden="true"></i>Økonomi</div><h3>Indtægtsstrømme</h3><ul><li>Årlig skolelicens (forudsætning: ca. 1.500 kr.)</li><li>Kommuneaftaler (forudsætning: ca. 12.000 kr. for op til 10 skoler)</li><li>Sponsorater i GroKlassen-nyhedsbrevet (forudsætning: 5.000–40.000 kr./år)</li><li>Gratis prøve som indgang (freemium)</li></ul></article>
         </div>
       </section>
 
       <!-- FN's verdensmål -->
       <section class="panel" id="skoler-verdensmaal" tabindex="-1" aria-labelledby="sdgTitle">
         <h2 id="sdgTitle">FN's verdensmål, vi bidrager til</h2>
-        <ul class="sdg-list">
-          <li><span class="sdg-no">4.7</span><span><strong>Uddannelse for bæredygtig udvikling:</strong> grøn dannelse i hverdagen.</span></li>
-          <li><span class="sdg-no">12.5</span><span><strong>Mindre affald:</strong> sortering, genbrug og madpakke uden engangsplast.</span></li>
-          <li><span class="sdg-no">12.8</span><span><strong>Viden om bæredygtig livsstil:</strong> åbne beregninger i "Sådan har vi regnet".</span></li>
-          <li><span class="sdg-no">13.3</span><span><strong>Uddannelse og bevidsthed om klima:</strong> klassen ser effekten af sine handlinger.</span></li>
-        </ul>
-      </section>
-
-      <!-- Næste skridt -->
-      <section class="panel" id="skoler-naeste" tabindex="-1" aria-labelledby="nextTitle">
-        <h2 id="nextTitle">Næste skridt: fra hypotese til viden</h2>
-        <ol class="steps">
-          <li><strong>Interviews:</strong> tal med lærere og skoleledere om behov og pris. <span data-team-line>Indtil nu: <span data-team="interviewsTeachers" data-after=" lærere"></span>.</span> <span data-team="feedbackUsed" data-before="Det har vi lært og ændret: "></span></li>
-          <li><strong>Pilotforsøg:</strong> 4 uger med rigtige klasser<span data-team-line> (<span data-team="pilotClasses" data-after=" klasser"></span>)</span>. Vi måler, om klasserne bliver ved, og hvad lærerne siger.<span data-team-line> Resultat: <span data-team="pilotResult"></span></span></li>
-          <li><strong>Kvalitetssikring:</strong> CO₂-tallene kvalitetssikres af en fagperson<span data-team-line> (<span data-team="factChecker"></span>)</span>.</li>
-          <li><strong>Version 2:</strong> login for lærere, fælles database i EU, servervalidering af fusk-reglerne, GDPR-vurdering og databehandleraftale.</li>
-          <li><strong>Test af pris:</strong> spørg skoleledelser, om de vil betale fx 1.000, 1.500 eller 3.000 kr. om året.</li>
-          <li data-team-line><strong>Navn og domæne:</strong> er navnet GroKlassen og et domæne ledigt? <span data-team="nameCheck" data-before="Resultat: "></span></li>
-        </ol>
+        <div id="sdgGrid"></div>
+        <p class="small" style="margin-top:8px">Farver efter FN's verdensmål. Ikoner er egne.</p>
       </section>
     </div>
 
@@ -493,9 +495,9 @@
               <button class="btn primary small-btn" type="button" id="reportBtn">Vis ugerapport</button>
             </div>
             <div class="tool">
-              <h3>📰 Månedens nyhedsbrev</h3>
-              <p>Et nyhedsbrev til forældre og skole om klassens grønne måned – kan printes, gemmes som PDF eller kopieres til Aula.</p>
-              <button class="btn small-btn" type="button" id="newsletterBtn">Lav nyhedsbrev</button>
+              <h3>📰 GroKlassen-nyhedsbrevet</h3>
+              <p>Se månedens nyhedsbrev, som GroKlassen sender til lærere og forældre i samarbejde med sponsorer. Kan printes eller gemmes som PDF.</p>
+              <button class="btn small-btn" type="button" id="newsletterBtn">Se månedens nyhedsbrev</button>
             </div>
             <div class="tool">
               <h3>⬇️ Eksportér CSV</h3>
@@ -580,19 +582,16 @@
 
 <!-- Månedens nyhedsbrev. "Print / Gem som PDF" udskriver kun nyhedsbrevet (se @media print i CSS). -->
 <dialog id="newsletterDialog" aria-labelledby="newsletterDialogTitle">
-  <h2 id="newsletterDialogTitle" tabindex="-1">Månedens nyhedsbrev · <span id="nlClass"></span></h2>
+  <h2 id="newsletterDialogTitle" tabindex="-1">GroKlassen-nyhedsbrevet</h2>
   <div class="form-row no-print nl-controls">
     <label for="nlMonth" class="small">Måned</label>
     <select id="nlMonth" class="class-select" autocomplete="off"></select>
-    <label class="nl-check small"><input type="checkbox" id="nlSponsor" checked> Vis sponsorafsnit</label>
   </div>
   <div id="newsletterContent"></div>
   <div class="dialog-actions no-print">
     <button class="btn" type="button" id="newsletterClose">Luk</button>
-    <button class="btn" type="button" id="newsletterCopy">Kopiér tekst</button>
     <button class="btn primary" type="button" id="newsletterPrint">Print / Gem som PDF</button>
   </div>
-  <p class="small no-print" id="nlStatus" aria-live="polite" style="margin:8px 0 0;text-align:right"></p>
 </dialog>
 
 <!-- Præsentationstilstand: 6 trin til en pitch på cirka 4 minutter. Styres med piletaster, swipe eller knapperne. -->

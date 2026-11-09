@@ -430,9 +430,6 @@ html{scroll-padding-bottom:100px}body{padding-bottom:env(safe-area-inset-bottom)
 .viz .deal-label{font-size:11px;fill:var(--viz-ink)}
 .calc-note{border-left:3px solid var(--warning);padding-left:10px;margin-top:10px}
 .sponsor-list li{margin-bottom:8px}
-.sdg-list{list-style:none;padding:0;margin:8px 0 0;display:grid;gap:8px}
-.sdg-list li{display:flex;gap:12px;align-items:baseline;font-size:.95rem}
-.sdg-no{flex:none;min-width:3.2em;text-align:center;font-weight:800;font-variant-numeric:tabular-nums;background:var(--soft);border-radius:8px;padding:2px 6px}
 .nl-grid{align-items:start}
 .nl-preview{min-width:0}
 #newsletterDialog{width:min(96vw,720px)}
@@ -461,3 +458,32 @@ html{scroll-padding-bottom:100px}body{padding-bottom:env(safe-area-inset-bottom)
 .nl-footsponsor{color:var(--text);font-weight:650}
 .nl-example{white-space:nowrap}
 @media(min-width:900px){.nl-kpis{grid-template-columns:repeat(4,minmax(0,1fr))}.nl-grid .nl-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* ---------- Sidste runde: to økonomiberegnere, verdensmål som fliser og nyhedsbrevet ---------- */
+.econ{border-top:1px solid var(--border);margin-top:18px;padding-top:16px}
+.econ-title{margin:0 0 8px;font-size:1.12rem}
+.econ-total{margin:18px 0 0;padding:12px 14px;border-radius:12px;background:var(--soft);font-weight:750;font-variant-numeric:tabular-nums}
+.sdg-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.sdg-tile{border-radius:14px;padding:14px;min-height:150px;display:flex;flex-direction:column;gap:4px}
+.sdg-ico{width:30px;height:30px;flex:none}
+.sdg-num{font-size:1.9rem;font-weight:850;letter-spacing:-.02em;line-height:1;font-variant-numeric:tabular-nums}
+.sdg-title{font-weight:800;font-size:.98rem;line-height:1.25}
+.sdg-tile p{margin:2px 0 0;font-size:.9rem;font-weight:600;line-height:1.35}
+.sdg-grid.compact{gap:6px;margin:8px 0}
+.sdg-grid.compact .sdg-tile{min-height:0;padding:8px 10px;border-radius:10px}
+.sdg-grid.compact .sdg-ico{width:20px;height:20px}
+.sdg-grid.compact .sdg-num{font-size:1.25rem}
+.sdg-grid.compact .sdg-title{font-size:.8rem}
+@media(max-width:780px){.sdg-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.a4-sheet .sdg-grid.compact{grid-template-columns:repeat(2,minmax(0,1fr));margin:2px 0 4px}
+.a4-sheet .sdg-grid.compact .sdg-tile{padding:5px 7px}
+.a4-sheet .sdg-grid.compact .sdg-num{font-size:12pt}
+.a4-sheet .sdg-grid.compact .sdg-title{font-size:8pt}
+.a4-sheet .sdg-grid.compact .sdg-ico{width:14px;height:14px}
+.nl-activity{margin:0 0 4px;font-size:.93rem}
+.nl-topline{margin:8px 0 0}
+.nl-ad{margin-top:14px;border:2px dashed var(--border);border-radius:12px;padding:10px 12px}
+.nl-ad-label{margin:0 0 4px;font-size:.78rem;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+.nl-ad p:last-child{margin:0;font-size:.92rem}
+.nl-signup{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px}
+.nl-signup .btn[disabled]{opacity:1;color:var(--muted);cursor:not-allowed}

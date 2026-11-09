@@ -1,5 +1,12 @@
 # Ændringslog
 
+## Version 3.6 – 9. november 2026 (sidste runde før BMP)
+
+- **To økonomiberegnere:** kommuner og skoler (licenser – break-even i kommuneaftaler og pris pr. elev) og sponsorater (nyhedsbrevet – break-even i sponsorer og pris pr. modtager). Hver har egne felter, KPI'er, graf, tabel, scenarier og "Gendan forudsætninger", plus en samlet linje. Forventet: +4.500 kr. + 11.000 kr. = +15.500 kr. om året. Pitchen, A4 og README bruger de samme tal.
+- **Ingen ufærdigt indhold:** felterne om interviews, pilotforsøg, betalingsvilje, faktatjekker og navnetjek er fjernet fra `TEAM_DATA` og siden. "Næste skridt" er fjernet; pitchens sidste trin hedder nu "Vision og opfordring".
+- **Nyhedsbrevet** sendes nu fra GroKlassen i samarbejde med sponsorer: grønt tip, samlede tal for alle klasser, en klasseaktivitet og en mærket annonceboks. Tilmelding er deaktiveret (kræver login og GDPR-samtykke). Lærerens knap hedder "Se månedens nyhedsbrev".
+- **FN's verdensmål** vises som fliser i FN's farver med egne ikoner – på siden, i pitchen og på A4.
+
 ## Version 3.5 – 5. november 2026 (sponsoraftaler, nyhedsbrev og en slankere "For skoler"-side)
 
 Bygger videre på den opdelte app fra den forrige upload (`index.html`, `app.js`, `app.css`, `manifest.json`, `sw.js` og `icons/`, der kan installeres som app).

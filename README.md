@@ -34,14 +34,14 @@ En senere version med lærerlogin vil behandle lærernes e-mail. Det kræver en 
 - Introduktion i 3 trin første gang (kan springes over og åbnes igen via "Sådan virker det").
 
 **For skoler (`#skoler`)** – mini-salgsside og pitch-støtte
-- Prisskitse med sponsorniveauer (hypoteser) · økonomiberegner med skolelicenser, kommuneaftaler, sponsoraftaler, tre scenarier, løn og break-even-graf · mulige sponsorer (ikke kontaktet) · eksempel på månedens nyhedsbrev med sponsoreksponering · Business Model Canvas farvekodet efter BMP's fire perspektiver · FN's verdensmål · næste skridt.
+- Prisskitse med sponsorniveauer (forudsætninger) · to økonomiberegnere – kommuner/skoler (licenser) og sponsorater (nyhedsbrevet) – med scenarier, løn, break-even og en samlet linje · sponsorer vi vil kontakte · GroKlassen-nyhedsbrevet i samarbejde med sponsorer · Business Model Canvas farvekodet efter BMP's fire perspektiver · FN's verdensmål som fliser.
 - **Print A4-oversigt:** én side til dommerne (se afsnit 10).
 
 **Lærer (`#laerer`, demo-PIN `1234`)**
 - Ventende indsendelser med alder, Godkend/Afvis pr. række, "Godkend alle fra i dag" og samlet behandling af ældre.
 - Graf over godkendte point pr. uge (med tabelvisning).
 - Eksport som CSV (åbner i Excel) og print-venlig ugerapport med spørgsmål til en klassesamtale.
-- **Månedens nyhedsbrev** til forældre og skole for den valgte klasse og måned – kan printes, gemmes som PDF eller kopieres som tekst til Aula (se afsnit 7).
+- **Se månedens nyhedsbrev:** samme forhåndsvisning af GroKlassen-nyhedsbrevet som under For skoler, med tallene fra denne enhed – kan printes eller gemmes som PDF (se afsnit 7).
 - **Fortryd:** Godkend og Afvis (også samlet) kan fortrydes i 8 sekunder med knappen i beskeden eller Ctrl/Cmd + Z.
 - Indlæs/nulstil demo-data og nulstil klassens egne data.
 
@@ -82,7 +82,7 @@ Alle tal er **forsigtige, vejledende skøn for én handling – ikke målinger**
 
 Dansk strøm og fjernvarme er så grønne, at lys, skærme og bad kun sparer få gram. De største gevinster kommer fra transport, mad og forbrug. Kun vand fra vandhanen tælles med. Prototypens gamle tal var for høje (fx lys 0,4 kg) og er rettet for at undgå greenwashing.
 
-**Holdet skal faktatjekke tallene før pitchen.** I appen står usikkerhederne ved hvert tal under "Usikkerhed:".
+Tallene er forsigtige skøn. I appen står usikkerheden ved hvert tal under "Usikkerhed:".
 
 ## 6. Fusk-beskyttelse
 
@@ -111,44 +111,49 @@ Dansk strøm og fjernvarme er så grønne, at lys, skærme og bad kun sparer få
 
 Priserne står i `SPONSOR_LEVELS` i `app.js`. Sponsorer ses kun i nyhedsbrevet til de voksne – aldrig i elevernes udfordringer – og de får ingen data om elever.
 
-### Økonomiberegneren
+### To økonomiberegnere
 
-Beregneren regner med tre indtægtskilder: **skolelicenser, kommuneaftaler og sponsoraftaler**. Kommune- og sponsoraftaler er faste indtægter, der ikke afhænger af antallet af skoler. I grafen ses de som en stiplet linje ("Faste aftaler"), og i tabellen er der en kolonne "Heraf sponsorer". Hver sponsoraftale koster ca. 1.000 kr. til nyhedsbrev og rapportering.
+GroKlassen har to indtægtsben, som regnes hver for sig. Hver beregner har egne felter, KPI'er, forklaring, graf, tabel, scenarieknapper og "Gendan forudsætninger". Under dem står en samlet linje. Tallene står i `MUNI_SCENARIOS` og `SPONSOR_SCENARIOS` øverst i `app.js`. Alle standardværdier er **forudsætninger**, og "forventet" bruges også i pitchen og på A4-oversigten.
 
-Break-even er det mindste antal skoler med licens, hvor indtægten dækker omkostningerne (med det valgte antal kommune- og sponsoraftaler). Fordi sponsorindtægter er usikre, viser beregneren også **break-even uden sponsorer**. Tekst, KPI, tabel, graf, pitchtrinnet "Forretningen" og A4-oversigten bruger de samme formler, så de altid stemmer overens.
+**A · Kommuner og skoler (licenser).** Break-even = det mindste antal kommuneaftaler, der dækker omkostningerne (med de valgte enkeltskoler). Nøgletal: pris pr. elev pr. år (forudsætning: 300 elever pr. skole).
 
-Alle tal er **antagelser** og står i `CALC_SCENARIOS` øverst i `app.js`:
+| Scenarie | Kommuneaftaler | Pris pr. aftale | Enkeltskoler × pris | Variable pr. skole | Faste omkostninger | Resultat | Break-even | Pr. elev |
+|---|---:|---:|---:|---:|---:|---:|---|---:|
+| Forsigtig | 1 | 10.000 kr. | 5 × 1.000 kr. | 200 kr. | 30.000 kr. | −18.000 kr. | 4 kommuneaftaler | 3,33 kr. |
+| **Forventet** | 2 | 12.000 kr. | 10 × 1.500 kr. | 150 kr. | 30.000 kr. | **+4.500 kr.** | **2 kommuneaftaler + 10 skolelicenser** | 4 kr. |
+| Optimistisk | 4 | 12.000 kr. | 20 × 1.500 kr. | 150 kr. | 36.000 kr. | +33.000 kr. | 1 kommuneaftale | 4 kr. |
 
-| Scenarie | Skolelicenser | Pris | Kommuneaftaler | Sponsoraftaler | Variable pr. skole | Faste omkostninger | Break-even | Uden sponsorer |
-|---|---:|---:|---:|---:|---:|---:|---|---|
-| Forsigtig | 10 | 1.000 kr. | 0 | 0 | 200 kr. | 30.000 kr. | **38 skoler** | 38 skoler |
-| **Forventet** (standard) | 25 | 1.500 kr. | 1 (10 skoler) | 1 à 15.000 kr. | 150 kr. | 30.000 kr. | **5 skoler + 1 kommuneaftale + 1 sponsoraftale** | 15 skoler |
-| Optimistisk | 40 | 1.500 kr. | 3 (10 skoler hver) | 3 à 15.000 kr. | 150 kr. | 36.000 kr. | **0 skoler + 3 kommuneaftaler + 3 sponsoraftaler** | 4 skoler |
+**B · Sponsorater (nyhedsbrevet).** Break-even = det mindste antal sponsorer (ved scenariets gennemsnitspris), der dækker nyhedsbrevets omkostninger. Nøgletal: pris pr. modtager pr. nyhedsbrev.
 
-Faste omkostninger = hosting og database + support + udvikling + **løn til drift og udvikling**. Lønnen er 0 kr. i alle scenarier, fordi holdet arbejder frivilligt i prototypefasen. Hvis en dommer spørger "Hvem betaler for jeres tid?", kan I skrive fx 150.000 kr. i feltet. Så stiger break-even i det forventede scenarie til 116 skoler (med 1 kommune- og 1 sponsoraftale), og I kan forklare, hvorfor kommuneaftaler er vigtige.
+| Scenarie | Støttere / partnere / hovedsponsorer | Nyhedsbreve | Produktion + udsendelse | Salg pr. sponsor | Modtagere | Resultat | Break-even | Pr. modtager |
+|---|---|---:|---:|---:|---:|---:|---|---:|
+| Forsigtig | 2 / 0 / 0 | 10 | 10 × 1.000 + 1.000 kr. | 1.000 kr. | 1.000 | −3.000 kr. | 3 sponsorer | 1 kr. |
+| **Forventet** | 2 / 1 / 0 | 10 | 10 × 1.000 + 1.000 kr. | 1.000 kr. | 2.000 | **+11.000 kr.** | **2 sponsorer** | 1,25 kr. |
+| Optimistisk | 3 / 2 / 1 | 10 | 10 × 1.500 + 2.000 kr. | 1.000 kr. | 5.000 | +62.000 kr. | 2 sponsorer | 1,70 kr. |
 
-> **Sponsorindtægter er usikre og kan ikke alene bære driften. Sponsorer har ingen indflydelse på udfordringer eller CO₂-tal.** Den note står også i appen. Bemærk, at det optimistiske scenarie kun går op, fordi både kommuner og sponsorer siger ja – vis derfor altid tallet uden sponsorer ved siden af.
+**Samlet (forventet):** +4.500 kr. + 11.000 kr. = **+15.500 kr. om året**.
 
-Referencepriser (set 25.10.2026 – faktatjek): Grøn Skole/Grønt Flag 3.600 kr./år for en grundskole, Klimakampen 500 kr. pr. klasse pr. 4-ugers kampagne, Gyldendals fagportaler ca. 1.300 kr. pr. klasse pr. år.
+Lønnen er 0 kr., fordi holdet arbejder frivilligt i prototypefasen. Skriver man fx 150.000 kr. i løn, stiger break-even for kommuner til 16 kommuneaftaler.
 
-**Priser og betalingsvilje skal valideres gennem interviews og pilotforsøg.**
+> **Sponsorindtægter er usikre og må aldrig styre elevernes indhold. Sponsorer har ingen indflydelse på udfordringer eller CO₂-tal.**
 
-### Mulige sponsorer (ikke kontaktet)
+Referencepriser (set på udbydernes egne hjemmesider 25.10.2026): Grøn Skole/Grønt Flag 3.600 kr./år for en grundskole, Klimakampen 500 kr. pr. klasse pr. 4-ugers kampagne, Gyldendals fagportaler ca. 1.300 kr. pr. klasse pr. år.
 
-Under For skoler → "Mulige sponsorer" står syv landsdækkende virksomheder, hvis bæredygtighedsarbejde passer til udfordringerne: Coop Danmark, Salling Group (Netto, føtex, Bilka), Ørsted, Danfoss, Grundfos, DSB og VELUX. **Ingen af dem er kontaktet, og ingen har sagt ja.** Der vises kun navn og én neutral linje – ingen logoer eller varemærker og intet, der antyder samarbejde. Mange virksomheder støtter via fonde (fx Salling Fondene, Poul Due Jensens Fond/Grundfos Foundation og VELUX FONDENE), hvilket kan være en anden vej. Listen er tjekket 5.11.2026 – tjek den igen, før I kontakter nogen.
+### Sponsorer vi vil kontakte (ikke kontaktet)
 
-### Månedens nyhedsbrev med sponsoreksponering
+Under For skoler står syv landsdækkende virksomheder, hvis bæredygtighedsarbejde passer til udfordringerne: Coop Danmark, Salling Group (Netto, føtex, Bilka), Ørsted, Danfoss, Grundfos, DSB og VELUX. **Ingen af dem er kontaktet, og ingen har sagt ja.** Der vises kun navn og én neutral linje – ingen logoer.
 
-Lærer → **📰 Månedens nyhedsbrev** laver et nyhedsbrev for den valgte klasse og måned ud fra klassens egne data: point i måneden, plantestadie, mest brugte udfordringer, uger med ugemålet nået og vejledende CO₂. Det kan **printes / gemmes som PDF** (samme printmotor som ugerapporten) eller **kopieres som tekst** til Aula eller skolens intranet. Under For skoler → "Månedens nyhedsbrev" er der et eksempel med demo-data, hvor man kan skifte mellem de tre sponsorniveauer.
+### GroKlassen-nyhedsbrevet (i samarbejde med sponsorer)
 
-- **Sponsorens navn** står i `TEAM_DATA.sponsor`. Er feltet tomt, står der "[Jeres sponsor]" med mærkatet "Eksempel · fiktiv sponsor". Skriv aldrig en virksomhed, før den har sagt ja – og indsæt aldrig en af de "mulige sponsorer" bare fordi den står på listen.
-- **Niveau og tip** står i `NEWSLETTER` i `app.js`: `sponsorLevel` ("main", "partner" eller "supporter") og `sponsorTip` (sponsorens eget, saglige tip om en af udfordringerne – holdet godkender teksten). Tomt tip = appens eget tip for måneden.
-- **Regler:** nyhedsbrevet er til lærere, skoleledelse og forældre – ikke reklame til børn. Ingen tilbud, rabatkoder eller produktreklame. Læreren kan slå sponsorafsnittet fra. Sponsoren kan ikke ændre indhold eller tal. Tjek selv reglerne for sponsorering i folkeskolen og markedsføringslovens regler om børn, før I indgår en aftale.
-- **Ingen e-mails:** prototypen har ingen tilmelding. En senere tilmelding med e-mail kræver samtykke, en databehandleraftale og en GDPR-vurdering, før den bruges.
+GroKlassen sender hver måned et nyhedsbrev til lærere, skoleledelse og forældre. Det indeholder månedens grønne tip, samlede tal på tværs af alle klasser (kun klasseniveau), en idé til en klasseaktivitet og en tydeligt mærket annonceboks ("Annonce · i samarbejde med …"). For skoler viser et eksempel med demo-data; Lærer → **Se månedens nyhedsbrev** viser samme forhåndsvisning med tallene fra enheden og kan printes som PDF.
+
+- **Sponsorens navn** står i `TEAM_DATA.sponsor`. Er feltet tomt, står der "Eksempel-sponsor" med mærket EKSEMPEL. Sponsorens tekst til annonceboksen står i `NEWSLETTER.sponsorText`.
+- **Regler:** kun til voksne, ingen reklame rettet mod børn, sponsorer vises aldrig i elevernes udfordringer, ingen tilbud eller rabatkoder, og sponsoren kan ikke ændre indhold eller tal.
+- **Ingen e-mails:** "Tilmeld" er deaktiveret. Tilmelding åbner, når GroKlassen får login, og kræver samtykke, databehandleraftale og GDPR-vurdering.
 
 ## 8. FN's verdensmål og bæredygtighed
 
-GroKlassen bidrager – i lille, lokal skala – til fire delmål:
+GroKlassen bidrager til fire delmål. På siden, i pitchen og på A4 vises de som fliser i FN's farver med egne, enkle ikoner (ikke FN's officielle ikoner):
 - **4.7** Uddannelse for bæredygtig udvikling: grøn dannelse i hverdagen.
 - **12.5** Mindre affald: sortering, genbrug, madpakke uden engangsplast.
 - **12.8** Viden om bæredygtig livsstil: åbne beregninger i "Sådan har vi regnet".
@@ -162,36 +167,28 @@ GroKlassen bidrager – i lille, lokal skala – til fire delmål:
 
 ```js
 const TEAM_DATA = {
-  interviewsTeachers: "6",   // Antal lærere, I har interviewet – kun tallet
-  interviewFinding:   "",    // Tomt felt = linjen skjules
+  sponsor:  "",   // Tomt felt = "Eksempel-sponsor" i nyhedsbrevet
+  teamName: "",   // Tomt felt = standardtekst
   ...
 };
 ```
 
 - **Tomt felt (`""`)** → **linjen skjules**, hvor feltet bruges. Undtagelser: `ideaOrigin`, `teamName`, `contact`, `pitchAsk` og `publicUrl` viser en standardtekst fra `TEAM_FALLBACK` lige under `TEAM_DATA`. Siden viser derfor aldrig pladsholdere.
 - **Udfyldt felt** → jeres tekst vises, fx "Hvad lærerne selv siger: …".
-- **Skriv kun det, I faktisk har undersøgt.** Opfind aldrig interviews, citater, brugertal, pilotresultater, sponsorer eller partneraftaler.
+- **Opfind aldrig** citater, eksperter, brugere, skoler, sponsorer eller aftaler. Tallene i appen er tydeligt markerede forudsætninger.
 - **Ingen persondata:** brug fx en fælles hold-mail – ikke private navne, telefonnumre eller e-mails.
 
 ### Tjekliste over alle felter
 
 - [ ] `ideaOrigin` – hvordan I fik idéen (1 sætning). *Vises:* For skoler → toppen af siden.
-- [ ] `interviewsTeachers` – antal interviewede lærere (kun tallet). *Vises:* For skoler → Næste skridt.
-- [ ] `interviewFinding` – vigtigste fund fra interviewene (1 kort sætning). *Vises:* pitch trin 2.
 - [ ] `targetGrades` – validerede klassetrin, fx "4.–9. klasse". *Vises:* Business Model Canvas og A4.
-- [ ] `willingnessToPay` – hvad skoleledere/lærere sagde om pris. *Vises:* Prisskitse, Canvas, pitch trin 5 og A4.
-- [ ] `feedbackUsed` – hvem I har talt med, og hvad I ændrede bagefter. *Vises:* For skoler → Næste skridt.
-- [ ] `pilotClasses` – antal pilotklasser (kun tallet). *Vises:* For skoler → Næste skridt.
-- [ ] `pilotResult` – hvad pilotforsøget viste (1 sætning). *Vises:* Næste skridt.
-- [ ] `factChecker` – hvem der faktatjekker CO₂-tallene. *Vises:* For skoler → Næste skridt.
-- [ ] `nameCheck` – resultat af tjek af navn/varemærke og domæne. *Vises:* For skoler → Næste skridt.
-- [ ] `sponsor` – en sponsor, der **har sagt ja**. Sæt også `CONTEST.isExample` til `false`, og vælg niveau i `NEWSLETTER.sponsorLevel`. *Vises:* Konkurrence og månedens nyhedsbrev. Tomt = "[Jeres sponsor]" + "Eksempel · fiktiv sponsor".
-- [ ] `pitchAsk` – jeres opfordring, fx "Vi søger 3 pilotskoler – vil I være med?". *Vises:* A4 (sidste pitchtrin har sin egen opfordring i `PITCH_SLIDES`).
+- [ ] `sponsor` – en sponsor, der **har sagt ja**. Sæt også `CONTEST.isExample` til `false`. *Vises:* Konkurrence og nyhedsbrevet. Tomt = "Eksempel-sponsor" med mærket EKSEMPEL.
+- [ ] `pitchAsk` – jeres opfordring, fx "Hjælp os med at åbne døren til de første kommuner". *Vises:* pitch trin 6 og A4.
 - [ ] `teamName` – holdets navn og evt. skole. *Vises:* A4.
 - [ ] `contact` – fælles kontakt (fx hold-mail, ingen private oplysninger). *Vises:* A4.
 - [ ] `publicUrl` – den udgivne adresse (er udfyldt). QR-koden peger herhen med `?demo=1`. Ret den, hvis I flytter siden.
 
-Uden for `TEAM_DATA` (også i `app.js`): `NEWSLETTER` (sponsorens niveau og eget tip), `SPONSOR_LEVELS` (sponsorpriser), `CALC_SCENARIOS` (økonomiens antagelser) og `CONTEST` (konkurrencen).
+Uden for `TEAM_DATA` (også i `app.js`): `NEWSLETTER` (sponsorens annoncetekst), `SPONSOR_LEVELS` (sponsorpriser), `MUNI_SCENARIOS` og `SPONSOR_SCENARIOS` (økonomiens forudsætninger) og `CONTEST` (konkurrencen).
 
 Kontrollér til sidst siden og alle 6 pitchtrin: alt, der står, skal være rigtigt.
 
@@ -206,11 +203,11 @@ Kontrollér til sidst siden og alle 6 pitchtrin: alt, der står, skal være rigt
 Demo-klassen 7.A står på 178 point – 2 point fra "Stort træ". Den første godkendelse i lærerområdet får planten til at vokse med en fejring.
 
 **QR-koden** laves i selve filen uden biblioteker (standard-QR, fejlkorrektion M). Den peger på `TEAM_DATA.publicUrl` + `?demo=1`, så dommerne lander i en levende demo og ikke i en tom app. Den vises:
-- på **sidste pitch-trin** (trin 6, "Næste skridt"),
+- på **sidste pitch-trin** (trin 6, "Vision og opfordring"),
 - bag knappen **"Del"** i toppen (med "Kopiér link" og – på mobil – "Del …"),
 - på **A4-oversigten**.
 
-**Print A4-oversigt** (knap under For skoler) giver én ren A4-side med værditilbud, kunder, prisskitse med sponsorniveauer, break-even med sponsorer (og uden, til sammenligning) fra beregnerens aktuelle scenarie, FN's verdensmål, QR-kode og holdets kontakt fra `TEAM_DATA`. Vælg "Gem som PDF" i printvinduet, hvis I vil sende den. Test den på jeres egen printer før pitchdagen.
+**Print A4-oversigt** (knap under For skoler) giver én ren A4-side med værditilbud, kunder, prisskitse, økonomi for licenser og sponsorater (forventet scenarie), FN's verdensmål som fliser, QR-kode og holdets kontakt fra `TEAM_DATA`. Vælg "Gem som PDF" i printvinduet, hvis I vil sende den. Test den på jeres egen printer før pitchdagen.
 
 ## 11. Sådan kører du appen lokalt
 
@@ -272,8 +269,8 @@ Adressen vil normalt ligne `https://DIT-GITHUB-NAVN.github.io/groklassen/`. Skri
 - fusk-reglerne (dobbelt indsendelse, loft og cooldown efter genindlæsning) og migrering,
 - `TEAM_DATA` (tomme felter skjuler linjen) og `?demo=1` (også at ingen pladsholdere er synlige),
 - QR-koden, Del-knappen og A4-oversigten (præcis én side),
-- økonomiens scenarier med sponsoraftaler og break-even (med og uden sponsorer), konkurrencetilmelding og -afmelding samt pitchens 6 trin,
-- mulige sponsorer (7 virksomheder, ingen logoer), sponsorniveauer, nyhedsbrevet (print på én side, kopiér tekst, sponsorafsnit til/fra, "Eksempel · fiktiv sponsor", de tre niveauer), verdensmålene og at de fjernede sektioner og links er væk,
+- de to økonomiberegnere (scenarier, break-even, nøgletal, samlet linje), konkurrencetilmelding og -afmelding samt pitchens 6 trin,
+- sponsorer vi vil kontakte (7 virksomheder, ingen logoer), sponsorniveauer, nyhedsbrevet (i samarbejde med sponsor, annonceboks, deaktiveret tilmelding, print på én side), verdensmål-fliserne og at de fjernede sektioner er væk,
 - swipe i pitchen (1:1-sporing, elastisk kant, kast, afbrydelse, rigtig touch og reduceret bevægelse) og Fortryd (knap, Ctrl/Cmd + Z, kun seneste handling, oven på fejringen),
 - tilgængelighed (tastatur, fokus, labels, `aria-live` og kontrast i begge temaer),
 - layout ved 375, 768 og 1280 px i lys og mørk tilstand (ingen vandret scroll; på mobil står overskrift, trin og "Registrér en handling" over folden).
